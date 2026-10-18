@@ -14,14 +14,13 @@ Também corre no PC. Escrita em Python + SDL2, com a interface em português.
 
 ## Download
 
-Vai a **[Releases](../../releases/latest)**:
+**[⬇ Descarregar tudo (ZIP)](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip)**, ou em cima: *Code > Download ZIP*.
 
-| Ficheiro | Para quê |
-|---|---|
-| `OrimbuxMothership_v1.9.1.zip` | Consola R36S (ArkOS / dArkOS). O conteúdo da pasta `ports` vai para a pasta `ports` do cartão. |
-| `OrimbuxMothership_PC_Windows_v1.9.1.zip` | Windows: abre e faz duplo clique em `Orimbux Mothership (PC).bat`. |
-| `orimbux_trailer_v191.mp4` | Trailer (1 min 18 s), com imagens reais das apps. |
-| `orimbux_creditos_v191.mp4` | Créditos. |
+O zip traz a app pronta a usar:
+- **Consola R36S:** a pasta `ports/` tem tudo o que vai para o cartão (ver *Instalar na R36S*).
+- **Windows:** faz duplo clique em `Orimbux Mothership (PC).bat` (ver *Correr no PC*).
+
+Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das apps, e [créditos](docs/video/creditos.mp4).
 
 ## As 12 apps
 
@@ -47,14 +46,14 @@ Há ainda trailer, créditos, cinco ambientes de música na intro, missões para
 
 ## Instalar na R36S
 
-1. Desliga a consola e tira o cartão SD das ROMs (o que tem a pasta `ports`).
-2. Copia `Orimbux Mothership.sh` e a pasta `mothership` (de `ports/` no zip) para a pasta `ports` do cartão.
+1. Desliga a consola e tira o cartão SD das ROMs (o que tem a pasta `ports`; no PC aparece como EASYROMS).
+2. Copia `Orimbux Mothership.sh` e a pasta `mothership` (estão dentro de `ports/` no zip) para a pasta `ports` do cartão.
 3. Volta a pôr o cartão, liga a consola e reinicia o EmulationStation.
 4. Abre **Ports > Orimbux Mothership**.
 
 ## Correr no PC
 
-- **Windows:** usa o zip PC da Release. Precisa do Python 3 (python.org). Na primeira vez instala `pysdl2-dll` sozinho.
+- **Windows:** descomprime o zip e faz duplo clique em `Orimbux Mothership (PC).bat`. Precisa do Python 3 (python.org); na primeira vez instala o resto sozinho (precisa de internet, ~1 minuto).
 - **Linux / macOS:** a partir deste repositório:
 
 ```bash
@@ -85,7 +84,8 @@ tools/
   render_trailer.py       grava o trailer/créditos em MP4 (precisa do ffmpeg)
   package.py              faz os zips da release
   *_test.py               testes headless (SDL_VIDEODRIVER=dummy)
-  pc/                     lançador para Windows
+  pc/                     lançador para Windows (versão para o zip da release)
+Orimbux Mothership (PC).bat   abre a app no Windows a partir deste repositório
 ```
 
 - Sem dependências pesadas na consola: só Python 3, SDL2 e `audioop`.
@@ -107,5 +107,5 @@ ORIMBUX MOTHERSHIP is a set of 12 music and game apps for the R36S handheld (Ark
 
 - **Music:** tempo, drum machine, sampler/slicer, loop pads, synth, voice FX, two DJ decks and a player.
 - **Games:** a virtual pet, a music quiz for up to 10 players, a Beat Hazard-like shooter driven by your own song, and a two-player rhythm duel.
-- **Download:** see [Releases](../../releases/latest).
+- **Download:** [ZIP of the repository](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip). R36S: copy the contents of `ports/` to the SD card's `ports` folder. Windows: run `Orimbux Mothership (PC).bat`.
 - **Code:** MIT. Samples are CC0 (Sonic Pi library), the font is Tiny5 (OFL).

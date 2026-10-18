@@ -29,3 +29,6 @@ ports/mothership/chop/*
 # build output of tools/
 tools/build/
 *.mp4
+
+# videos of the trailer and credits are part of the docs
+!docs/video/*.mp4
