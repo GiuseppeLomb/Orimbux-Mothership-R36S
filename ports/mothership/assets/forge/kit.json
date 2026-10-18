@@ -1,0 +1,484 @@
+{
+ "tracks": [
+  {
+   "id": "kick",
+   "name": "KICK",
+   "samples": [
+    {
+     "file": "bd_haus",
+     "label": "HAUS"
+    },
+    {
+     "file": "bd_808",
+     "label": "808"
+    },
+    {
+     "file": "bd_boom",
+     "label": "BOOM"
+    },
+    {
+     "file": "bd_klub",
+     "label": "KLUB"
+    },
+    {
+     "file": "bd_fat",
+     "label": "FAT"
+    },
+    {
+     "file": "bd_tek",
+     "label": "TEK"
+    },
+    {
+     "file": "bd_zum",
+     "label": "ZUM"
+    },
+    {
+     "file": "bd_pure",
+     "label": "PURE"
+    },
+    {
+     "file": "bd_ada",
+     "label": "ADA"
+    },
+    {
+     "file": "bd_gas",
+     "label": "GAS"
+    },
+    {
+     "file": "bd_sone",
+     "label": "SONE"
+    },
+    {
+     "file": "bd_zome",
+     "label": "ZOME"
+    },
+    {
+     "file": "bd_jazz",
+     "label": "JAZZ"
+    },
+    {
+     "file": "bd_chip",
+     "label": "CHIP"
+    },
+    {
+     "file": "drum_heavy_kick",
+     "label": "HEAVY"
+    },
+    {
+     "file": "drum_bass_hard",
+     "label": "ACUST"
+    },
+    {
+     "file": "elec_soft_kick",
+     "label": "ELEC S"
+    },
+    {
+     "file": "elec_hollow_kick",
+     "label": "HOLLOW"
+    }
+   ]
+  },
+  {
+   "id": "snare",
+   "name": "SNARE",
+   "samples": [
+    {
+     "file": "sn_dolf",
+     "label": "DOLF"
+    },
+    {
+     "file": "sn_dub",
+     "label": "DUB"
+    },
+    {
+     "file": "sn_zome",
+     "label": "ZOME"
+    },
+    {
+     "file": "sn_generic",
+     "label": "GENERIC"
+    },
+    {
+     "file": "drum_snare_hard",
+     "label": "ACUST H"
+    },
+    {
+     "file": "drum_snare_soft",
+     "label": "ACUST S"
+    },
+    {
+     "file": "elec_snare",
+     "label": "ELEC"
+    },
+    {
+     "file": "elec_hi_snare",
+     "label": "ELEC HI"
+    },
+    {
+     "file": "elec_mid_snare",
+     "label": "ELEC MID"
+    },
+    {
+     "file": "elec_lo_snare",
+     "label": "ELEC LO"
+    },
+    {
+     "file": "elec_filt_snare",
+     "label": "FILTRO"
+    }
+   ]
+  },
+  {
+   "id": "snap",
+   "name": "SNAP",
+   "samples": [
+    {
+     "file": "perc_snap",
+     "label": "SNAP"
+    },
+    {
+     "file": "perc_snap2",
+     "label": "SNAP2"
+    },
+    {
+     "file": "elec_pop",
+     "label": "POP"
+    },
+    {
+     "file": "elec_flip",
+     "label": "FLIP"
+    },
+    {
+     "file": "tbd_perc_tap_1",
+     "label": "TAP 1"
+    },
+    {
+     "file": "tbd_perc_tap_2",
+     "label": "TAP 2"
+    },
+    {
+     "file": "elec_twip",
+     "label": "TWIP"
+    },
+    {
+     "file": "glitch_perc1",
+     "label": "GLITCH"
+    }
+   ]
+  },
+  {
+   "id": "hat",
+   "name": "HAT",
+   "samples": [
+    {
+     "file": "hat_zild",
+     "label": "ZILD"
+    },
+    {
+     "file": "hat_bdu",
+     "label": "BDU"
+    },
+    {
+     "file": "hat_cats",
+     "label": "CATS"
+    },
+    {
+     "file": "hat_gem",
+     "label": "GEM"
+    },
+    {
+     "file": "hat_noiz",
+     "label": "NOIZ"
+    },
+    {
+     "file": "hat_psych",
+     "label": "PSYCH"
+    },
+    {
+     "file": "hat_raw",
+     "label": "RAW"
+    },
+    {
+     "file": "hat_snap",
+     "label": "SNAP"
+    },
+    {
+     "file": "hat_star",
+     "label": "STAR"
+    },
+    {
+     "file": "hat_tap",
+     "label": "TAP"
+    },
+    {
+     "file": "hat_zap",
+     "label": "ZAP"
+    },
+    {
+     "file": "hat_gnu",
+     "label": "GNU"
+    },
+    {
+     "file": "hat_yosh",
+     "label": "YOSH"
+    },
+    {
+     "file": "hat_len",
+     "label": "LEN"
+    },
+    {
+     "file": "hat_metal",
+     "label": "METAL"
+    },
+    {
+     "file": "hat_cab",
+     "label": "CAB"
+    },
+    {
+     "file": "hat_sci",
+     "label": "SCI"
+    },
+    {
+     "file": "hat_gump",
+     "label": "GUMP"
+    },
+    {
+     "file": "drum_cymbal_closed",
+     "label": "CLOSED"
+    },
+    {
+     "file": "drum_cymbal_pedal",
+     "label": "PEDAL"
+    },
+    {
+     "file": "elec_tick",
+     "label": "TICK"
+    },
+    {
+     "file": "tbd_perc_hat",
+     "label": "TBD"
+    }
+   ]
+  },
+  {
+   "id": "open",
+   "name": "HAT ABERTO",
+   "samples": [
+    {
+     "file": "drum_cymbal_open",
+     "label": "OPEN"
+    },
+    {
+     "file": "drum_cymbal_soft",
+     "label": "SOFT"
+    },
+    {
+     "file": "elec_cymbal",
+     "label": "ELEC"
+    },
+    {
+     "file": "drum_splash_soft",
+     "label": "SPLASH S"
+    },
+    {
+     "file": "ride_tri",
+     "label": "TRI"
+    },
+    {
+     "file": "ride_via",
+     "label": "VIA"
+    },
+    {
+     "file": "hat_zan",
+     "label": "ZAN"
+    },
+    {
+     "file": "hat_mess",
+     "label": "MESS"
+    },
+    {
+     "file": "hat_hier",
+     "label": "HIER"
+    }
+   ]
+  },
+  {
+   "id": "tom",
+   "name": "TOM",
+   "samples": [
+    {
+     "file": "drum_tom_mid_hard",
+     "label": "MID H"
+    },
+    {
+     "file": "drum_tom_lo_hard",
+     "label": "LO H"
+    },
+    {
+     "file": "drum_tom_hi_hard",
+     "label": "HI H"
+    },
+    {
+     "file": "drum_tom_lo_soft",
+     "label": "LO S"
+    },
+    {
+     "file": "drum_tom_mid_soft",
+     "label": "MID S"
+    },
+    {
+     "file": "drum_tom_hi_soft",
+     "label": "HI S"
+    },
+    {
+     "file": "elec_fuzz_tom",
+     "label": "FUZZ"
+    },
+    {
+     "file": "elec_bong",
+     "label": "BONG"
+    }
+   ]
+  },
+  {
+   "id": "perc",
+   "name": "PERC",
+   "samples": [
+    {
+     "file": "drum_cowbell",
+     "label": "COWBELL"
+    },
+    {
+     "file": "perc_bell",
+     "label": "BELL"
+    },
+    {
+     "file": "perc_bell2",
+     "label": "BELL2"
+    },
+    {
+     "file": "elec_triangle",
+     "label": "TRIANGLE"
+    },
+    {
+     "file": "elec_wood",
+     "label": "WOOD"
+    },
+    {
+     "file": "elec_blip",
+     "label": "BLIP"
+    },
+    {
+     "file": "elec_blip2",
+     "label": "BLIP2"
+    },
+    {
+     "file": "elec_ping",
+     "label": "PING"
+    },
+    {
+     "file": "elec_plip",
+     "label": "PLIP"
+    },
+    {
+     "file": "elec_beep",
+     "label": "BEEP"
+    },
+    {
+     "file": "tbd_perc_blip",
+     "label": "BLIP3"
+    },
+    {
+     "file": "tabla_na",
+     "label": "NA"
+    },
+    {
+     "file": "tabla_te1",
+     "label": "TE1"
+    },
+    {
+     "file": "tabla_ke1",
+     "label": "KE1"
+    },
+    {
+     "file": "tabla_ghe1",
+     "label": "GHE1"
+    },
+    {
+     "file": "glitch_perc2",
+     "label": "PERC2"
+    },
+    {
+     "file": "glitch_perc3",
+     "label": "PERC3"
+    },
+    {
+     "file": "glitch_perc4",
+     "label": "PERC4"
+    },
+    {
+     "file": "glitch_perc5",
+     "label": "PERC5"
+    },
+    {
+     "file": "perc_till",
+     "label": "TILL"
+    }
+   ]
+  },
+  {
+   "id": "fx",
+   "name": "FX",
+   "samples": [
+    {
+     "file": "drum_cymbal_hard",
+     "label": "CRASH"
+    },
+    {
+     "file": "drum_splash_hard",
+     "label": "SPLASH"
+    },
+    {
+     "file": "perc_impact1",
+     "label": "IMPACT1"
+    },
+    {
+     "file": "perc_impact2",
+     "label": "IMPACT2"
+    },
+    {
+     "file": "misc_cineboom",
+     "label": "CINEBOOM"
+    },
+    {
+     "file": "vinyl_scratch",
+     "label": "SCRATCH"
+    },
+    {
+     "file": "perc_swash",
+     "label": "SWASH"
+    },
+    {
+     "file": "elec_chime",
+     "label": "CHIME"
+    },
+    {
+     "file": "bass_hit_c",
+     "label": "BASS HIT"
+    },
+    {
+     "file": "bass_voxy_hit_c",
+     "label": "VOXY HIT"
+    },
+    {
+     "file": "elec_twang",
+     "label": "TWANG"
+    },
+    {
+     "file": "drum_roll",
+     "label": "ROLL"
+    }
+   ]
+  }
+ ]
+}

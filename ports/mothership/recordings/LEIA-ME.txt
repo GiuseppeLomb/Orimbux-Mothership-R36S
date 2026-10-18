@@ -1,0 +1,3 @@
+As gravacoes do ABDUCTOR ficam aqui (rec_*.wav).
+As SESSOES do Loop Reactor / Xeno Synth (SELECT + A) tambem: session_*.wav + session_*.json
+(o .json e a pista do BEAT DUEL - nao o apagues se quiseres jogar essa sessao).

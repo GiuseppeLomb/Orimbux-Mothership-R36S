@@ -1,0 +1,3 @@
+Copia para esta pasta a musica que o WARP FLOOR (Dancefloor) deve tocar.
+.wav toca logo. .mp3 .ogg .flac .m4a precisam de ffmpeg ou mpg123 na consola
+(se nao existirem, converte primeiro para .wav 44100 Hz no PC).

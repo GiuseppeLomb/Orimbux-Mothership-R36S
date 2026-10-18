@@ -1,0 +1,45 @@
+{
+  "_info": "Bancos do LOOP REACTOR. Cada banco tem 8 pads pela ordem: up, left, right, down, x, y, a, b. mode: loop (entra no compasso e repete), shot (toca logo uma vez). beats: duração do loop em batidas (para o encaixar no BPM). file: nome do .wav em assets/samples (sem extensão) ou caminho para um .wav teu.",
+  "banks": [
+    {"name": "CORE", "color": "orange", "pads": [
+      {"label": "AMEN",    "file": "loop_amen",        "mode": "loop", "beats": 4},
+      {"label": "KICK",    "file": "bd_haus",          "mode": "shot"},
+      {"label": "HATS",    "file": "hat_zild",         "mode": "shot"},
+      {"label": "SNARE",   "file": "sn_dolf",          "mode": "shot"},
+      {"label": "BREAK",   "file": "loop_breakbeat",   "mode": "loop", "beats": 4},
+      {"label": "AMEN+",   "file": "loop_amen_full",   "mode": "loop", "beats": 16},
+      {"label": "AROVANE", "file": "arovane_beat_c",   "mode": "loop", "beats": 16},
+      {"label": "CRASH",   "file": "drum_cymbal_hard", "mode": "shot"}
+    ]},
+    {"name": "GRAVITY", "color": "violet", "pads": [
+      {"label": "DNB",     "file": "bass_dnb_f",    "mode": "shot"},
+      {"label": "VOXY",    "file": "bass_voxy_c",   "mode": "shot"},
+      {"label": "HARD",    "file": "bass_hard_c",   "mode": "shot"},
+      {"label": "DROP",    "file": "bass_drop_c",   "mode": "shot"},
+      {"label": "THICK",   "file": "bass_thick_c",  "mode": "shot"},
+      {"label": "TRANCE",  "file": "bass_trance_c", "mode": "shot"},
+      {"label": "GLITCH",  "file": "glitch_bass_g", "mode": "shot"},
+      {"label": "WOODSY",  "file": "bass_woodsy_c", "mode": "shot"}
+    ]},
+    {"name": "NEBULA", "color": "cyan", "pads": [
+      {"label": "PAD 1",   "file": "tbd_pad_1",       "mode": "shot"},
+      {"label": "PAD 2",   "file": "tbd_pad_2",       "mode": "shot"},
+      {"label": "PAD 3",   "file": "tbd_pad_3",       "mode": "shot"},
+      {"label": "PAD 4",   "file": "tbd_pad_4",       "mode": "shot"},
+      {"label": "LUNAR",   "file": "ambi_lunar_land", "mode": "shot"},
+      {"label": "WOOSH",   "file": "ambi_dark_woosh", "mode": "shot"},
+      {"label": "REWIND",  "file": "vinyl_rewind",    "mode": "shot"},
+      {"label": "BOOM",    "file": "misc_cineboom",   "mode": "shot"}
+    ]},
+    {"name": "SIGNAL", "color": "green", "pads": [
+      {"label": "VOCTONE", "file": "tbd_voctone",     "mode": "shot"},
+      {"label": "ROBOT",   "file": "mehackit_robot1", "mode": "shot"},
+      {"label": "BOT 2",   "file": "glitch_robot1",   "mode": "shot"},
+      {"label": "BLIP",    "file": "tbd_perc_blip",   "mode": "shot"},
+      {"label": "BEEP",    "file": "elec_blip",       "mode": "shot"},
+      {"label": "TABLA",   "file": "loop_tabla",      "mode": "loop", "beats": 32},
+      {"label": "SCRATCH", "file": "vinyl_scratch",   "mode": "shot"},
+      {"label": "PING",    "file": "elec_ping",       "mode": "shot"}
+    ]}
+  ]
+}

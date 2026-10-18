@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# saves and personal data the app writes next to itself
+ports/mothership/config.json
+ports/mothership/pet.json
+ports/mothership/vr_save.json
+ports/mothership/bd_save.json
+ports/mothership/bd_scores.json
+ports/mothership/forge.json
+ports/mothership/earlab.json
+ports/mothership/quiz.json
+ports/mothership/missions.json
+ports/mothership/log.txt
+ports/mothership/vr_cache/
+ports/mothership/recordings/*
+!ports/mothership/recordings/LEIA-ME.txt
+ports/mothership/music/*
+!ports/mothership/music/LEIA-ME.txt
+ports/mothership/samples/*
+!ports/mothership/samples/LEIA-ME.txt
+ports/mothership/forge/*
+!ports/mothership/forge/LEIA-ME.txt
+ports/mothership/chop/*
+!ports/mothership/chop/LEIA-ME.txt
+
+# build output of tools/
+tools/build/
+*.mp4

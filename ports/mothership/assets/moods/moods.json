@@ -1,0 +1,55 @@
+{
+ "order": [
+  "melancolico",
+  "alegre",
+  "energetico",
+  "triste",
+  "zangado"
+ ],
+ "moods": {
+  "melancolico": {
+   "label": "MELANC\u00d3LICO",
+   "files": [
+    "melancolico_0.wav",
+    "melancolico_1.wav",
+    "melancolico_2.wav",
+    "melancolico_3.wav"
+   ]
+  },
+  "alegre": {
+   "label": "ALEGRE",
+   "files": [
+    "alegre_0.wav",
+    "alegre_1.wav",
+    "alegre_2.wav",
+    "alegre_3.wav"
+   ]
+  },
+  "energetico": {
+   "label": "ENERG\u00c9TICO",
+   "files": [
+    "energetico_0.wav",
+    "energetico_1.wav",
+    "energetico_2.wav",
+    "energetico_3.wav"
+   ]
+  },
+  "triste": {
+   "label": "TRISTE",
+   "files": [
+    "triste_0.wav",
+    "triste_1.wav",
+    "triste_2.wav"
+   ]
+  },
+  "zangado": {
+   "label": "ZANGADO",
+   "files": [
+    "zangado_0.wav",
+    "zangado_1.wav",
+    "zangado_2.wav",
+    "zangado_3.wav"
+   ]
+  }
+ }
+}

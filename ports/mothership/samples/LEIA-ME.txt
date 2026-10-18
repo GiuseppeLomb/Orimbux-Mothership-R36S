@@ -1,0 +1,3 @@
+Poe aqui os teus sons (.wav) para o BEAT FORGE.
+Aparecem na lista de sons de todas as pistas (segurar R2 + esq/dir), marcados com *.
+Cada som e cortado a 4 segundos. Qualquer .wav normal serve (mono ou estereo, qualquer frequencia).

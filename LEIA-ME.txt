@@ -1,0 +1,257 @@
+ORIMBUX MOTHERSHIP v1.9.1  -  R36S (ArkOS / dArkOS)
+==================================================
+
+INSTALAR (no PC)
+1. Desliga a consola e tira o cartao SD onde estao as ROMs (o que tem a pasta "ports").
+   No PC aparece como EASYROMS. Se usas dois cartoes, e o segundo cartao.
+2. Copia para a pasta "ports" do cartao:
+   "Orimbux Mothership.sh" + os ficheiros mothership_1.zip, mothership_2.zip, ... (nao os abras).
+   Na primeira vez que abres a app ela instala-se sozinha (demora ~1 minuto) e apaga os .zip.
+   (Alternativa: copiar a pasta "mothership" ja aberta.)
+3. Volta a pôr o cartao, liga a consola e reinicia o EmulationStation
+   (START > Quit > Restart EmulationStation) ou reinicia a consola.
+4. Abre "Ports" > "Orimbux Mothership".
+
+ATUALIZAR DE UMA VERSAO ANTERIOR
+  Igual: copia o .sh e os .zip novos para "ports". A instalacao substitui os ficheiros da app e
+  mantem os teus: pet.json (Xeno Pet), vr_save.json (Void Runner), bd_save.json (Beat Duel),
+  forge.json (ritmos), quiz.json (Som de Ouro) e as pastas recordings, music, samples, forge e chop.
+  A v1.9 apaga as fontes antigas (agora ha uma so letra) e o video do antigo Ear Lab.
+
+NOVO NA v1.9.1
+  - VOID RUNNER: O GRAVE e agora uma progressao. Comeca fraco e cresce com a musica, persegue-te
+    devagar e puxa muito menos, mas com um alcance enorme (2000 px). No mundo 1 nunca puxa mais
+    depressa do que corres. A horda e mais leve que tu: o Grave engole-a mais facilmente.
+  - VOID RUNNER: subir de nivel custa mais XP. CRISTAIS DE CORES: VIOLETA 1 XP, AZUL 3 (nivel 5),
+    VERDE 8 (nivel 10), DOURADO 20 (nivel 15), RUBI 50 (nivel 21), PRISMA 120 (nivel 28). Quanto mais
+    rico, mais raro. Inimigos grandes e os 8 s depois de um DROP dao mais cristais raros. A pausa
+    mostra a tabela; o cristal ao lado de LV e o melhor que ja podes apanhar.
+  - TRAILER e CREDITOS: nenhuma palavra sai das caixas nem fica cortada. As imagens das apps ficam
+    paradas num enquadramento que nao corta texto, o passo vai para a barra de cima e o logotipo dos
+    creditos aparece inteiro.
+  - Texto arrumado tambem na nave: lista de missoes da ponte, ajudas (segurar SELECT) e cartoes de
+    primeira vez, lista de musicas do Void Runner e painel do Beat Duel.
+
+NOVO NA v1.9
+  - UI nova em toda a nave: uma so letra (Tiny5, a do Xeno Pet), com acentos. Cada app mostra em
+    cima ONDE ESTAS (categoria, "passo 3 de 8", nome) e em baixo os botoes desenhados com as acoes
+    mais importantes (no maximo 4). O resto esta na ajuda (segurar SELECT).
+  - MENU DA MUSICA: segura START nas apps de musica, na ponte ou no hangar. Teclas fixas:
+    A tocar/pausa de tudo | X parar tudo | esq/dir BPM | cima/baixo volume | Y gravar sessao |
+    L1 metronomo | B fechar. Em cima diz o que esta a tocar.
+  - PONTE nova: MUSICA / JOGOS / SISTEMA, cada app explicada em palavras simples, e MISSOES para
+    quem esta a comecar ("A tua primeira musica" e "O remix"): a missao diz o proximo passo e a app
+    certa ja fica escolhida. Na primeira vez aparece um cartao com as 4 regras de ouro.
+  - SOM DE OURO (JOGOS) substitui o EAR LAB: concurso de musica ao estilo "Quem quer ser
+    milionario": 345 perguntas em 4 niveis (FACIL, MEDIO, DIFICIL, ESPECIALISTA) + perguntas de
+    teoria e de ouvido sem fim. Modo FESTA para 2 a 10 jogadores, com pontos para cada um.
+  - VOID RUNNER musical: escolhes uma musica e ela e o nivel. O buraco negro passou a ser O GRAVE,
+    um subwoofer gigante que pulsa com o ritmo e puxa aos poucos. Drops, baus e armas que ficam
+    mais fortes com a musica alta.
+  - BEAT DUEL: modo FRENTE A FRENTE com a consola deitada entre os dois jogadores.
+  - INTRO: 5 ambientes de musica (melancolico, alegre, energetico, triste, zangado); um calha ao
+    acaso e toca ate carregares START (esq/dir muda).
+  - LETRA mais legivel: maiusculas desenhadas a mao, mais espaco entre letras, 8 e x redesenhados.
+  - XENO PET: a consola nao tem pilha de relogio; quando liga com o relogio parado, o pet pergunta
+    quanto tempo estiveste fora (ver XENO PET).
+  - VOX NEBULA: o micro liga/desliga com R2 (START passa a app seguinte, como em todas).
+  - TWIN DECKS: gravar a mistura passou para o menu da musica (segura START e carrega Y).
+  - TRAILER novo (1 min 18 s): musica mais longa, nave e planetas em pixel art com o dobro do
+    detalhe, capitulos MUSICA e JOGOS e as imagens reais da nova UI.
+  - CREDITOS legiveis: perspetiva suave e letras maiores.
+
+PONTE (menu)   esq/dir ou L1/R1 = MUSICA / JOGOS / SISTEMA   cima/baixo = escolher   A = entrar
+
+CONTROLOS GERAIS (iguais em todas as apps)
+  SELECT (toque) .. voltar a PONTE        SEGURAR SELECT .. AJUDA: controlos + uma dica
+  START (toque) ... app de musica seguinte (segue o workflow)
+  SEGURAR START ... MENU DA MUSICA (tocar/pausa, parar, BPM, volume, gravar)
+  SELECT + START .. sair da app           SELECT + L2/R2 .. desfazer / refazer (Beat Forge, Abductor)
+  Na primeira vez em cada app aparece um cartao com os passos (HANGAR > REVER TUTORIAIS repete).
+
+O WORKFLOW DA NAVE (MUSICA, de cima para baixo)
+  1 TEMPO PULSAR .......... escolhe o BPM: toda a nave toca nesse tempo
+  2 RITMO BEAT FORGE ...... faz a bateria (grelha, construtor por estilo, arranjo)
+  3 SONS TEUS ABDUCTOR .... grava o micro ou corta uma musica em fatias (Comet Chop)
+  4 AO VIVO LOOP REACTOR .. toca loops, os teus ritmos (banco FORGE) e fatias (banco CHOP)
+  5 MELODIA XENO SYNTH .... poe uma melodia por cima, sempre na escala
+  6 VOZ VOX NEBULA ........ canta com efeitos por cima de tudo
+  7 MISTURA TWIN DECKS .... mistura as tuas musicas e gravacoes
+  8 OUVIR WARP FLOOR ...... ouve o resultado com visuais
+  SELECT + A (ou segurar START e Y) grava uma SESSAO: vira uma musica jogavel no BEAT DUEL.
+
+PULSAR         A = tap tempo | esquerda/direita = BPM | cima/baixo = compasso
+               X = subdivisao | B = click on/off
+BEAT FORGE     Caixa de ritmos com 3 modos (L2 muda): GRELHA, CONSTRUTOR e ARRANJO.
+               Toca no tempo da nave e continua nas outras apps de musica (para nos jogos, no trailer
+               e nos creditos).
+               GRELHA: 8 pistas x 8/12/16/24/32 passos, 8 padroes (A-H).
+                 setas cursor | A passo | B PLAY/STOP | X forca | Y rajada 1-4 | L1/R1 padrao
+                 segurar R2: esq/dir som | cima/baixo tom | X/Y volume | A pan | B mute | L2 solo |
+                 L1/R1 numero de passos
+                 OS TEUS SONS: .wav em ports/mothership/samples, gravacoes do Abductor e fatias do Comet
+                 Chop aparecem na lista de sons de todas as pistas (marcados com *).
+               CONSTRUTOR (como no FL Studio): esq/dir escolhe o estilo (TRAP, BOOM BAP, HOUSE, TECHNO,
+                 DRUM & BASS, REGGAETON, AFRO HOUSE, LO-FI, ROCK) - ajusta BPM, swing e sons.
+                 cima/baixo pista | A/Y variacao dessa pista | X dado (tudo ao acaso) | L1/R1 padrao
+               ARRANJO (playlist): blocos de padroes em fila = uma musica. esq/dir bloco | cima/baixo
+                 letra | A inserir | Y apagar | X modo SONG | SELECT+X exporta a musica: fica em
+                 recordings e aparece no BEAT DUEL (com pista) e no TWIN DECKS.
+               SELECT+cima/baixo BPM | SELECT+esq/dir swing | SELECT+A gravar sessao | SELECT+X padrao ->
+               LOOP REACTOR | SELECT+Y copiar padrao | SELECT+B SONG | SELECT+R1 probabilidade |
+               SELECT+L1 x2 apagar | SELECT+L2/R2 desfazer/refazer. Tudo fica em forge.json.
+ABDUCTOR       3 paineis com L1/R1: GRAVAR | CORTAR | TOCAR
+               GRAVAR (precisa de micro USB): A = gravar/parar | X = ouvir | Y = mandar para pad
+               COMET CHOP (funciona sem micro, com qualquer .wav: gravacoes, musica, sessoes, Beat Duel):
+               CORTAR: A escolhe ficheiro | cima/baixo marcador (INICIO, cortes, FIM) | esq/dir mover
+                 (segurar R2 = fino) | X = 4/8/16 fatias | Y ouvir fatia | A ouvir janela
+                 L2 = janela de 1/2/4 compassos ao BPM da nave | B outro ficheiro
+               TOCAR: os 8 botoes tocam as fatias | L2/R2 pagina (16 fatias)
+               SELECT+X fatias 1-8 -> LOOP REACTOR (banco CHOP) | SELECT+Y choke | SELECT+A gravar sessao
+               SELECT+L2/R2 desfazer/refazer os marcadores
+LOOP REACTOR   setas + X/Y/A/B = 8 pads | L1/R1 banco | L2 parar tudo | R2 (segurar) WARP
+               analogico direito = volume | SELECT + cima/baixo = BPM
+               SELECT + A = GRAVAR SESSAO (liga/desliga, max 3 min) -> vira musica jogavel no BEAT DUEL
+               Banco FORGE (5o) = padroes exportados do BEAT FORGE, ja em loop.
+               Banco CHOP (6o) = fatias exportadas do COMET CHOP (Abductor).
+XENO SYNTH     8 botoes = notas | L1/R1 oitava | L2 hold | R2 acorde
+               analogico esq. = bend | analogico dir. = filtro | SELECT+setas = onda/escala
+               SELECT + A = GRAVAR SESSAO (igual ao Loop Reactor: as notas que tocas viram a pista)
+VOX NEBULA     Efeitos de voz ao vivo (micro USB). R2 liga/desliga o micro. 8 botoes = efeito:
+               ROBO ALIEN MONSTRO ECO CAVERNA RADIO DISTORCAO LIMPO | L2 = eco por cima
+               L1/R1 ganho | SELECT+cima/baixo gate (corta o ruido) | SELECT+A gravar sessao
+               O micro continua ligado nas outras secoes de musica (canta por cima dos loops).
+               USA AUSCULTADORES: com a coluna o micro apanha o som e apita.
+TWIN DECKS     Dois leitores para misturar a ouvido (sem analise automatica).
+               FILTRO de DJ por deck: analogico esq. cima/baixo = deck A, analogico dir. = deck B
+               (para baixo abafa, para cima tira os graves). L3/R3 (carregar no analogico) = centro.
+               DECK A: L1 play | L2 cue | cima/baixo pitch | esq/dir nudge (parado: procurar)
+               DECK B: R1 play | R2 cue | X/B pitch | Y/A nudge (parado: procurar)
+               CUE: a tocar volta ao ponto de cue; parado marca o cue; segurar = ouvir dali.
+               Analogico esquerdo = crossfader. Gravar a mistura (ate 20 min): segura START, depois Y.
+               SELECT+L1/R1 carregar musica (pasta music, gravacoes e as 5 do Beat Duel)
+               SELECT+cima / SELECT+X bater o BPM | SELECT+Y SYNC (o deck em espera iguala o outro)
+               SELECT+baixo / SELECT+B pitch a zero | SELECT+esq/dir crossfader
+               SELECT+A SPLIT CUE: com auscultadores, ouvido esquerdo = cue, direito = mistura
+               (SELECT+L2/R2 escolhe o deck no cue). So funciona com auscultadores.
+WARP FLOOR     musica em ports/mothership/music. A play/pausa | esq/dir faixa | X shuffle | B parar
+CHIP TRACKER   Nao e feito por nos: usa o LittleGPTracker (tracker open-source completo) pelo PortMaster
+               da consola, se estiver disponivel para o teu sistema.
+
+XENO PET       (JOGOS) esquerda/direita escolhe a acao, A faz: COMER, BRINCAR (mini-jogo Star Catch), LIMPAR,
+               LUZ (dormir), CURAR, MIMO, ESTADO (Y no Estado = Memorial).
+               Vida de 30 dias: 1 dia de ovo, 7 dias de crianca (Bebe e depois Crianca) e ~22 de adulto.
+               A forma adulta depende do cuidado: NEBULON, GLORPO ou SNARX. Cada xeno nasce com a sua cor.
+               Quando precisa de algo aparece um balao animado com o icone (fome, sono, banho, doente,
+               triste) e um aviso no topo. O estado dele tambem aparece na PONTE (em cima a esquerda).
+               Quando parte, fica uma lapide no MEMORIAL com a foto dele em crianca (X apaga a lapide).
+               O pet vive em tempo real. A R36S nao tem pilha de relogio: desligada, o relogio para (ou
+               volta atras). Quando ligas a consola e o relogio diz que quase nao passou tempo, o pet
+               PERGUNTA quanto tempo estiveste fora (pouco, umas horas, uma noite, um dia, varios dias)
+               e vive esse tempo. B = nao passou tempo. No PC o relogio conta sempre.
+               Gravado em ports/mothership/pet.json. Para mostrar aos amigos: HANGAR > PET VELOCIDADE.
+SOM DE OURO    (JOGOS) Concurso de musica. 345 perguntas de cultura (geral, instrumentos, teoria,
+               generos, classica, pop & rock, Portugal, eletronica, ciencia do som, cinema & jogos) em
+               4 niveis, mais perguntas de teoria e de ouvido geradas sem fim (qual e a nota mais aguda,
+               que acorde e, que BPM...). X ouve o som outra vez.
+               JOGAR: 15 perguntas, a dificuldade sobe de FACIL (1-4) a ESPECIALISTA (13-15).
+               Setas escolhem, A responde, A outra vez confirma a RESPOSTA FINAL.
+               AJUDAS (uma vez por jogo): L1 = 50:50 | R1 = sondagem da tripulacao | L2 = pergunta ao Xeno.
+               As perguntas 5 e 10 sao patamares: se errares depois, ficas com esse premio.
+               B desiste e leva o premio que tens.
+               FESTA: 2 a 10 jogadores na mesma consola. Escolhes quantos, a dificuldade (A SUBIR ou fixa)
+               e as rondas (3 a 15); NOMES: cima/baixo muda a letra, esq/dir a posicao, X apaga.
+               Em cada ronda cada um responde a sua pergunta (passa a consola quando aparece "VEZ DE").
+               Pontos: 100 a 400 conforme a dificuldade + bonus por responder depressa (20-25 s).
+               Classificacao no fim de cada ronda e podio no fim. B no ecra "VEZ DE" acaba a festa.
+               TREINO LIVRE: 5 temas, sem fim, fica mais dificil a cada resposta certa seguida.
+               Recordes em ports/mothership/quiz.json.
+VOID RUNNER    (JOGOS) A tua musica e o nivel (inspirado no Beat Hazard). No menu: cima/baixo escolhe a
+               MUSICA, esq/dir o MUNDO (6, do calmo a Matriarca; ganhar num abre o seguinte).
+               Musicas: SEM FIM (ambientes da nave sem parar), MIX DA NAVE (as 5 seguidas, ~6 min), cada
+               musica da nave, as tuas sessoes, gravacoes e as musicas da pasta music (.wav; mp3/ogg
+               depois de abertas 1 vez no WARP FLOOR).
+               A nave OUVE a musica primeiro (1-2 s, fica guardado em vr_cache): energia, batidas e drops.
+               O nivel dura a musica. Sobrevive ate ao fim e O GRAVE IMPLODE.
+               O GRAVE (no lugar do buraco negro): um subwoofer gigante que pulsa com cada batida e te
+               puxa - uma progressao: quase nada no inicio da musica, mais forte ate ao fim; suave ao
+               longe, mais forte perto. O alcance e enorme mas nao infinito (2000 px, o circulo
+               cor-de-rosa muito ao longe). Persegue-te devagar; se o deixas muito para tras, apanha-te.
+               Cresce com a musica e com o que engole (a horda e mais leve que tu).
+               CRISTAIS (XP): VIOLETA 1, AZUL 3 (nivel 5), VERDE 8 (10), DOURADO 20 (15), RUBI 50 (21),
+               PRISMA 120 (28). Os ricos sao raros; inimigos grandes e o pos-DROP dao mais.
+               MUSICA ALTA = mais inimigos, mas as tuas armas batem e disparam mais. Barra ENERGIA em cima.
+               DROPS: "DROP A CAMINHO!" 2 s antes; no drop vem uma onda, armas a 150% durante 8 s e um BAU.
+               BAUS: tambem os bosses (bau grande) e alguns inimigos grandes. Melhoram o que ja tens
+               (1 ou 3 premios) e dao as EVOLUCOES primeiro. A seta dourada mostra onde estao.
+               Musicas curtas dao mais XP. Setas/analogico movem-te, as armas disparam sozinhas.
+               A ou B = VOID DASH (passa por tiros e explosoes sem dano). START ou SELECT = pausa e a
+               musica tambem para. Progresso em ports/mothership/vr_save.json.
+               ARMAS (12): Lumen Bolt, Prism Ring, Solar Lance, Nova Pulse, Chain Spark, Halo Mine,
+                 Cometas (misseis teleguiados), Coroa Solar (aura), Lua Crescente (bumerangue),
+                 Sentinela (drone), Crio (abranda/congela), Farol (laser rotativo).
+               PASSIVOS (11): Propulsores, Ancora, Iman, Vitalidade, Blindagem, Recarga, Void Dash+,
+                 Olho de Aguia (critico), Amplificador (area), Regeneracao, Sabedoria (XP).
+               ESTRATEGIA: so ha 6 lugares de armas e 6 de passivos. Arma no nivel 5 + o passivo certo
+                 = carta de EVOLUCAO. As cartas dizem com que passivo cada arma evolui.
+                 Bolt+Recarga=TEMPESTADE  Ring+Iman=SATURNO  Lance+Propulsores=RAIO SOLAR
+                 Nova+Blindagem=SUPERNOVA  Chain+Void Dash=TROVAO  Mine+Ancora=BURACO BRANCO
+                 Cometas+Olho de Aguia=CHUVA DE METEOROS  Coroa+Regeneracao=SOL INTERIOR
+                 Lua+Sabedoria=ECLIPSE  Sentinela+Vitalidade=ENXAME DE LUZ  Crio+Amplificador=ZERO
+                 ABSOLUTO  Farol+Amplificador=HORIZONTE
+                 No ecra de nivel: Y troca as 3 cartas (3 vezes por partida), X bane a carta escolhida
+                 dessa partida (2 vezes).
+               INIMIGOS: cada um avisa antes de atacar. Saltador (mira com linha vermelha e investe),
+                 Vigia (orbes), Ninhada (deixa gosma que prende), Devorador (inspira e puxa-te),
+                 e novos: Bomba (explode perto de ti; a explosao tambem fere a horda), Cuspidor (para,
+                 incha e cospe 5 orbes), Espectro (some e aparece no teu caminho), Tecelao (teias que
+                 prendem) e Escudo (bloqueia tiros de frente: usa area, raios ou ataca por tras).
+                 Eventos: ENXAME, INVESTIDA, OLHOS NO ESCURO, BARRAGEM (procura a brecha), EMBOSCADA.
+                 Bosses: REI DEVORADOR (mundos 1-5) e A MATRIARCA (mundo 6), perto do fim da musica.
+BEAT DUEL      (JOGOS) Jogo de ritmo. As notas descem, carrega quando chegam a linha.
+               NOTAS LONGAS: mantem o botao carregado ate a cauda acabar (SEGURO! = pontos extra).
+               DUELO: P1 joga com as SETAS, P2 com Y B X A (mesma ordem: esq, baixo, cima, dir).
+               Acertos seguidos enchem a barra rosa -> ataque ao rival: SPEED (notas mais rapidas),
+               HIDDEN (notas somem antes da linha) ou MIRROR (pistas trocadas), durante 6 segundos.
+               FRENTE A FRENTE: a consola fica deitada na mesa entre os dois. O ecra divide-se a meio e
+               cada metade fica direita para quem esta desse lado: as notas vem do centro para cada um.
+               P1 senta-se do lado da cruz, P2 do lado dos botoes. Cada um carrega para o lado em que a
+               nota esta, visto do seu lado (P2: B esquerda, A baixo, Y cima, X direita).
+               VS CPU: tu contra a consola (setas ou botoes). TREINO: sozinho.
+               No menu: cima/baixo musica | esq/dir dificuldade | X modo | A jogar | START sai do jogo
+               L1 = CALIBRAR AUDIO (faz isto 1 vez com o som que usas: carrega A a cada clique).
+               MUSICAS: NEON DRIFT (synthwave), PIXEL RUSH (chiptune), VOID BASS (drum & bass),
+               MOON HOP (lo-fi hip hop), MOTHERSHIP ANTHEM (house) + SESSOES gravadas (pista automatica)
+               + gravacoes do ABDUCTOR e musicas da pasta music (Y = editor de pista: escolhes o BPM,
+               tocas o ritmo por cima da musica e as notas ficam alinhadas a grelha).
+               Musicas em .mp3/.ogg da pasta music: abre-as 1 vez no WARP FLOOR para converter.
+               Recordes em ports/mothership/bd_save.json.
+
+INTRO          Ao abrir a nave toca um de 5 ambientes de musica (melancolico, alegre, energetico, triste,
+               zangado), sempre a variar, ate carregares START. esq/dir muda de ambiente.
+TRAILER        (SISTEMA) 1 min 18 s: um sinal nas estrelas, a nave salta do hiperespaco, as 8 apps de
+               musica e os 4 jogos aparecem no ecra da nave com imagens reais, e um refrao final com o
+               logotipo. Musica original feita com os sons da nave. A/B/START/SELECT sai.
+               Versao em video (MP4) para partilhar: orimbux_trailer_v19.mp4.
+CREDITOS       (SISTEMA ou HANGAR) Os creditos a rolar pelo espaco, com tema proprio.
+               cima = mais rapido | baixo = mais devagar | A/B/START sai.
+HANGAR         scanlines, animacoes, volume, quantize, trocar A/B X/Y, teste de botoes
+               GRAVACOES: lista tudo o que gravaste/exportaste com duracao e tamanho, espaco livre no
+                 cartao, A ouvir, Y duas vezes apagar.
+               BUFFER AUDIO 512: menos atraso (bom para o Vox Nebula e o Beat Duel), mais esforco do
+                 processador. Aplica-se ao reabrir a app; se estalar, volta a 1024.
+               REVER TUTORIAIS: mostra de novo os cartoes da primeira vez (e o cartao de boas-vindas).
+               MISSOES: recomeca a missao "A tua primeira musica".
+
+SE ALGO FALHAR
+  Abre ports/mothership/log.txt no PC: tem a descricao do erro.
+  Se os botoes estiverem trocados: HANGAR > BOTOES A/B X/Y > TROCADOS.
+  Void Runner lento: pausa > INIMIGOS: MENOS.
+
+CREDITOS
+  Samples: Sonic Pi sample pack, CC0 (dominio publico) - assets/samples/CREDITS-sonic-pi-samples.md
+  Letra: Tiny5 - SIL Open Font License (assets/fonts)
+  Pixel art (nave, planetas, nebulosa): desenhada em codigo (tools/build_art.py)
+  Motor: Python + SDL2 via PySDL2 (dominio publico / zlib)
+  Musicas (Beat Duel, trailer, creditos): originais, sintetizadas para a nave.
+  Orimbux, 2026.
