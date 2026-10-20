@@ -36,6 +36,9 @@ try:
     ns = {}
     exec(UNZIP.split("z = zipfile")[0], ns)
     assert package.USER_FILES <= ns["SAVES"] and package.USER_DIRS == ns["PLAYER_DIRS"]
+    # ---- the packaged launcher is plain bash (LF), even when packed from a Windows checkout with CRLF files
+    sh = package.launcher()
+    assert b"\r" not in sh and sh.startswith(b"#!/bin/bash\n") and sh.decode("utf-8") == src
 
     # ---- a hostile or hand-made zip
     ports = os.path.join(TMP, "case1", "ports")

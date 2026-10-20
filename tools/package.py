@@ -33,18 +33,23 @@ def files():
     return out
 
 
+def launcher():
+    """the launcher as bash on the console needs it: LF line endings, even from a Windows checkout (autocrlf)"""
+    return open(os.path.join(PORTS, "Orimbux Mothership.sh"), "rb").read().replace(b"\r\n", b"\n")
+
+
 def main():
     ver, outd = sys.argv[1], sys.argv[2]
     os.makedirs(os.path.join(outd, "card"), exist_ok=True)
     fl = files()
-    launcher = os.path.join(PORTS, "Orimbux Mothership.sh")
+    data = launcher()
     leia = os.path.join(ROOT, "LEIA-ME.txt")
     full = os.path.join(outd, "OrimbuxMothership_%s.zip" % ver)
     with zipfile.ZipFile(full, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
         z.write(leia, "LEIA-ME.txt")
         info = zipfile.ZipInfo("ports/Orimbux Mothership.sh")
         info.external_attr = 0o100755 << 16
-        z.writestr(info, open(launcher, "rb").read(), zipfile.ZIP_DEFLATED)
+        z.writestr(info, data, zipfile.ZIP_DEFLATED)
         for p, arc in fl:
             z.write(p, "ports/" + arc)
     # card parts: greedy fill by size, the LEIA-ME goes in part 1
@@ -66,7 +71,6 @@ def main():
         with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
             for p, arc in part:
                 z.write(p, arc)
-    data = open(launcher, "rb").read()
     open(os.path.join(card, "Orimbux Mothership.sh"), "wb").write(data)
     os.chmod(os.path.join(card, "Orimbux Mothership.sh"), 0o755)
     print("full:", full, "%.1f MB, %d files" % (os.path.getsize(full) / 1e6, len(fl)))
