@@ -1,6 +1,5 @@
 # EAR LAB - ear training: intervals, chords, scales, notes (relative to C) and tempo (BPM).
 # Levels unlock on their own (80% of the last 10 right). Answers on the d-pad OR the face buttons (same cross).
-import json
 import math
 import os
 import random
@@ -62,10 +61,7 @@ class EarLab(object):
         self.app = app
         self.raw = {}
         self.cache = {}
-        try:
-            self.st = json.load(open(SAVE))
-        except Exception:
-            self.st = {}
+        self.st = engine.load_save(SAVE) or {}
         self.state = "menu"
         self.msel = 0
         self.q = None

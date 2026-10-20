@@ -553,10 +553,7 @@ class BeatDuel(object):
         self.msg = ("", 0.0)
 
     def load(self):
-        try:
-            return json.load(open(SAVE))
-        except Exception:
-            return {}
+        return engine.load_save(SAVE) or {}
 
     def write(self):
         try:

@@ -117,11 +117,7 @@ class Forge(object):
     # ---------------------------------------------------------------- persistence
     def load(self):
         nt = len(self.kit)
-        st = {}
-        try:
-            st = json.load(open(SAVE))
-        except Exception:
-            pass
+        st = engine.load_save(SAVE) or {}
         tracks = st.get("tracks") or []
         self.tracks = []
         for i, t in enumerate(self.kit):

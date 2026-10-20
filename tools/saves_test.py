@@ -60,10 +60,23 @@ try:
     assert json.load(open(p)) == {"best": 5} and not os.path.exists(p + ".tmp")
     print("write_json is atomic")
 
-    # ---- the app's own saves: a crash half-way through json.dump never truncates the saved file
+    # ---- unreadable saves (cut short by a power cut, zeros, not an object) are kept, never written over
+    damaged = {"config.json": b"[]", "pet.json": b'{"gen": 3, "name": "ZORP", "form": "glorpo", "age": 9',
+               "forge.json": b"\0" * 300, "quiz.json": b'{"best": 9, "gam', "vr_save.json": b"{",
+               "bd_save.json": b"[1, 2]"}
+    for f, data in damaged.items():
+        open(os.path.join(APPD, f), "wb").write(data)
     a = appmod.App(headless=True)
     while not a.bank.ready:
         time.sleep(0.05)
+    for f, data in damaged.items():
+        kept = glob.glob(os.path.join(APPD, f + ".bad-*"))
+        assert len(kept) == 1 and open(kept[0], "rb").read() == data, "%s: the damaged file was not kept" % f
+        assert not os.path.exists(os.path.join(APPD, f)), f
+    assert a.sections["pet"].p["form"] == "egg" and a.sections["quiz"].st["best"] == -1
+    print("unreadable saves are kept as <name>.bad-<date>")
+
+    # ---- the app's own saves: a crash half-way through json.dump never truncates the saved file
     a.cfg["volume"] = 55
     a.save_cfg()
     a.sections["pet"].save()

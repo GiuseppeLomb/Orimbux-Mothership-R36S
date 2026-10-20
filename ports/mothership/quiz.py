@@ -4,7 +4,6 @@
 #  FESTA: 2 to 10 players pass the console; every player gets a question per round, points for right answers
 #    (more for harder ones and for answering fast), standings after each round and a podium at the end.
 #  TREINO LIVRE: endless practice by theme. X replays the sound of a question, for free.
-import json
 import math
 import os
 import random
@@ -58,10 +57,7 @@ class Quiz(object):
         self.app = app
         self.ear = earlab.EarLab(app)          # tones, chords and clicks
         self.drums = {}
-        try:
-            self.st = json.load(open(SAVE))
-        except Exception:
-            self.st = {"best": -1, "games": 0, "right": 0, "asked": 0}
+        self.st = engine.load_save(SAVE) or {"best": -1, "games": 0, "right": 0, "asked": 0}
         self.state = "menu"
         self.msel = 0
         self.psel = 0

@@ -5,7 +5,6 @@
 # Design rules for speed on the R36S: every sprite is baked once into a texture (one RenderCopy per entity),
 # the ground is a pre-rendered tile, hits use a spatial grid, nothing allocates much per frame.
 import glob
-import json
 import math
 import os
 import random
@@ -1890,13 +1889,12 @@ class VoidRunner(object):
 
     # ---------------------------------------------------------------- save
     def load(self):
-        try:
-            d = json.load(open(SAVE))
-            d.setdefault("best", {})
-            d.setdefault("unlocked", 1)
-            return d
-        except Exception:
+        d = engine.load_save(SAVE)
+        if d is None:
             return {"unlocked": 1, "best": {}, "endless": 0}
+        d.setdefault("best", {})
+        d.setdefault("unlocked", 1)
+        return d
 
     def write(self, sync=True):
         try:

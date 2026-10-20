@@ -69,6 +69,35 @@ def write_json(path, obj, sync=True, **kw):
     os.replace(tmp, path)
 
 
+def keep_bad(path, move=True):
+    """keeps a saved file the app cannot use next to it, as <name>.bad-<date>-<time>: it is never deleted"""
+    dst = "%s.bad-%s" % (path, time.strftime("%Y%m%d-%H%M%S"))
+    try:
+        if move:
+            os.replace(path, dst)
+        else:
+            with open(path, "rb") as src, open(dst, "wb") as out:
+                out.write(src.read())
+    except OSError:
+        pass
+
+
+def load_save(path):
+    """a saved JSON object, or None when there is none. A file that exists but is not a readable JSON object
+    (cut short by a power cut, full of zeros...) is kept with keep_bad, so starting again from the defaults never
+    writes over it."""
+    if not os.path.exists(path):
+        return None
+    try:
+        d = read_json(path)
+    except Exception:
+        d = None
+    if isinstance(d, dict):
+        return d
+    keep_bad(path)
+    return None
+
+
 # ------------------------------------------------------------------ graphics
 def load_frm(path):
     """8-bit frames sharing one palette: FRM1, count, w, h, palette, [len + zlib(indices)]"""

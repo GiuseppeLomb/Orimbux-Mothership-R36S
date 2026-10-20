@@ -35,3 +35,5 @@ tools/build/
 
 # atomic saves: the temporary file of an interrupted write
 ports/mothership/*.tmp
+# a damaged save the app could not read, kept instead of overwritten
+ports/mothership/*.bad-*

@@ -1,5 +1,4 @@
 # XENO PET - a virtual alien pet that lives in the Mothership (tamagotchi style)
-import json
 import math
 import os
 import random
@@ -201,13 +200,11 @@ class XenoPet(object):
 
     # ---------------------------------------------------------------- persistence
     def load(self):
-        try:
-            p = json.load(open(PET_FILE))
-            base = new_pet()
+        p = engine.load_save(PET_FILE)
+        base = new_pet()
+        if p:
             base.update(p)
-            return base
-        except Exception:
-            return new_pet()
+        return base
 
     def save(self, sync=True):
         self.p["last_seen"] = time.time()

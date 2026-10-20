@@ -58,10 +58,9 @@ def log(msg):
 
 def load_cfg():
     cfg = dict(DEFAULT_CFG)
-    try:
-        cfg.update(json.load(open(CFG_PATH)))
-    except Exception:
-        pass
+    saved = engine.load_save(CFG_PATH)
+    if saved:
+        cfg.update(saved)
     return cfg
 
 
