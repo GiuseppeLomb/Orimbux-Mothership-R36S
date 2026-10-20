@@ -97,7 +97,7 @@ Cada falha tem o ficheiro e a linha (no commit `6841748`), o problema, como se r
   `beatduel.py:555-559`.
 - Problema: os ficheiros são lidos com `json.load` e usados sem validar tipos nem domínios. Um JSON válido mas
   com a forma errada rebenta no arranque (`App.__init__` constrói todas as secções), ou mais tarde a desenhar.
-- Reprodução (`repro_saves.py`, sobre o `main`):
+- Reprodução (sobre o `main`; os mesmos casos estão em `tools/saves_test.py`):
 
   | Ficheiro | Conteúdo | Resultado |
   |---|---|---|
@@ -123,7 +123,7 @@ Cada falha tem o ficheiro e a linha (no commit `6841748`), o problema, como se r
   valores por omissão e grava-os por cima na primeira gravação. O `pet.json` estragado passa a um ovo novo e o pet
   antigo desaparece ao fim de 30 s; o `forge.json` passa aos padrões de demonstração.
 - Reprodução: `pet.json` truncado a meio, ou 200 bytes `\0`, ou `forge.json` truncado: a app arranca e o ficheiro
-  é reescrito (`repro_saves.py`: `REWRITTEN`).
+  é reescrito na gravação seguinte (casos em `tools/saves_test.py`).
 - Correção: antes de recomeçar, guardar o ficheiro estragado ao lado com o nome `<ficheiro>.bad-AAAAMMDD-HHMMSS`
   (nunca se apaga nada). O mesmo quando a validação de C1 tem de corrigir algum campo.
 
@@ -229,6 +229,16 @@ Cada falha tem o ficheiro e a linha (no commit `6841748`), o problema, como se r
   acentos e sem o campo `top`, por cima das fontes atuais feitas por `build_font.py`.
 - Correção: retirar o construtor de fontes obsoleto; `font` passa a indicar `build_font.py`.
 
+**M7. Outros ficheiros do jogador lidos sem validação** (encontrada durante as correções).
+- Onde: `beatduel.py:45-87` (`find_songs`: sessões `recordings/session_*.json` e `*.chart.json`), `decks.py:250-263`,
+  `recmgr.py:42-47`, `app.py:206-211` (o `forge_X.json` de um loop do Forge), `songscan.py:28-31` (a cache).
+- Problema: as notas, o título, o bpm e os "beats" eram usados tal como vinham do ficheiro.
+- Reprodução (sobre o `main`): uma sessão com a nota `[3.0, 7]` rebenta o Beat Duel ao jogar (`IndexError`); uma
+  sessão com `"title": 5` rebenta a lista de músicas (`TypeError`); `"beats": 0` num loop do Forge rebenta o
+  reamostrador ao tocar o pad; uma cache de análise com a forma errada torna a música impossível de jogar.
+- Correção: validar as notas (`[tempo, pista 0-3]` ou `[tempo, pista, duração]`) e descartar as danificadas, saltar
+  sessões sem `file`, dar valores seguros ao título e ao bpm, analisar outra vez uma cache danificada.
+
 ### Baixa
 
 **B1. Imports não usados** em `tools/` (os 9 restantes avisos de pyflakes).
@@ -245,6 +255,10 @@ estivesse na pasta (uma gravação interrompida).
 
 **B5.** `engine.py:27` lê o `config.json` ao importar sem `with` nem codificação; `load_cfg` não aceita o BOM UTF-8.
 
+**B6. `chop_test.py` é instável** (encontrada na verificação final): em headless o relógio do misturador só anda com
+o tempo real, e dois toques gravados podiam cair no mesmo bloco de áudio e fundir-se numa nota. No `main` falhou 2
+vezes em 5; com os frames mais rápidos, mais vezes.
+
 ### Verificado e sem problemas
 
 - **Texturas SDL:** as do nível do Void Runner, do logótipo da intro, do trailer, dos créditos e das vistas do
@@ -257,35 +271,161 @@ estivesse na pasta (uma gravação interrompida).
 
 ---
 
-## 3. Progresso (trabalho interrompido pelo limite de utilização)
+## 3. O que foi corrigido
 
-### Corrigido, um commit por assunto, cada um com o seu teste em `tools/`
+Um commit por assunto, cada um com o teste que o prova em `tools/`. Os testes novos falham no `main` (reproduzem as
+falhas) e passam neste ramo.
 
-| Falha | Commit | Teste |
+| Falha | O que mudou | Commit | Teste |
+|---|---|---|---|
+| C3 | `engine.write_json`: escreve `<ficheiro>.tmp`, `flush`, `fsync`, `os.replace`, em todas as gravações. Sem `fsync` nas periódicas (pet a cada 30 s, gravação automática do Forge, Void Runner a meio do jogo, cache) para um cartão lento nunca parar um frame | `a78e44c` | `saves_test.py` |
+| C2 | `engine.load_save`: um ficheiro ilegível passa a `<ficheiro>.bad-AAAAMMDD-HHMMSS` antes de a app recomeçar | `56955b8` | `saves_test.py` |
+| C1 | validação campo a campo de `config`, `pet`, `forge`, `quiz`, `vr_save` e `bd_save`; quando corrige algo, guarda primeiro uma cópia `.bad` do original | `08f4d83` | `saves_test.py` (9 casos, ida e volta, formatos antigos) |
+| M7 | notas, títulos, bpm, "beats" e cache validados ao ler | `cae1082` | `files_test.py` |
+| A1 | cada fonte de som lida à parte: a que falha é marcada, fechada e retirada; cada erro vai ao log uma vez | `2f8b462` | `audio_test.py` |
+| A2 | `try/finally` no ciclo; `shutdown()` com cada passo protegido | `933f854` | `robust_test.py` |
+| A3 | `time.perf_counter()` no ciclo, em `Mixer.pump` e no relógio do Beat Duel | `c67f366` (+ `af532a3`: os relógios falsos dos testes) | `robust_test.py` |
+| A4 | se o `os.remove` falhar, fecha o stream desse ficheiro e tenta outra vez | `6098de9` | `v17_test.py` passa a passar |
+| M1 + B4 | o lançador só extrai `mothership/`, nunca os ficheiros do jogador; `package.py` deixa de fora `*.tmp`, `*.bad-*`, `missions.json` | `87ec129` | `launcher_test.py` (inclui o `.sh` inteiro no bash) |
+| M2 + B5 | `with`/`try-finally` no Twin Decks, no Warp e nas leituras; `os.replace` no Warp | `b146a99` | `robust_test.py` |
+| M3 | `Scanner.cancel()` | `b3f748f` | `robust_test.py` |
+| M4 | o micro é lido uma vez por callback | `0fbad12` | `audio_test.py` |
+| M5 | texto: retângulos das letras em cache; retângulos: array `c_int` direto | `14dce76` | `perf_equal_test.py`, `screens_test.py` |
+| M5 | cache de `ui.tokens`, `ui.wrap`, `ui.fit` | `e76e8c8` | `perf_equal_test.py` |
+| M5 | onsets do Void Runner por bisseção (com o filtro antigo como recurso) | `fde89ef` | `perf_equal_test.py`, `vr_test.py` |
+| M5 | misturador: saltar multiplicações por exatamente 1,0 | `70fd697` | `perf_equal_test.py`, hash do áudio no `perf_test.py` |
+| M6 | construtor de fontes obsoleto retirado do `build_extra.py` | `a779954` | `tools_test.py` |
+| B1 + B3 | imports não usados; `v19_test` apaga a sessão que grava | `4131a10` | pyflakes, `v19_test.py` |
+| B2 | código morto retirado | `f401efc` | `screens_test.py` |
+| B6 | `chop_test` faz o áudio avançar em passos fixos | `5f08944` | `chop_test.py` (6 em 6) |
+
+Ferramentas novas de medição: `tools/perf_test.py` (`84b62f6`) e `tools/screens_test.py` (`f24370f`).
+
+**O que pode notar-se depois destas correções.** Nada no aspeto, nos textos, nos sons, nos controlos ou no equilíbrio:
+os 50 ecrãs são idênticos ao `main`, o áudio tem o mesmo hash e o bot do `vr_test` termina os três mundos com os mesmos
+abatidos e estados. As únicas diferenças visíveis são as correções de falhas, e mais uma: um ficheiro guardado estragado
+deixa um `<nome>.bad-...` ao lado, que nunca é apagado. Um `forge.json` no formato v1 também é guardado assim, uma vez,
+antes de ser convertido.
+
+---
+
+## 4. Resultados antes e depois
+
+### Análise estática
+
+| | `main` | `audit` |
 |---|---|---|
-| C3 escrita atómica (`engine.write_json`: tmp + fsync + `os.replace`) | `a78e44c` | `saves_test.py` |
-| C2 ficheiros ilegíveis guardados como `<nome>.bad-<data>` | `56955b8` | `saves_test.py` |
-| C1 validação campo a campo dos 6 ficheiros guardados | `08f4d83` | `saves_test.py` (9 casos + ida e volta + formatos antigos) |
-| M7 (novo) sessões, pistas, metadados e cache lidos sem validação: uma nota na pista 7 rebentava o Beat Duel | `cae1082` | `files_test.py` |
-| A1 thread de áudio: a fonte que falha é retirada, o log regista cada erro uma vez | `2f8b462` | `audio_test.py` |
-| A2 gravar tudo e parar o `arecord` também quando a app sai por erro | `933f854` | `robust_test.py` |
-| A3 relógio monotónico no ciclo, no `pump()` e no Beat Duel | `c67f366` (+ `af532a3` nos relógios falsos dos testes) | `robust_test.py` |
-| A4 Windows: apagar a gravação que está a tocar | `6098de9` | `v17_test.py` passa a passar |
-| M1 lançador só extrai `mothership/`, nunca os ficheiros do jogador (+ B4 `package.py`) | `87ec129` | `launcher_test.py` (inclui o `.sh` inteiro no bash) |
-| M2 ficheiros fechados (Twin Decks, conversão do Warp, leituras) (+ B5) | `b146a99` | `robust_test.py` |
-| M3 cancelar a análise de música do Void Runner | `b3f748f` | `robust_test.py` |
-| M4 corrida do micro no VOX | `0fbad12` | `audio_test.py` |
-| Ferramenta: hash de 50 ecrãs para provar que nada mudou no aspeto | `f24370f` | `screens_test.py`: idêntico ao `main` |
+| pyflakes (`ports/mothership/*.py tools/*.py`) | 10 avisos | **0** |
+| vermin, Python mínimo da app | 3.6 | 3.6 |
+| vermin, Python mínimo das ferramentas | 3.7 | 3.7 |
 
-### Por fazer
+### Testes
 
-- **M5 desempenho:** as quatro otimizações estão medidas e provadas em bancada (texto -37%, array de retângulos
-  -38%, ambos com píxeis idênticos; `ui.tokens` em cache; saltar ×1,0 no misturador), mas ainda não estão aplicadas.
-- **M6** `build_extra.py`, **B1** imports não usados, **B2** código morto, **B3** testes que deixam lixo.
-- **Verificação final:** pyflakes, todos os testes, tempos do `vr_test` e `perf_test`, e `screens_test` contra o `main`.
-- **Relatório final** (propostas que mudariam a app: cache do Warp com nomes repetidos em subpastas, reabrir o
-  comando no PC, temporizadores de interface em `time.time()`, etc.).
+| Teste | `main` | `audit` |
+|---|---|---|
+| `v19_test`, `v18_test`, `forge_test`, `decks_test`, `vox_test`, `bd_test`, `bd_face_test`, `quiz_party_test`, `vr_gems_test`, `vr_test 0,2,5` | passam | passam |
+| `v17_test` | **falha** (Windows, A4) | passa |
+| `chop_test` | passa às vezes (falhou 2 em 5, B6) | passa sempre (6 em 6) |
+| `text_bounds` | 9 textos fora do ecrã (animação do trailer) | os mesmos 9 |
+| `saves_test`, `files_test`, `audio_test`, `robust_test`, `launcher_test`, `perf_equal_test`, `tools_test` (novos) | falham (reproduzem as falhas) | passam |
+| `screens_test` (novo) | 50 hashes | **os mesmos 50 hashes** |
 
-Testes já confirmados no ramo, depois das correções: todos os 13 de partida passam, incluindo o `v17_test`,
-que falhava no `main`. Os novos `saves_test`, `files_test`, `audio_test`, `robust_test` e `launcher_test` também
-passam, e os 50 ecrãs são idênticos ao `main`. Nada foi enviado para o GitHub.
+### Tempos (PC)
+
+Medidos lado a lado com o `main`, em rondas alternadas, ficando o melhor de 3. O PC mudou de estado de energia durante
+a sessão (o `main` mediu 1,92 ms na ponte no início e 1,48 ms no fim), por isso só a comparação lado a lado é válida.
+
+`tools/perf_test.py` (ms por frame; áudio: um callback de 1024 amostras com carga típica):
+
+| Ecrã | `main` | `audit` | |
+|---|---|---|---|
+| bridge | 1.48 | 1.12 | -24% |
+| forge (a tocar) | 1.31 | 1.01 | -23% |
+| reactor (2 loops) | 1.37 | 1.13 | -18% |
+| hangar | 0.92 | 0.66 | -28% |
+| quiz | 1.55 | 1.14 | -27% |
+| pet | 0.81 | 0.67 | -18% |
+| xeno | 1.77 | 1.39 | -22% |
+| **áudio** `render(1024)` | 231 µs | 210 µs | -9%, hash `6b54d35091d19331` igual |
+
+`tools/vr_test.py OUT 0,2,5`:
+
+| Mundo | update `main` → `audit` | draw `main` → `audit` | resultado (igual nos dois) |
+|---|---|---|---|
+| 1 | 0.23 → 0.20 ms | 0.73 → 0.64 ms | colapso, 1240 abatidos |
+| 3 | 0.27 → 0.24 ms | 0.71 → 0.60 ms | morto, 314 abatidos |
+| 6 | 0.27 → 0.23 ms | 0.80 → 0.73 ms | morto, 718 abatidos |
+
+Custo novo: a validação do `forge.json` acrescenta cerca de 1 ms ao arranque no PC (1,7 ms contra 0,8 ms), com um
+caminho rápido para os passos já válidos.
+
+---
+
+## 5. O que ficou por fazer e porquê
+
+- **Nada foi testado na R36S** (não há consola neste ambiente). Dependem do ArkOS:
+  - o `os.replace` sobre um ficheiro que já existe no cartão (exFAT ou FAT). O `pet.json` já o usava em versões
+    anteriores, por isso deve funcionar;
+  - o custo do `fsync` num cartão SD lento. Foi por isso que ficou fora das gravações periódicas;
+  - o `arecord` do ABDUCTOR e do VOX (micro USB) e o seu fim no encerramento;
+  - o relógio sem pilha e o acerto da hora pelo NTP (simulado nos testes);
+  - o lançador `.sh`: testado no Git Bash com um `python3` falso, mas não no bash da consola;
+  - os ganhos de desempenho, medidos no PC. Como são custos de Python, a proporção no RK3326 deve ser parecida, mas não
+    está medida.
+- **Python 3.7 real:** só verificação estática (vermin). Não há Python 3.7 para Windows aqui. Nada do que foi escrito
+  usa sintaxe posterior a 3.6.
+- **Temporizadores de interface** em `time.time()`: ver P3. Mudar ~100 sítios é um diff grande para um caso raro.
+- **Desenhar o texto numa só chamada SDL** (`SDL_RenderGeometry`) exige SDL 2.0.18+, que não é garantido no ArkOS.
+- **`bd_scores.json`** aparece na lista de ficheiros de jogos guardados, mas nenhum código o lê ou escreve. Só existe nas
+  listas de exclusão do `package.py` e do lançador, que o protegem.
+
+---
+
+## 6. Propostas que mudariam a app (não aplicadas)
+
+**P1. Cache do Warp Floor com nomes repetidos.** `music/a/song.mp3` e `music/b/song.mp3` partilham
+`music/.cache/song.mp3.wav` (`Warp.cache_path` em `app.py`, `find_songs` em `beatduel.py`), por isso toca a música
+errada. Corrigir muda o nome da cache dos ficheiros em subpastas, que seriam convertidos outra vez, uma vez.
+
+**P2. Comando no PC.** Desligar e voltar a ligar o comando não o reabre: `engine.Input` só abre comandos se não houver
+nenhum aberto, e `SDL_JOYDEVICEREMOVED` não é tratado.
+
+**P3. Temporizadores de interface** (suspense do quiz, colapso do Void Runner, toasts, repetição das setas) usam
+`time.time()`. Com um salto da hora para trás podem ficar parados até a hora "alcançar". A correção é passar esses
+sítios para um relógio monotónico.
+
+**P4. Beat Duel:** a nota é julgada no momento em que o evento é processado. Usar o timestamp do evento SDL tornaria o
+julgamento independente de um frame lento.
+
+**P5. ABDUCTOR:** o medidor de nível lê o fim do ficheiro em gravação em cada frame (`Abductor.update`). Ler a cada 3
+frames pouparia leituras no cartão, mas o medidor mexeria menos vezes.
+
+**P6. Gestor de GRAVAÇÕES:** chama `os.statvfs` em cada frame (`RecManager.draw`). Bastaria fazê-lo ao abrir e ao
+apagar.
+
+**P7. Entrar no Beat Duel com o micro ligado** desliga-o com o `mixer.lock` apanhado (`proc.wait` até 1 s), o que pode
+dar um corte breve de som. A correção é parar o micro fora do lock.
+
+**P8. Twin Decks no Windows:** apagar no gestor um ficheiro que está carregado num deck falha ("Não consegui apagar"),
+porque o deck o tem aberto. Descarregar o deck mudaria o que o jogador vê.
+
+**P9. Lançador:** fora da consola, a limpeza final de `/dev/tty0` faz o script terminar com código 1. É inofensivo (o
+EmulationStation ignora o código), e pôr `2>/dev/null` antes do `>` silenciava-o.
+
+---
+
+## 7. Como repetir as verificações
+
+```bash
+pyflakes ports/mothership/*.py tools/*.py
+python3 tools/saves_test.py && python3 tools/files_test.py && python3 tools/audio_test.py
+python3 tools/robust_test.py && python3 tools/launcher_test.py && python3 tools/perf_equal_test.py
+python3 tools/tools_test.py
+python3 tools/perf_test.py                      # tempos e hash do áudio
+python3 tools/screens_test.py > audit.txt       # e no main: python3 tools/screens_test.py OUTRA/ports/mothership
+python3 tools/vr_test.py /tmp/vr 0,2,5
+```
+
+Os testes antigos (`v17_test` a `v19_test`, `forge_test`, `decks_test`, `chop_test`, `vox_test`, `bd_test`,
+`bd_face_test`, `quiz_party_test`, `vr_gems_test`, `text_bounds`) correm como antes, com
+`SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy`.
