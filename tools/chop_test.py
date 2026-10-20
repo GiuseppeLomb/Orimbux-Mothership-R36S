@@ -78,10 +78,12 @@ try:
     assert a.bank.pad(bi, 0)["label"] == "FATIA 1" and os.path.exists(made[0])
     # finger drumming REC -> Beat Duel chart
     ab.combo("a"); assert a.rec.active()
+    # the audio advances a fixed step per frame: left to the real-time clock, two presses could share one
+    # audio block on a fast machine and merge into one note (the test then failed now and then)
     for b in ("up", "right", "down", "left", "x", "a"):
-        for _ in range(6): a.frame(1 / 30.0)
+        for _ in range(6): a.mixer.render(1470); a.frame(1 / 30.0)
         ab.on("press", b)
-    for _ in range(10): a.frame(1 / 30.0)
+    for _ in range(10): a.mixer.render(1470); a.frame(1 / 30.0)
     rp = a.rec.path
     ab.combo("a")
     made += [rp + ".wav", rp + ".json"]
