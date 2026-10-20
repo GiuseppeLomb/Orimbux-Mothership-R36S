@@ -221,8 +221,11 @@ def build_pet_sounds():
 
 if __name__ == "__main__":
     # the old DEMO 64K (music + maps) was replaced by the trailer (tools/build_trailer.py); pass "music"/"maps"
-    # explicitly to rebuild those files
-    what = sys.argv[1:] or ["pet", "font"]
+    # explicitly to rebuild those files. The app's fonts (k16..kb48, with the Portuguese accents) are made by
+    # tools/build_font.py: the ASCII-only font builder that lived here is gone (it would have overwritten them).
+    what = sys.argv[1:] or ["pet"]
+    if "font" in what:
+        sys.exit("the fonts are made by tools/build_font.py")
     for d in ((DEMO,) if ("music" in what or "maps" in what) else ()) + (PET,):
         os.makedirs(d, exist_ok=True)
     if "music" in what:
@@ -231,72 +234,3 @@ if __name__ == "__main__":
         build_maps()
     if "pet" in what:
         build_pet_sounds()
-    if "font" in what:
-        build_kid_font()
-
-
-# ------------------------------------------------------------------ child-friendly pixel font (Pixelify Sans, OFL)
-def build_kid_font():
-    """Tiny5 (OFL) is drawn on an 8-units-per-em pixel grid. Rasterise each glyph big, sample one value per
-    font pixel (perfectly crisp), then scale by an integer factor: 2x -> 16px, 3x -> 24px, 4x -> 32px, 6x -> 48px."""
-    import json
-    from PIL import Image, ImageDraw, ImageFont
-    src = "/home/claude/gf/ofl/tiny5/Tiny5[BLED,JITT,ROND,wdth,wght].ttf"
-    out = os.path.join(A, "fonts")
-    chars = "".join(chr(c) for c in range(32, 127))
-    U = 25                      # px per font pixel at size 200
-    font = ImageFont.truetype(src, 200)
-    font.set_variation_by_axes([400, 100, 0, 0, 0])
-    asc, desc = font.getmetrics()
-    ox, oy = 40, 40
-    cw, chh = 400, oy + asc + desc + 60
-
-    def raster(ch):
-        im = Image.new("L", (cw, chh), 0)
-        ImageDraw.Draw(im).text((ox, oy), ch, font=font, fill=255)
-        return im
-    import numpy as np
-    href = np.array(raster("H")) > 127
-    ys, xs = np.where(href)
-    px, py = xs.min() % U, ys.min() % U
-    rows0 = py + U // 2
-    nrows = (chh - rows0) // U
-    top_row = (oy - U - rows0) // U          # one font-pixel of headroom above the ascender origin
-    bot_row = (oy + asc + desc - rows0) // U + 1
-    small = {}
-    for ch in chars:
-        a = np.array(raster(ch)) > 127
-        adv = int(round(font.getlength(ch) / U))
-        cols0 = px + U // 2 - U * ((px + U // 2 - (ox - U)) // U)   # start one pixel left of origin
-        grid = []
-        for r in range(max(0, top_row), min(nrows, bot_row)):
-            yy = rows0 + r * U
-            row = []
-            for c in range(adv + 2):
-                xx = cols0 + c * U
-                row.append(1 if (0 <= xx < cw and a[yy, xx]) else 0)
-            grid.append(row)
-        small[ch] = (np.array(grid, dtype=np.uint8), adv)
-    for name_sz, k in ((16, 2), (24, 3), (32, 4), (48, 6)):
-        h = small["H"][0].shape[0] * k
-        widths = [(small[ch][0].shape[1]) * k for ch in chars]
-        maxw, x, y, pos = 1024, 0, 0, []
-        for wdt in widths:
-            if x + wdt + 2 > maxw:
-                x, y = 0, y + h + 2
-            pos.append((x, y))
-            x += wdt + 2
-        img = Image.new("L", (maxw, y + h), 0)
-        glyphs = {}
-        for ch, wdt, (gx, gy) in zip(chars, widths, pos):
-            g, adv = small[ch]
-            gi = Image.fromarray(g * 255).resize((g.shape[1] * k, g.shape[0] * k), Image.NEAREST)
-            img.paste(gi, (gx, gy))
-            # advance = font advance + 1 pixel of tracking; drawn box starts one pixel left (overlap is fine)
-            glyphs[ch] = [gx + k, gy, adv * k]
-        rgba = Image.merge("RGBA", (Image.new("L", img.size, 255),) * 3 + (img,))
-        name = "k%d" % name_sz
-        open(os.path.join(out, name + ".rgba"), "wb").write(rgba.tobytes())
-        json.dump({"w": maxw, "h": h, "glyphs": glyphs}, open(os.path.join(out, name + ".json"), "w"))
-    open(os.path.join(out, "tiny5-OFL.txt"), "w").write(open("/home/claude/gf/ofl/tiny5/OFL.txt").read())
-    print("kid font ok")
