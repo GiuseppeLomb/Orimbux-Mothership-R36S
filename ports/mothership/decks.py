@@ -65,22 +65,24 @@ class Deck(object):
     def _peaks(self, path, block, sw, ch):
         try:
             wf = wave.open(path, "rb")
-            out = bytearray()
-            step = block * 2 * ch            # after conversion everything is 16-bit
-            while True:
-                d = wf.readframes(block * 400)
-                if not d:
-                    break
-                if sw == 1:
-                    d = audioop.bias(d, 1, -128)
-                if sw != 2:
-                    d = audioop.lin2lin(d, sw, 2)
-                for i in range(0, len(d), step):
-                    out.append(min(255, audioop.max(d[i:i + step], 2) >> 7))
-                if path != self.path:
-                    return
-                self.peaks = out[:]          # partial result is drawn while it loads
-            wf.close()
+            try:
+                out = bytearray()
+                step = block * 2 * ch            # after conversion everything is 16-bit
+                while True:
+                    d = wf.readframes(block * 400)
+                    if not d:
+                        break
+                    if sw == 1:
+                        d = audioop.bias(d, 1, -128)
+                    if sw != 2:
+                        d = audioop.lin2lin(d, sw, 2)
+                    for i in range(0, len(d), step):
+                        out.append(min(255, audioop.max(d[i:i + step], 2) >> 7))
+                    if path != self.path:    # another track was loaded meanwhile
+                        return
+                    self.peaks = out[:]          # partial result is drawn while it loads
+            finally:
+                wf.close()                       # also when it stops early (Windows keeps open files locked)
             n = len(out)
             if n and path == self.path:
                 cols = 600

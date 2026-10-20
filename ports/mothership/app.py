@@ -1,6 +1,5 @@
 # Orimbux Mothership - sections (Intro, Bridge, Loop Reactor, Xeno Synth, Pulsar, Abductor, Warp Floor, Hangar)
 import array
-import json
 import math
 import ctypes
 import os
@@ -206,7 +205,7 @@ def stars_draw(g, stars, dt, vertical=True, alpha=200, move=True):
 class Bank(object):
     def __init__(self, app):
         self.app = app
-        self.banks = json.load(open(os.path.join(APP, "banks.json")))["banks"]
+        self.banks = engine.read_json(os.path.join(APP, "banks.json"))["banks"]
         self.forge_bank = len(self.banks)
         self.banks.append({"name": "FORGE", "color": "orange", "pads": [self.forge_pad(p) for p in range(8)]})
         self.chop_bank = len(self.banks)
@@ -478,7 +477,7 @@ MOOD_DIR = os.path.join(engine.ASSETS, "moods")
 
 def load_moods():
     try:
-        d = json.load(open(os.path.join(MOOD_DIR, "moods.json")))
+        d = engine.read_json(os.path.join(MOOD_DIR, "moods.json"))
         return [(k, d["moods"][k]["label"], [os.path.join(MOOD_DIR, f) for f in d["moods"][k]["files"]])
                 for k in d["order"]]
     except Exception as e:
@@ -1000,7 +999,7 @@ class Xeno(Section):
 
     def __init__(self, app):
         Section.__init__(self, app)
-        self.meta = json.load(open(os.path.join(engine.ASSETS, "synth", "synth.json")))
+        self.meta = engine.read_json(os.path.join(engine.ASSETS, "synth", "synth.json"))
         self.wave = 0
         self.scale = 0
         self.octave = 3
@@ -1012,7 +1011,7 @@ class Xeno(Section):
         k = (wave, octv, bright)
         if k not in self.tables:
             fn = "%s_o%d_%s.raw" % (self.meta["waves"][wave].lower(), octv, "b" if bright else "d")
-            cyc = open(os.path.join(engine.ASSETS, "synth", fn), "rb").read()
+            cyc = engine.read_bytes(os.path.join(engine.ASSETS, "synth", fn))
             reps = max(1, 8192 // (len(cyc) // 2))
             mono = cyc * reps
             self.tables[k] = audioop.tostereo(mono, 2, 1, 1)
@@ -1578,8 +1577,11 @@ class Warp(Section):
             tool = self.conv
             if src.lower().endswith(".wav") and not tool:
                 wf = wave.open(src, "rb")
-                data = to_std(wf.readframes(wf.getnframes()), wf.getnchannels(), wf.getsampwidth(), wf.getframerate())
-                wf.close()
+                try:
+                    data = to_std(wf.readframes(wf.getnframes()), wf.getnchannels(), wf.getsampwidth(),
+                                  wf.getframerate())
+                finally:
+                    wf.close()
                 out = wave.open(dst + ".part", "wb")
                 out.setnchannels(2)
                 out.setsampwidth(2)
@@ -1593,7 +1595,7 @@ class Warp(Section):
             elif tool and src.lower().endswith(".mp3"):
                 ok = subprocess.call([tool, "-q", "-r", str(SR), "--stereo", "-w", dst + ".part", src]) == 0
             if ok:
-                os.rename(dst + ".part", dst)
+                os.replace(dst + ".part", dst)
         except Exception as e:
             log("convert %s %r" % (src, e))
         with self.lock:

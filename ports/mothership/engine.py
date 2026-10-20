@@ -24,8 +24,9 @@ W, H = 640, 480
 SR = 44100
 BUF = 1024  # frames per audio callback (~23 ms); HANGAR > BUFFER AUDIO 512 halves the latency (after a restart)
 try:
-    if json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json"))).get("buffer") == 512:
-        BUF = 512
+    with open(os.path.join(APP, "config.json"), encoding="utf-8-sig") as _f:
+        if json.load(_f).get("buffer") == 512:
+            BUF = 512
 except Exception:
     pass
 HEADROOM = 0.5  # per-voice pre-gain so several loops can stack without clipping
@@ -50,6 +51,11 @@ def mix(a, b, t):
 
 
 # ------------------------------------------------------------------ saved files
+def read_bytes(path):
+    with open(path, "rb") as f:
+        return f.read()
+
+
 def read_json(path):
     """a JSON file (UTF-8, with or without the BOM some Windows editors add)"""
     with open(path, encoding="utf-8-sig") as f:
@@ -119,7 +125,7 @@ def num(v, default, lo=None, hi=None):
 # ------------------------------------------------------------------ graphics
 def load_frm(path):
     """8-bit frames sharing one palette: FRM1, count, w, h, palette, [len + zlib(indices)]"""
-    d = open(path, "rb").read()
+    d = read_bytes(path)
     n, w, h = struct.unpack("<BHH", d[4:9])
     pal = d[9:9 + 768]
     rgba = b"".join(pal[i * 3:i * 3 + 3] + b"\xff" for i in range(256))
@@ -155,8 +161,8 @@ def frm_texture(ren, w, h, rgba, z, key=None):
 
 class Font(object):
     def __init__(self, ren, name):
-        meta = json.load(open(os.path.join(ASSETS, "fonts", name + ".json")))
-        raw = open(os.path.join(ASSETS, "fonts", name + ".rgba"), "rb").read()
+        meta = read_json(os.path.join(ASSETS, "fonts", name + ".json"))
+        raw = read_bytes(os.path.join(ASSETS, "fonts", name + ".rgba"))
         self.h = meta["h"]                       # nominal box (layout height)
         self.top = meta.get("top", 0)            # extra rows above it (accents on capitals)
         self.hf = self.h + self.top

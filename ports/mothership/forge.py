@@ -104,7 +104,7 @@ class Forge(object):
 
     def __init__(self, app):
         self.app = app
-        self.kit = json.load(open(os.path.join(D, "kit.json")))["tracks"]
+        self.kit = engine.read_json(os.path.join(D, "kit.json"))["tracks"]
         self.ids = [t["id"] for t in self.kit]
         self.user = []
         self.raw = {}

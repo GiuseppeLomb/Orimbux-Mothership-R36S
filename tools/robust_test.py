@@ -102,6 +102,50 @@ try:
         time.time, sdl2.SDL_Delay = real_time, real_delay
     assert n[0] == 5 and max(delays) <= 34 and real_time() - t0 < 5, delays
     print("a jump of the system time never stalls the loop, pump() or the Beat Duel clock")
+
+    # ---- files are closed: the Twin Decks waveform scan (also when another track is loaded half-way), and
+    # every file read while the app starts and its sections open
+    import gc
+    import warnings
+    import wave
+    import decks
+    opened = []
+    real_open = wave.open
+
+    def counting_open(*args, **kw):
+        w = real_open(*args, **kw)
+        opened.append(w)
+        return w
+    decks.wave.open = counting_open
+    try:
+        d = decks.Deck("A")
+        bd_dir = os.path.join(APPD, "assets", "bd")
+        d.load(os.path.join(bd_dir, "pixel_rush.wav"), "A")
+        d.load(os.path.join(bd_dir, "neon_drift.wav"), "B")       # the first scan is still running
+        d.wf.close()
+        t0 = time.time()                           # give both scans time to finish (or to stop early)
+        while d.overview == [] and time.time() - t0 < 10:
+            time.sleep(0.05)
+        time.sleep(0.3)
+    finally:
+        decks.wave.open = real_open
+    leaked = [w for w in opened if getattr(w, "_file", None) is not None]
+    assert len(opened) >= 4 and not leaked, "%d of %d wav files left open" % (len(leaked), len(opened))
+    gc.collect()
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always", ResourceWarning)
+        c = appmod.App(headless=True)
+        c.cfg["seen"] = list(__import__("help").HELP)
+        while not c.bank.ready:
+            time.sleep(0.05)
+        for name in ("bridge", "pet", "forge", "xeno", "quiz", "voidrunner", "beatduel", "trailer", "credits",
+                     "hangar", "bridge"):
+            c.go(name)
+            c.frame(1 / 30.0)
+        gc.collect()
+    unclosed = [str(w.message) for w in caught if issubclass(w.category, ResourceWarning)]
+    assert not unclosed, unclosed[:5]
+    print("the waveform scan closes its files; starting the app leaves no file open")
     print("ok")
 finally:
     for p in procs:

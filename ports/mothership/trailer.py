@@ -2,7 +2,6 @@
 # music apps on the ship's viewscreen (real footage, flipped on the beat), the four games, and the ship
 # taking them all home under a final chorus. Runs live on the console; tools/render_trailer.py records
 # the same thing to an MP4.
-import json
 import math
 import os
 import random
@@ -138,7 +137,7 @@ class Trailer(object):
             except Exception:
                 self.files[f] = None
         try:
-            self.crops = json.load(open(os.path.join(D, "crops.json")))
+            self.crops = engine.read_json(os.path.join(D, "crops.json"))
         except Exception:
             self.crops = {}
         try:

@@ -164,7 +164,8 @@ AWAY_CHOICES = [("Pouco", "menos de 1 hora", 1800), ("Umas horas", "cerca de 3 h
 def boot_uptime():
     """seconds since the console booted (Linux), or None"""
     try:
-        return float(open("/proc/uptime").read().split()[0])
+        with open("/proc/uptime") as f:
+            return float(f.read().split()[0])
     except Exception:
         return None
 
