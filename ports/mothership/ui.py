@@ -41,7 +41,26 @@ def where(key):
 
 
 # ---------------------------------------------------------------- text helpers
+# the screens draw the same few texts every frame: their line breaks, shortened forms and key glyphs are worked
+# out once (the font metrics never change); the caches are emptied if they ever grow large
+_WRAP, _FIT, _TOKENS = {}, {}, {}
+
+
+def _remember(cache, key, value):
+    if len(cache) > 600:
+        cache.clear()
+    cache[key] = value
+    return value
+
+
 def wrap(g, font, s, w):
+    key = (font, str(s), w)
+    if key in _WRAP:
+        return list(_WRAP[key])
+    return list(_remember(_WRAP, key, _wrap(g, font, s, w)))
+
+
+def _wrap(g, font, s, w):
     lines, line = [], ""
     for para in str(s).split("\n"):
         for word in para.split():
@@ -67,6 +86,13 @@ def para(g, font, s, x, y, w, col, lh=None, align="left", a=255):
 def fit(g, font, s, w):
     """shorten with '…' to fit"""
     s = str(s)
+    key = (font, s, w)
+    if key in _FIT:
+        return _FIT[key]
+    return _remember(_FIT, key, _fit(g, font, s, w))
+
+
+def _fit(g, font, s, w):
     if g.tw(font, s) <= w:
         return s
     while s and g.tw(font, s + "…") > w:
@@ -113,6 +139,13 @@ _TOK = re.compile(r"(\+|/|\s+|[^\s+/]+)")
 
 
 def tokens(spec):
+    key = str(spec)
+    if key in _TOKENS:
+        return _TOKENS[key]
+    return _remember(_TOKENS, key, tuple(_tokens(spec)))
+
+
+def _tokens(spec):
     s = " " + str(spec) + " "
     for pat, rep in _PHRASES:
         s = re.sub(pat, rep, s, flags=re.I)
