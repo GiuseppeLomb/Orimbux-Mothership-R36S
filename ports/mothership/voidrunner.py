@@ -447,7 +447,7 @@ class Run(object):
             if k not in self.seen_en and k != "mite":
                 self.seen_en.add(k)
                 self.vr.save_d["seen_en"] = sorted(self.seen_en)
-                self.vr.write()
+                self.vr.write(sync=False)          # mid-run: never stall a frame on the SD card
                 self.say("NOVO: " + ART.ENEMIES[k]["name"], ART.ENEMIES[k]["desc"])
         e.k = boss or k
         self.enemies.append(e)
@@ -1898,9 +1898,9 @@ class VoidRunner(object):
         except Exception:
             return {"unlocked": 1, "best": {}, "endless": 0}
 
-    def write(self):
+    def write(self, sync=True):
         try:
-            json.dump(self.save_d, open(SAVE, "w"))
+            engine.write_json(SAVE, self.save_d, sync)
         except Exception:
             pass
 

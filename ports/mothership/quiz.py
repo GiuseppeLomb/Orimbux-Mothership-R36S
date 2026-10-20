@@ -87,8 +87,7 @@ class Quiz(object):
 
     def save(self):
         try:
-            json.dump(self.st, open(SAVE + ".tmp", "w"))
-            os.replace(SAVE + ".tmp", SAVE)
+            engine.write_json(SAVE, self.st)
         except Exception:
             pass
 

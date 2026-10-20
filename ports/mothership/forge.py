@@ -155,11 +155,9 @@ class Forge(object):
         return {"v": 2, "tracks": self.tracks, "pats": self.pats, "swing": self.swing, "song": self.song,
                 "song_on": self.song_on, "style": self.style, "vars": self.vars}
 
-    def save(self):
+    def save(self, sync=True):
         try:
-            tmp = SAVE + ".tmp"
-            json.dump(self.state(), open(tmp, "w"), separators=(",", ":"))
-            os.replace(tmp, SAVE)
+            engine.write_json(SAVE, self.state(), sync, separators=(",", ":"))
         except Exception:
             pass
         self.dirty = 0.0
@@ -319,7 +317,7 @@ class Forge(object):
 
     def tick(self):
         if self.dirty and time.time() - self.dirty > 2.0:
-            self.save()
+            self.save(sync=False)
         if not self.playing:
             return
         m = self.app.mixer
@@ -490,7 +488,7 @@ class Forge(object):
             meta = {"id": os.path.basename(base), "title": time.strftime("FORGE SONG %d/%m %H:%M"),
                     "artist": "TU", "bpm": round(self.app.mixer.bpm, 1), "duration": round(total / float(SR), 2),
                     "file": os.path.basename(base) + ".wav", "charts": {"easy": easy, "normal": notes, "hard": notes}}
-            json.dump(meta, open(base + ".json", "w"))
+            engine.write_json(base + ".json", meta)
             self.say("Música exportada: Beat Duel e Twin Decks (%d:%02d)" % (total // SR // 60, total // SR % 60))
             self.last_song = base
         except Exception as e:

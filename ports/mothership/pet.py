@@ -209,13 +209,10 @@ class XenoPet(object):
         except Exception:
             return new_pet()
 
-    def save(self):
+    def save(self, sync=True):
         self.p["last_seen"] = time.time()
         try:
-            tmp = PET_FILE + ".tmp"
-            with open(tmp, "w") as f:
-                json.dump(self.p, f)
-            os.replace(tmp, PET_FILE)
+            engine.write_json(PET_FILE, self.p, sync)
         except Exception:
             pass
 
@@ -349,7 +346,7 @@ class XenoPet(object):
         self.save_t += dt
         if self.save_t > 30:
             self.save_t = 0
-            self.save()
+            self.save(sync=False)
 
     def speed(self):
         return {1: 1.0, 10: 10.0, 60: 60.0}.get(int(self.app.cfg.get("pet_speed", 1)), 1.0)
@@ -669,7 +666,7 @@ class XenoPet(object):
         self.save_t += dt
         if self.save_t > 30:
             self.save_t = 0
-            self.save()
+            self.save(sync=False)
         if self.mode == "game":
             self.update_game(dt)
             return

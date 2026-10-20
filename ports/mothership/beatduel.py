@@ -560,7 +560,7 @@ class BeatDuel(object):
 
     def write(self):
         try:
-            json.dump(self.save_d, open(SAVE, "w"))
+            engine.write_json(SAVE, self.save_d)
         except Exception:
             pass
 
@@ -794,12 +794,12 @@ class BeatDuel(object):
         data = {"title": s["title"], "bpm": e["bpm"], "charts": {"easy": easy, "normal": notes, "hard": notes}}
         try:
             if s["src"] == "SESSAO":
-                full = json.load(open(s["chart_path"]))
+                full = engine.read_json(s["chart_path"])
                 full["charts"] = data["charts"]
                 full["bpm"] = e["bpm"]
-                json.dump(full, open(s["chart_path"], "w"))
+                engine.write_json(s["chart_path"], full)
             else:
-                json.dump(data, open(s["chart_path"], "w"))
+                engine.write_json(s["chart_path"], data)
             self.say("Pista guardada: %d notas" % len(notes))
         except Exception as ex:
             self.say("Erro a guardar: %s" % ex)

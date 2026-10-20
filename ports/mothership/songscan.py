@@ -74,8 +74,7 @@ def scan_file(path):
         try:
             if not os.path.isdir(CACHE):
                 os.makedirs(CACHE)
-            json.dump(out, open(cp + ".tmp", "w"))
-            os.replace(cp + ".tmp", cp)
+            engine.write_json(cp, out, sync=False)
         except Exception:
             pass
     return out

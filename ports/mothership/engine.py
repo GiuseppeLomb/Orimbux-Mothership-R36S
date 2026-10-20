@@ -49,6 +49,26 @@ def mix(a, b, t):
     return (int(a[0] + (b[0] - a[0]) * t), int(a[1] + (b[1] - a[1]) * t), int(a[2] + (b[2] - a[2]) * t))
 
 
+# ------------------------------------------------------------------ saved files
+def read_json(path):
+    """a JSON file (UTF-8, with or without the BOM some Windows editors add)"""
+    with open(path, encoding="utf-8-sig") as f:
+        return json.load(f)
+
+
+def write_json(path, obj, sync=True, **kw):
+    """saves atomically: writes <path>.tmp, then swaps it in with os.replace, so a crash, a full card or a power cut
+    never leave half a file. sync=True also pushes it to the card first (fsync); the frequent background saves skip
+    that so a slow SD card never stalls a frame."""
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, **kw)
+        f.flush()
+        if sync:
+            os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
 # ------------------------------------------------------------------ graphics
 def load_frm(path):
     """8-bit frames sharing one palette: FRM1, count, w, h, palette, [len + zlib(indices)]"""

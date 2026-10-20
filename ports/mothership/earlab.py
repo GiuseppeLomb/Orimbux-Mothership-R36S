@@ -78,9 +78,7 @@ class EarLab(object):
 
     def save(self):
         try:
-            tmp = SAVE + ".tmp"
-            json.dump(self.st, open(tmp, "w"))
-            os.replace(tmp, SAVE)
+            engine.write_json(SAVE, self.st)
         except Exception:
             pass
 

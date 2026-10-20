@@ -226,7 +226,7 @@ class Bank(object):
 
     def set_forge_pad(self, p, path, beats=4):
         try:
-            json.dump({"beats": beats}, open(path[:-4] + ".json", "w"))
+            engine.write_json(path[:-4] + ".json", {"beats": beats})
         except Exception:
             pass
         self.banks[self.forge_bank]["pads"][p] = self.forge_pad(p)
@@ -418,7 +418,7 @@ class SessionRec(object):
                 "file": os.path.basename(self.path) + ".wav",
                 "charts": {"easy": easy, "normal": ev, "hard": hard}}
         try:
-            json.dump(meta, open(self.path + ".json", "w"))
+            engine.write_json(self.path + ".json", meta)
             self.app.mission("session_saved")
         except Exception as e:
             log("session json %r" % (e,))
@@ -1959,10 +1959,10 @@ class App(object):
             self.bank.ready = True
 
     # ---- helpers
-    def save_cfg(self):
+    def save_cfg(self, sync=False):
         try:
             self.cfg["bpm"] = round(self.mixer.bpm, 1)
-            json.dump(self.cfg, open(CFG_PATH, "w"), indent=1)
+            engine.write_json(CFG_PATH, self.cfg, sync, indent=1)
         except Exception as e:
             log("cfg %r" % (e,))
 
@@ -2164,7 +2164,7 @@ class App(object):
             spent = time.time() - now
             if spent < 1 / 30.0:
                 sdl2.SDL_Delay(int((1 / 30.0 - spent) * 1000))
-        self.save_cfg()
+        self.save_cfg(sync=True)
         self.rec.stop()
         self.sections["forge"].save()
         self.sections["vox"].stop()

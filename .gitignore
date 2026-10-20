@@ -32,3 +32,6 @@ tools/build/
 
 # videos of the trailer and credits are part of the docs
 !docs/video/*.mp4
+
+# atomic saves: the temporary file of an interrupted write
+ports/mothership/*.tmp
