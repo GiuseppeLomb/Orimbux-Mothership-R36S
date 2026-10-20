@@ -298,6 +298,7 @@ class Vox(object):
         m = self.app.mixer
         with m.lock:
             if self.stream not in m.streams:
+                self.stream.done = False        # it may have been dropped by the mixer after an error
                 m.streams.append(self.stream)
         self.say("Micro ligado: usa auscultadores para não apitar")
 

@@ -816,6 +816,7 @@ class Mixer(object):
         self.ok = False
         self._cb = None
         self._t0 = None
+        self._logged = set()
 
     # ---- transport
     def beat_frames(self):
@@ -887,26 +888,37 @@ class Mixer(object):
                     k += 1
             alive = []
             for v in self.voices:
-                ch = v.read(clock, n, self.warp)
-                if ch is not None:
-                    ch = audioop.mul(ch, 2, v.gain * HEADROOM)
-                    out = audioop.add(out, ch, 2)
+                try:
+                    ch = v.read(clock, n, self.warp)
+                    if ch is not None:
+                        out = audioop.add(out, audioop.mul(ch, 2, v.gain * HEADROOM), 2)
+                except Exception as e:          # one broken sound never silences the others
+                    self._drop(v, e)
+                    continue
                 if not v.done:
                     alive.append(v)
             self.voices = alive
             if self.synth:
                 keep = []
                 for s in self.synth:
-                    out = audioop.add(out, audioop.mul(s.read(n, self.synth_bend, self.synth_tone), 2, 1.0), 2)
+                    try:
+                        out = audioop.add(out, audioop.mul(s.read(n, self.synth_bend, self.synth_tone), 2, 1.0), 2)
+                    except Exception as e:
+                        self._drop(s, e)
+                        continue
                     if not s.done:
                         keep.append(s)
                 self.synth = keep
             if self.streams:
                 keep = []
                 for s in self.streams:
-                    ch = s.read(n, clock)
-                    if ch is not None:
-                        out = audioop.add(out, audioop.mul(ch, 2, 0.85), 2)
+                    try:
+                        ch = s.read(n, clock)
+                        if ch is not None:
+                            out = audioop.add(out, audioop.mul(ch, 2, 0.85), 2)
+                    except Exception as e:
+                        self._drop(s, e)
+                        continue
                     if s.done:
                         s.close()
                     else:
@@ -919,16 +931,35 @@ class Mixer(object):
             self.clock += n
             return out
 
+    def _drop(self, src, e):
+        """a sound source that raised is taken out (and closed) so everything else keeps playing; marked done so
+        whoever started it sees it has stopped"""
+        try:
+            src.done = True
+            src.close()
+        except Exception:
+            pass
+        self.log_error("%s: %s" % (type(src).__name__, ascii(e)))
+
+    def log_error(self, msg):
+        """the audio thread logs each different error once: one that repeats every callback (~43 a second) would
+        otherwise fill the SD card"""
+        if msg in self._logged or len(self._logged) >= 20:
+            return
+        self._logged.add(msg)
+        try:
+            with open(os.path.join(APP, "log.txt"), "a") as f:
+                f.write("audio: %s\n" % msg)
+        except Exception:
+            pass
+
     def _callback(self, userdata, stream, length):
         try:
             data = self.render(length // 4)
             ctypes.memmove(stream, data, length)
         except Exception as e:  # never let the audio thread die
             ctypes.memset(stream, 0, length)
-            try:
-                open(os.path.join(APP, "log.txt"), "a").write("audio: %s\n" % ascii(e))
-            except Exception:
-                pass
+            self.log_error(ascii(e))
 
     def open(self):
         self._cb = sdl2.SDL_AudioCallback(self._callback)
