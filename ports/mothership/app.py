@@ -2174,9 +2174,11 @@ class App(object):
             self.shutdown()
 
     def loop(self):
-        last = time.time()
+        # frame timing on a monotonic clock: the R36S has no clock battery and sets the time when the network comes
+        # up; a jump of the system time must never stall the loop (SDL_Delay of hours) or run time backwards
+        last = time.perf_counter()
         while self.running:
-            now = time.time()
+            now = time.perf_counter()
             dt = min(0.1, now - last)
             last = now
             self.handle()
@@ -2188,7 +2190,7 @@ class App(object):
                 sdl2.SDL_SetWindowFullscreen(self.win, sdl2.SDL_WINDOW_FULLSCREEN_DESKTOP if self.fullscreen else 0)
             self.frame(dt)
             sdl2.SDL_RenderPresent(self.ren)
-            spent = time.time() - now
+            spent = time.perf_counter() - now
             if spent < 1 / 30.0:
                 sdl2.SDL_Delay(int((1 / 30.0 - spent) * 1000))
 

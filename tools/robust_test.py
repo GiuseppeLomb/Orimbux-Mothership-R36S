@@ -57,6 +57,51 @@ try:
         time.sleep(0.05)
     assert rec.poll() is not None, "the recorder was left running"
     print("an error in a section still saves config, pet and Beat Forge, and stops the recorder")
+
+    # ---- the system time jumps (no clock battery: the time is set when the network comes up)
+    import threading
+    import sdl2
+    import beatduel
+    import engine
+    real_time = time.time
+    m = engine.Mixer()                                 # no audio device: pump() keeps the transport moving
+    m.pump()
+    time.time = lambda: real_time() + 1e7              # four months forward
+    done = []
+    th = threading.Thread(target=lambda: (m.pump(), done.append(1)))
+    th.daemon = True
+    th.start()
+    th.join(3)
+    time.time = real_time
+    assert done and m.clock < 44100 * 60, "pump() tried to render the whole jump"
+    clk = beatduel.Clock(m)
+    f0 = clk.frames()
+    time.time = lambda: real_time() - 3600             # an hour backwards
+    f1 = clk.frames()
+    time.time = real_time
+    assert f1 >= f0, "the Beat Duel clock went backwards"
+    delays = []
+    real_delay = sdl2.SDL_Delay
+    b = appmod.App(headless=True)
+    b.cfg["seen"] = list(__import__("help").HELP)
+    b.go("bridge")
+    n = [0]
+
+    def jumpy_update(dt):
+        assert dt >= 0, dt
+        n[0] += 1
+        time.time = lambda: real_time() - 1e6 * n[0]   # the clock keeps jumping back while the loop runs
+        if n[0] == 5:
+            b.running = False
+    b.sections["bridge"].update = jumpy_update
+    sdl2.SDL_Delay = lambda ms: delays.append(ms)
+    t0 = real_time()
+    try:
+        b.loop()
+    finally:
+        time.time, sdl2.SDL_Delay = real_time, real_delay
+    assert n[0] == 5 and max(delays) <= 34 and real_time() - t0 < 5, delays
+    print("a jump of the system time never stalls the loop, pump() or the Beat Duel clock")
     print("ok")
 finally:
     for p in procs:

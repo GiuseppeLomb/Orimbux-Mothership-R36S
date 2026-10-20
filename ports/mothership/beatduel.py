@@ -124,7 +124,7 @@ class Clock(object):
 
     def frames(self):
         c = self.m.clock
-        now = time.time()
+        now = time.perf_counter()          # monotonic: a change of the system time never moves the notes
         if c != self.last_c:
             if self.last_c >= 0 and 0 < c - self.last_c <= 8 * BUF:
                 self.chunk = max(BUF, c - self.last_c)

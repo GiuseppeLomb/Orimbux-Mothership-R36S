@@ -972,10 +972,11 @@ class Mixer(object):
         return self.ok
 
     def pump(self):
-        """no audio device: keep the transport moving in real time"""
+        """no audio device: keep the transport moving in real time (a monotonic clock: a jump of the system time
+        would otherwise make it render hours of audio at once)"""
         if self.ok:
             return
-        now = time.time()
+        now = time.perf_counter()
         if self._t0 is None:
             self._t0 = now
         target = int((now - self._t0) * SR)
