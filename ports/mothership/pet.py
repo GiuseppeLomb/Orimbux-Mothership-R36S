@@ -156,20 +156,6 @@ def clean_memorial(h):
 _PAL_CACHE = {}
 
 
-AWAY_CHOICES = [("Pouco", "menos de 1 hora", 1800), ("Umas horas", "cerca de 3 horas", 3 * 3600),
-                ("Uma noite", "cerca de 8 horas", 8 * 3600), ("Um dia", "24 horas", 86400),
-                ("Vários dias", "3 dias", 3 * 86400)]
-
-
-def boot_uptime():
-    """seconds since the console booted (Linux), or None"""
-    try:
-        with open("/proc/uptime") as f:
-            return float(f.read().split()[0])
-    except Exception:
-        return None
-
-
 def palette_for(form, hue=0.0, sick=False):
     """form palette with the body colours hue-rotated (each pet has its own colour)"""
     key = (form, round(hue, 3), sick)
@@ -249,19 +235,13 @@ class XenoPet(object):
             pass
 
     def catch_up(self):
-        """simulate the time the console was off. The pet lives in real time (the system clock), but the R36S
-        has no battery-backed clock: while it is off, its clock stops (or resets), so that time is lost. When
-        the console has just booted and its clock says almost no time passed, the pet asks how long you were
-        away instead of guessing."""
+        """simulate the time the console was off. The pet lives in real time (the system clock). The R36S has no
+        battery-backed clock: while it is off its clock stops (or resets), so that time is simply not lived, and
+        when the clock went back or jumped too far the pet just carries on from now (it never asks)."""
         now = time.time()
         gap = now - float(self.p.get("last_seen", now))
-        up = boot_uptime()
         if gap < 0 or gap > 60 * 86400:
-            self.away_report = {"clock": True, "ask": True}
             self.p["last_seen"] = now
-            return
-        if up is not None and up < 900 and gap < up + 300 and gap < 1800 and self.p.get("name"):
-            self.away_report = {"clock": True, "ask": True}
             return
         if gap < 120:
             return
@@ -411,9 +391,8 @@ class XenoPet(object):
     # ---------------------------------------------------------------- section api
     def enter(self):
         self.mode = "home"
-        if self.away_report and (self.p["form"] != "egg" or self.away_report.get("ask")):
+        if self.away_report and self.p["form"] != "egg":
             self.mode = "away"
-            self.sub = 1
         self.process_events()
 
     def leave(self):
@@ -470,19 +449,6 @@ class XenoPet(object):
             return
         m = self.mode
         if m == "away":
-            r = self.away_report or {}
-            if r.get("ask"):
-                if b in ("up", "down"):
-                    self.sub = (self.sub + (1 if b == "down" else -1)) % len(AWAY_CHOICES)
-                    self.app.ui_move()
-                elif kind == "press" and b in ("a", "start"):
-                    self.simulate(AWAY_CHOICES[self.sub][2])
-                    self.app.ui_ok()
-                elif kind == "press" and b == "b":
-                    self.away_report = None
-                    self.mode = "home"
-                    self.process_events()
-                return
             if kind == "press" and b in ("a", "b", "start"):
                 self.away_report = None
                 self.mode = "home"
@@ -1103,47 +1069,26 @@ class XenoPet(object):
         g.rect(x, y, w, h, C["panel"], 245)
         g.frame(x, y, w, h, C["cyan"], 3)
         g.text("k24", "ENQUANTO ESTIVESTE FORA", W // 2, y + 16, C["cyan"], 255, "center")
-        if r.get("ask"):
-            x, y, w, h = 70, 70, 500, 330
-            g.rect(x, y, w, h, C["panel"], 250)
-            g.frame(x, y, w, h, C["cyan"], 3)
-            g.text("k24", "QUANTO TEMPO ESTIVESTE FORA?", W // 2, y + 14, C["cyan"], 255, "center")
-            g.text("k16", "A consola não tem pilha de relógio: desligada, não conta o tempo.", W // 2, y + 50,
-                   C["soft"], 255, "center")
-            for i, (lab, sub, _) in enumerate(AWAY_CHOICES):
-                yy = y + 84 + i * 42
-                on = i == self.sub
-                g.rect(x + 40, yy, w - 80, 36, self.app.accent if on else C["hull"])
-                g.text("kb24", lab, x + 56, yy + 3, C["void"] if on else C["text"])
-                g.text("k16", sub, x + w - 56, yy + 8, C["void"] if on else C["muted"], 255, "right")
-            g.text("k16", "cima/baixo escolher  ·  A confirmar  ·  B não passou tempo", W // 2, y + h - 30, C["dim"],
-                   255, "center")
-            return
-        if r.get("clock"):
-            g.text("k16", "O relógio da consola foi reiniciado.", W // 2, y + 60, C["soft"], 255, "center")
-            g.text("k16", "Não sei quanto tempo passou: ficou tudo como estava.", W // 2, y + 86, C["soft"], 255,
-                   "center")
-        else:
-            gap = r.get("gap", 0)
-            hrs = gap / 3600.0
-            g.text("k16", "Passaram %s" % ("%.1f horas" % hrs if hrs < 48 else "%.1f dias" % (hrs / 24)), W // 2,
-                   y + 50, C["soft"], 255, "center")
-            b, a = r.get("before", {}), r.get("after", {})
-            lines = []
-            if a.get("poops", 0) > b.get("poops", 0):
-                lines.append("Fez %d coco(s) na nave." % (a["poops"] - b["poops"]))
-            if a.get("full", 0) < 30:
-                lines.append("Está com fome!")
-            if a.get("happy", 0) < 30:
-                lines.append("Sente a tua falta.")
-            if r.get("got_sick"):
-                lines.append("Ficou doente: dá-lhe um remédio.")
-            if a.get("form") != b.get("form"):
-                lines.append("Cresceu!")
-            if not lines:
-                lines.append("Portou-se bem e está tudo em ordem.")
-            for i, l in enumerate(lines[:4]):
-                g.text("k16", l, W // 2, y + 86 + i * 24, C["text"], 255, "center")
+        gap = r.get("gap", 0)
+        hrs = gap / 3600.0
+        g.text("k16", "Passaram %s" % ("%.1f horas" % hrs if hrs < 48 else "%.1f dias" % (hrs / 24)), W // 2,
+               y + 50, C["soft"], 255, "center")
+        b, a = r.get("before", {}), r.get("after", {})
+        lines = []
+        if a.get("poops", 0) > b.get("poops", 0):
+            lines.append("Fez %d coco(s) na nave." % (a["poops"] - b["poops"]))
+        if a.get("full", 0) < 30:
+            lines.append("Está com fome!")
+        if a.get("happy", 0) < 30:
+            lines.append("Sente a tua falta.")
+        if r.get("got_sick"):
+            lines.append("Ficou doente: dá-lhe um remédio.")
+        if a.get("form") != b.get("form"):
+            lines.append("Cresceu!")
+        if not lines:
+            lines.append("Portou-se bem e está tudo em ordem.")
+        for i, l in enumerate(lines[:4]):
+            g.text("k16", l, W // 2, y + 86 + i * 24, C["text"], 255, "center")
         g.text("k16", "A continuar", W // 2, y + h - 34, C["dim"], 255, "center")
 
     def draw_evolve(self, g, t, floor):
