@@ -171,20 +171,6 @@ def key_for(app):
     return name
 
 
-def wrap(g, font, s, w):
-    lines, line = [], ""
-    for word in s.split():
-        test = (line + " " + word).strip()
-        if g.tw(font, test) > w and line:
-            lines.append(line)
-            line = word
-        else:
-            line = test
-    if line:
-        lines.append(line)
-    return lines
-
-
 class Help(object):
     def __init__(self, app):
         self.app = app

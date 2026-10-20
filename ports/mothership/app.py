@@ -38,8 +38,6 @@ DEFAULT_CFG = {"scanlines": True, "anim": True, "volume": 80, "quantize": "bar",
                "bpm": 174, "custom_pads": {}, "joy_map": {}, "pet_speed": 1}
 
 PAD_ORDER = ["up", "left", "right", "down", "x", "y", "a", "b"]
-TABS = [("PULSAR", "pulsar"), ("FORGE", "forge"), ("ABDUCT", "abductor"), ("REACTOR", "reactor"), ("XENO", "xeno"),
-        ("WARP", "warp")]
 CYCLE = list(ui.MUSIC_KEYS)        # START (tap) follows the music workflow
 MUSIC_HUB = CYCLE + ["bridge", "hangar"]   # where holding START opens the music menu
 QUIET = ("pet", "voidrunner", "beatduel", "trailer", "credits", "quiz")      # sections with their own sound: drum machine stops
@@ -93,48 +91,8 @@ def header(g, app, title, active):
 TITLE_OF = dict((k, n) for k, n, _ in ui.MUSIC_FLOW)
 
 
-def _old_header(g, app, title, active):
-    g.rect(0, 0, W, 48, C["deck"])
-    g.rect(0, 48, W, 3, C["hulllo"])
-    g.text("p16", "ORIMBUX", 14, 16, C["violet"])
-    g.text("p16", "ORIMBUX", 12, 14, C["cyan"])
-    g.text("p8", "// " + title, 128, 22, app.accent)
-    if app.rec.active():
-        if int(time.time() * 2) % 2 == 0:
-            g.rect(128, 34, 8, 8, (255, 50, 60))
-        g.text("p8", app.rec.label(), 142, 34, (255, 90, 100))
-    vx = app.sections.get("vox") if hasattr(app, "sections") else None
-    if vx is not None and vx.live:
-        g.text("p8", "MIC " + vx.fx, 250, 34, C["green"])
-    x = W - 12
-    for label, key in reversed(TABS):
-        w = g.tw("p8", label) + 10
-        x -= w
-        if key == active:
-            g.rect(x, 16, w, 18, app.accent)
-            g.text("p8", label, x + 5, 21, C["void"])
-        else:
-            g.rect(x, 16, w, 18, C["hull"])
-            g.text("p8", label, x + 5, 21, C["muted"])
-        x -= 4
-
-
 def footer(g, items, y=H - 44, h=44):
     ui.footer(g, [(it[0], it[1]) for it in items])
-
-
-def _old_footer(g, items, y=H - 44, h=44):
-    g.rect(0, y, W, h, C["deck"])
-    g.rect(0, y, W, 3, C["hulllo"])
-    if not items:
-        return
-    total = sum(g.tw("v20", k + " " + v) for k, v, _ in items)
-    gap = (W - 32 - total) / max(1, len(items) - 1) if len(items) > 1 else 0
-    x = 16
-    for k, v, col in items:
-        x2 = g.text("v20", k, x, y + 14, col)
-        x2 = g.text("v20", " " + v, x2, y + 14, C["muted"])
-        x = x2 + gap
 
 
 def pad_box(g, app, x, y, w, h, label, glyph, state, t, beat_phase, bank_col):
