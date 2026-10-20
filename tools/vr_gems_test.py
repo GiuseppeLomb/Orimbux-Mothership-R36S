@@ -43,14 +43,21 @@ try:
         r.G, r.R, r.pulse = gs[-1], 60.0, 0.0
         r.hx, r.hy = 0.0, 0.0
         mags = []
-        for d in (70, 150, 300, 600, 1000, 1500, 1990, 2010):
+        dists = (61, 150, 300, 600, 1000, 2000, 3500, 5000, 5990, 6010)
+        for d in dists:
             gx, gy, _ = r.pull(d, 0.0)
             mags.append(math.hypot(gx, gy))
+        edge = mags[0]
         assert all(b <= a_ + 1e-9 for a_, b in zip(mags, mags[1:])), mags  # gradual: weaker further out
-        assert mags[-1] == 0.0 and mags[-2] < 0.5, mags                    # nothing past its reach
-        assert mags[4] > 1.0, mags                                          # but felt very far out (1000 px)
-        print("world %d: pull at the edge %.0f..%.0f px/s (speed %.0f); at 300 px %.0f, at 1000 px %.1f" % (
-            lvl + 1, gs[0], gs[-1], sp, mags[2], mags[4]))
+        assert mags[-1] == 0.0, mags                                        # nothing past its reach (6000 px)
+        assert 0.08 * edge < mags[6] < 0.12 * edge, mags                    # almost the whole map: a light pull
+        assert mags[2] > 0.25 * edge and mags[4] < 0.2 * edge, mags         # strong only relatively near it
+        r.R = 150.0                                                          # a bigger GRAVE: a bigger strong zone
+        big = math.hypot(*r.pull(150.0 + 240, 0.0)[:2])
+        r.R = 60.0
+        assert big > math.hypot(*r.pull(60.0 + 240, 0.0)[:2]) * 1.2, big
+        print("world %d: pull at the edge %.0f..%.0f px/s (speed %.0f); at 300 px %.0f, at 1000 px %.1f, "
+              "at 3500 px %.1f" % (lvl + 1, gs[0], gs[-1], sp, mags[2], mags[4], mags[6]))
         r.free()
         vr.run = None
 

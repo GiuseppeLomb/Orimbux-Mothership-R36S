@@ -4,6 +4,7 @@
 # GRAVE implodes. Drops bring a wave, a power boost and a chest.
 # Design rules for speed on the R36S: every sprite is baked once into a texture (one RenderCopy per entity),
 # the ground is a pre-rendered tile, hits use a spatial grid, nothing allocates much per frame.
+import ctypes
 import glob
 import math
 import os
@@ -21,7 +22,7 @@ SAVE = os.path.join(engine.APP, "vr_save.json")
 VRD = os.path.join(engine.ASSETS, "vr")
 LEVEL_TIME = 300.0           # SEM FIM: the world changes every 5 minutes
 ROUT = 6000.0                # O GRAVE's reach: almost the whole map feels its bass
-FAR = 0.1                    # how strong that light pull is everywhere, as a part of the pull at its edge
+FAR = 0.1                     # how strong that light pull is everywhere, as a part of the pull at its edge
 NEAR = 120.0                 # + 3 x its radius: how close it must get before the pull grows (with O GRAVE's size)
 GEMS = [   # crystal colours: name, XP, runner level that unlocks it, palette (dark, bright, glow, core)
     ("VIOLETA", 1, 1, ((106, 31, 176), (178, 60, 255), (255, 60, 200), (255, 230, 255))),
@@ -38,6 +39,12 @@ CHEST = ["..KKKKKKKKKK..", ".KBBBBBBBBBBK.", "KBYYYYYYYYYYBK", "KBBBBBBBBBBBBK",
 CHEST_PAL = {"K": (40, 20, 10), "B": (150, 84, 36), "Y": (255, 200, 70), "G": (255, 236, 140), "W": (255, 255, 255)}
 S = 3                       # art pixel -> screen pixels
 TILE = 80                   # ground tile in art pixels (240 px)
+# the 2.5D view (PS1-era pixel 3D): the ground is a tilted plane - a world distance across the screen stays the same,
+# one going away shrinks to TILT - and everything that stands on it is drawn upright, feet on the ground
+TILT = 0.75
+AY = H // 2 + 24            # the screen line under the runner's feet (the camera looks a little ahead)
+HOVER = {"seer": 14, "phantom": 18, "bomber": 4}       # foes that float above their shadow
+LIT = (255, 150, 235)       # the colour O GRAVE's light gives what is near it
 
 TYPES = {   # hp, speed, contact damage, xp, radius, mass fed to O GRAVE
     "mite": (4, 36, 4, 1, 10, 1), "skitter": (9, 52, 6, 2, 14, 2), "seer": (14, 26, 5, 3, 16, 3),
@@ -159,39 +166,99 @@ def bake_ring(ren, w, h, thick, col):
 
 
 def bake_ground(ren, biome, seed):
-    """tileable, low-noise ground: 3 tones + rare void veins + a few decor sprites"""
+    """the floor of the 2.5D view: big pixel-art stone slabs seen from above at an angle - diamonds lit from the
+    top-left, the dark side of the raised ones underneath, a carved inner rim on some, a dithered light across
+    each top, rare void cracks. Baked already squashed to the tilted plane (TILT) and tileable: 80 x 60 art
+    pixels, 240 x 180 px."""
     rng = random.Random(seed)
-    L = 8
-    lat = [[rng.random() for _ in range(L)] for _ in range(L)]
-    lat2 = [[rng.random() for _ in range(L)] for _ in range(L)]
-    step = TILE / float(L)
-
-    def vn(x, y, g):
-        fx, fy = x / step, y / step
-        x0, y0 = int(fx), int(fy)
-        tx, ty = fx - x0, fy - y0
-        tx, ty = tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty)
-        a = g[y0 % L][x0 % L] * (1 - tx) + g[y0 % L][(x0 + 1) % L] * tx
-        b = g[(y0 + 1) % L][x0 % L] * (1 - tx) + g[(y0 + 1) % L][(x0 + 1) % L] * tx
-        return a * (1 - ty) + b * ty
-    tones = biome["ground"]
+    tw, th, P = TILE, int(TILE * TILT), 2
+    heights = [[rng.randrange(3) for _ in range(P)] for _ in range(P)]
+    carved = [[rng.random() < 0.5 for _ in range(P)] for _ in range(P)]
+    cracked = [[rng.random() < 0.35 for _ in range(P)] for _ in range(P)]
     maw = biome["id"] == "maw"
     bayer = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+    cw, chh = tw / float(P), th / float(P)          # one slab: a diamond 40 x 30 art pixels
     grid = []
-    for y in range(TILE):
+    for y in range(th):
         row = []
-        for x in range(TILE):
-            n = vn(x, y, lat) + bayer[y % 4][x % 4] / 16.0 * 0.12
-            ch = "1" if n < 0.48 else ("2" if n < 0.74 else "3")
-            v = vn(x * 2 % TILE, y * 2 % TILE, lat2)
-            if (maw or vn(x, y, lat2) > 0.72) and abs(v - 0.5) < 0.018:
-                ch = "V"
-            row.append(ch)
+        for x in range(tw):
+            a, b = x / cw + y / chh, x / cw - y / chh
+            i, j = int(math.floor(a)), int(math.floor(b))
+            fa, fb = a - i, b - j
+            h = heights[i % P][j % P]
+            side = 0.06 + 0.05 * h                     # raised slabs show more of their dark side
+            if fa < 0.035 or fb > 0.965:
+                c = "H"                                # the top-left edges catch the light
+            elif fa > 1 - side or fb < side:
+                c = "D" if (fa > 1 - side * 0.45 or fb < side * 0.45) else "E"
+            elif carved[i % P][j % P] and (abs(fa - 0.2) < 0.02 or abs(fb - 0.8) < 0.02) and 0.2 < fa < 0.8                     and 0.2 < fb < 0.8:
+                c = "E"                                # a carved rim inside the slab
+            elif (maw or cracked[i % P][j % P]) and abs(fa - fb + 0.1 * math.sin(fa * 9)) < 0.025 and fa > 0.3:
+                c = "V"
+            else:
+                light = 1.0 - 0.55 * fa - 0.45 * (1.0 - fb) + bayer[y % 4][x % 4] / 16.0 * 0.35
+                c = "123"[min(2, h + (1 if light > 0.7 else 0))] if light > 0.18 else "E"
+            row.append(c)
         grid.append("".join(row))
-    pal = {"1": tones[0], "2": tones[1], "3": tones[2], "V": (86, 22, 130)}
-    surf = _surface(TILE * S, TILE * S)
+    tones = biome["ground"]
+    pal = {"1": tones[0], "2": tones[1], "3": tones[2], "H": engine.mix(tones[2], (255, 255, 255), 0.22),
+           "E": engine.mix(tones[0], (0, 0, 0), 0.3), "D": engine.mix(tones[0], (0, 0, 0), 0.6), "V": (86, 22, 130)}
+    surf = _surface(tw * S, th * S)
     paint_grid(surf, grid, pal, S)
-    return [_to_tex(ren, surf), TILE * S, TILE * S]
+    return [_to_tex(ren, surf), tw * S, th * S]
+
+
+def _rgba_tex(ren, w, h, data, blend=sdl2.SDL_BLENDMODE_BLEND):
+    """a texture from RGBA bytes (drawn scaled up: SDL keeps the pixels sharp, the light stays pixel art)"""
+    buf = ctypes.create_string_buffer(bytes(data), len(data))
+    surf = sdl2.SDL_CreateRGBSurfaceWithFormatFrom(buf, w, h, 32, w * 4, sdl2.SDL_PIXELFORMAT_ABGR8888)
+    tex = sdl2.SDL_CreateTextureFromSurface(ren, surf)
+    sdl2.SDL_FreeSurface(surf)
+    sdl2.SDL_SetTextureBlendMode(tex, blend)
+    return [tex, w, h]
+
+
+BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+
+
+def _dither(v, x, y, steps=6):
+    """0..1 -> a banded, dithered 0..1 (the PS1 look instead of a smooth gradient)"""
+    q = v * steps + BAYER[y % 4][x % 4] / 16.0 - 0.5
+    return max(0.0, min(float(steps), math.floor(q + 0.5))) / steps
+
+
+def bake_pool(ren, n=48):
+    """a round pool of light, brightest in the middle: drawn additively, tinted, flattened on the ground"""
+    data = bytearray()
+    c = (n - 1) / 2.0
+    for y in range(n):
+        for x in range(n):
+            d = math.hypot(x - c, y - c) / (c + 0.5)
+            data += bytes((255, 255, 255, int(255 * _dither(max(0.0, 1.0 - d) ** 1.6, x, y))))
+    return _rgba_tex(ren, n, n, data, sdl2.SDL_BLENDMODE_ADD)
+
+
+def bake_ray(ren, w=64, h=8):
+    """a shaft of light: bright at its root (left), fading along its length and to its edges"""
+    data = bytearray()
+    for y in range(h):
+        for x in range(w):
+            v = (1.0 - x / float(w)) ** 1.4 * (1.0 - abs(y - (h - 1) / 2.0) / (h / 2.0))
+            data += bytes((255, 255, 255, int(255 * _dither(max(0.0, v), x, y))))
+    return _rgba_tex(ren, w, h, data, sdl2.SDL_BLENDMODE_ADD)
+
+
+def bake_vignette(ren, w=160, h=120):
+    """the edges of the screen fall into the dark, the far side (top) into a haze: depth for the 2.5D view"""
+    data = bytearray()
+    for y in range(h):
+        for x in range(w):
+            ex = abs(x - (w - 1) / 2.0) / (w / 2.0)
+            ey = abs(y - (h - 1) / 2.0) / (h / 2.0)
+            edge = max(0.0, (ex * ex + ey * ey) ** 0.5 - 0.62) / 0.6
+            fog = max(0.0, 1.0 - y / (h * 0.32)) * 0.7
+            data += bytes((4, 0, 14, int(200 * _dither(min(1.0, max(edge, fog)), x, y, 8))))
+    return _rgba_tex(ren, w, h, data)
 
 
 # ====================================================================== entities
@@ -286,10 +353,12 @@ class Run(object):
         b = ART.BIOMES[self.biome_i]
         pal = dict(ART.VOID)
         pal.update({"A": b["accent"], "B": b["accent2"]})
+        lit = dict((c, engine.mix(v, LIT, 0.35) if v else v) for c, v in pal.items())
         self.tx = {}
         for k, e in ART.ENEMIES.items():
             self.tx[k] = bake(self.ren, e["grid"], pal)
             self.tx[k + "_w"] = bake(self.ren, e["grid"], pal, white=True)
+            self.tx[k + "_lit"] = bake(self.ren, e["grid"], lit)     # in O GRAVE's light
         self.tx["king"] = bake(self.ren, ART.ENEMIES["gorger"]["grid"], pal, 6)
         self.tx["king_w"] = bake(self.ren, ART.ENEMIES["gorger"]["grid"], pal, 6, white=True)
         self.tx["matriarch"] = bake(self.ren, ART.BOSS["grid"], pal, 5)
@@ -413,7 +482,7 @@ class Run(object):
         near = NEAR + 3.0 * self.R
         s = e / (ROUT - self.R)
         f = FAR + (1.0 - FAR) / ((1.0 + e / near) * (1.0 + e / near))
-        p = self.G * k * (1.0 + 0.2 * self.pulse) * f * (1.0 - s * s) / d
+        p = self.G * k * (1.0 + 0.2 * self.pulse) * f * (1.0 - s * s * s * s) / d      # flat, then fades at the end
         return dx * p - dy * p * 0.2, dy * p + dx * p * 0.2, d
 
     # weapon geometry, shared by update and draw
@@ -1499,133 +1568,201 @@ class Run(object):
 
     # ---------------------------------------------------------------- drawing
     def draw(self, g, t):
-        ren = self.ren
-        cx, cy = self.px - W / 2, self.py - H / 2
+        """the 2.5D view, PS1-era pixel 3D: the ground is a tilted plane of pixel-art blocks; whatever stands on it is
+        an upright sprite, drawn back to front, with a soft pixel shadow; O GRAVE is the light - a pool of light on
+        the ground, rays, foes lit near it and shadows cast away from it ('fake ray tracing', all pre-baked and
+        batched so the console keeps up). The game itself still lives in flat world coordinates."""
+        ren, vr = self.ren, self.vr
+        T = TILT
+        cx, cy, ay = self.px - W / 2, self.py, AY          # world x at the screen's left, world y on the feet line
         if self.shake > 0:
             cx += random.uniform(-6, 6) * self.shake
-            cy += random.uniform(-6, 6) * self.shake
+            ay += random.uniform(-6, 6) * self.shake
         dst = sdl2.SDL_Rect()
+        cen = sdl2.SDL_Point()
 
         def put(tx, x, y, w=None, h=None):
             dst.x, dst.y = int(x), int(y)
             dst.w, dst.h = int(w or tx[1]), int(h or tx[2])
             sdl2.SDL_RenderCopy(ren, tx[0], None, dst)
 
-        def dots(x, y, r, n, col, a=255, sz=6, rot=0.0):
+        def dots(x, y, r, n, col, a=255, sz=6, rot=0.0, lift=0):
+            """n dots on a circle lying on the ground (an ellipse on screen), lifted `lift` px above it"""
             h = sz / 2.0
-            g.rects([(x + math.cos(rot + i * math.tau / n) * r - h, y + math.sin(rot + i * math.tau / n) * r - h,
-                      sz, sz) for i in range(n)], col, a)
-        # ground (tiled)
+            g.rects([(x + math.cos(rot + i * math.tau / n) * r - h, y + math.sin(rot + i * math.tau / n) * r * T - h -
+                      lift, sz, sz) for i in range(n)], col, a)
+        # ---- the ground: tilted blocks, then sparse props standing on it
         gt = self.tx["ground"]
-        ts = gt[1]
-        ox, oy = -int(cx % ts), -int(cy % ts)
-        for yy in range(oy, H, ts):
-            for xx in range(ox, W, ts):
+        tw_, th_ = gt[1], gt[2]
+        oy = int((ay - cy * T) % th_) - th_
+        ox = int((-cx) % tw_) - tw_
+        for yy in range(oy, H, th_):
+            for xx in range(ox, W, tw_):
                 put(gt, xx, yy)
-        # sparse decor: one deterministic pick per 200px world cell (no visible repetition)
+        props, pshadow = [], []
         n = len(self.decor)
-        for gy in range(int(cy // 200) - 1, int((cy + H) // 200) + 1):
+        top, bottom = cy - ay / T - 40, cy + (H - ay) / T + 60
+        for gy in range(int(top // 200) - 1, int(bottom // 200) + 1):
             for gx in range(int(cx // 200) - 1, int((cx + W) // 200) + 1):
                 hsh = (gx * 73856093 ^ gy * 19349663) & 0xFFFFFF
                 if hsh % 5 < 2:
                     d = self.decor[(hsh >> 3) % (n - 1)] if hsh % 13 else self.decor[-1]
-                    put(d, gx * 200 + (hsh >> 6) % 150 - cx, gy * 200 + (hsh >> 12) % 150 - cy)
-        # O GRAVE
-        vr = self.vr
-        hx, hy, R = self.hx - cx, self.hy - cy, self.R
-        # the edge of its reach: a faint dotted circle when it crosses the screen
-        er = ROUT
-        if abs(math.hypot(W / 2 - hx, H / 2 - hy) - er) < 420:
-            n = 180
-            pts = []
-            for i in range(n):
-                a = i * math.tau / n + t * 0.05
-                x, y = hx + math.cos(a) * er, hy + math.sin(a) * er
-                if -4 < x < W + 4 and -4 < y < H + 4:
-                    pts.append((x - 2, y - 2, 4, 4))
-            g.rects(pts, (255, 60, 200), 70)
-        if -R * 5 < hx < W + R * 5 and -R * 5 < hy < H + R * 5:
-            pr, pr2 = [], []
-            for i, p in enumerate(self.parts):
-                x, y = hx + math.cos(p[0]) * p[1], hy + math.sin(p[0]) * p[1]
-                (pr if i % 2 else pr2).append((x, y, 3, 3))
-            g.rects(pr, C["violet"], 160)
-            g.rects(pr2, (255, 60, 200), 160)
-            vr.draw_grave(g, hx, hy, R, t, self.pulse, self.charge, [(self.t - w[0], w[1]) for w in self.waves],
-                          self.boost_t > 0)
-        # chests
-        ct = vr.tex["chest"]
-        for c in self.chests:
-            x, y = c[0] - cx, c[1] - cy
-            if -60 < x < W + 60 and -60 < y < H + 60:
-                bob = math.sin(t * 4 + c[0]) * 3
-                put(vr.tex["glowlight"], x - 46, y - 40)
-                k = 1.5 if c[2] else 1.0
-                put(ct, x - ct[1] * k / 2, y - ct[2] * k / 2 + bob, ct[1] * k, ct[2] * k)
+                    x, y = gx * 200 + (hsh >> 6) % 150 - cx, (gy * 200 + (hsh >> 12) % 150 - cy) * T + ay
+                    props.append((d, x - d[1] / 2, y - d[2] + 3))
+                    pshadow.append((x - d[1] * 0.4, y - 2, d[1] * 0.8, 5))
+        g.rects(pshadow, (0, 0, 0), 90)
+        for d, x, y in props:
+            put(d, x, y)
+        # ---- O GRAVE's light on the ground (additive), its rays, the speaker itself
+        hx, hy, R = self.hx - cx, (self.hy - cy) * T + ay, self.R
+        lr = 160 + 5 * R                                   # how far its light reaches on the ground
+        if -lr < hx < W + lr and -lr * T < hy < H + lr * T:
+            pool = vr.tex["pool"]
+            glow = min(1.0, 0.45 + 0.35 * self.pulse + 0.4 * self.charge + (0.2 if self.boost_t > 0 else 0.0))
+            sdl2.SDL_SetTextureColorMod(pool[0], 255, 70 + int(60 * self.charge), 200)
+            sdl2.SDL_SetTextureAlphaMod(pool[0], int(115 * glow))
+            put(pool, hx - lr, hy - lr * T, lr * 2, lr * 2 * T)
+            ray = vr.tex["ray"]
+            sdl2.SDL_SetTextureColorMod(ray[0], 255, 120, 230)
+            sdl2.SDL_SetTextureAlphaMod(ray[0], int(50 + 60 * glow))
+            wd = 20 + R * 0.35
+            for i in range(7):                             # shafts of light turning slowly over the ground
+                a = t * 0.12 + i * math.tau / 7
+                ux, uy = math.cos(a), math.sin(a) * T
+                ln = lr * 1.15 * math.hypot(ux, uy)
+                dst.x, dst.y, dst.w, dst.h = int(hx), int(hy - wd / 2), int(ln), int(wd)
+                cen.x, cen.y = 0, int(wd / 2)
+                sdl2.SDL_RenderCopyEx(ren, ray[0], None, dst, math.degrees(math.atan2(uy, ux)), cen,
+                                      sdl2.SDL_FLIP_NONE)
         # goo + webs on the ground
         pt = vr.tex["pud"]
         for p in self.puddles:
-            x, y, r = p[0] - cx, p[1] - cy, p[3]
+            x, y, r = p[0] - cx, (p[1] - cy) * T + ay, p[3]
             if -r < x < W + r and -r < y < H + r:
                 web = p[4] == "web"
                 sdl2.SDL_SetTextureColorMod(pt[0], *((235, 235, 255) if web else (150, 50, 200)))
                 sdl2.SDL_SetTextureAlphaMod(pt[0], int(255 * min(1.0, p[2])))
-                put(pt, x - r, y - r, r * 2, r * 2)
+                put(pt, x - r, y - r * T, r * 2, r * 2 * T)
                 if web:
-                    g.rects([(x + math.cos(i * 0.785) * k - 1, y + math.sin(i * 0.785) * k - 1, 3, 3)
+                    g.rects([(x + math.cos(i * 0.785) * k - 1, y + math.sin(i * 0.785) * k * T - 1, 3, 3)
                              for i in range(8) for k in (12, 24, 36)], (255, 255, 255), 150)
         sdl2.SDL_SetTextureColorMod(pt[0], 255, 255, 255)
         sdl2.SDL_SetTextureAlphaMod(pt[0], 255)
-        # solar crown (under everything that moves)
+        if -R * 5 < hx < W + R * 5 and -R * 5 < hy < H + R * 5:
+            pr, pr2 = [], []
+            for i, p in enumerate(self.parts):
+                x, y = hx + math.cos(p[0]) * p[1], hy + math.sin(p[0]) * p[1] * T - 6
+                (pr if i % 2 else pr2).append((x, y, 3, 3))
+            g.rects(pr, C["violet"], 160)
+            g.rects(pr2, (255, 60, 200), 160)
+        reach = 300 + 6 * R                               # its rings of sound travel far: the whole bass field
+        if -reach < hx < W + reach and -reach < hy < H + reach:
+            vr.draw_grave(g, hx, hy, R, t, self.pulse, self.charge, [(self.t - w[0], w[1]) for w in self.waves],
+                          self.boost_t > 0, T, reach)
+        # solar crown (on the ground around the runner)
         lva = self.weapons.get("aura", 0)
         if lva:
             ar = self.aura_r(lva, "aura" in self.evo)
-            put(vr.tex["aura"], W / 2 - ar, H / 2 - ar, ar * 2, ar * 2)
-            dots(W / 2, H / 2, ar, 12, (255, 214, 60), 200, 4, t * 1.5)
-        # shards, mines, white holes
+            put(vr.tex["aura"], W / 2 - ar, ay - ar * T, ar * 2, ar * 2 * T)
+            dots(W / 2, ay, ar, 12, (255, 214, 60), 200, 4, t * 1.5)
+        # ---- things lying on the ground: crystals, mines, white holes
         st = self.tx["shard"]
-        for s in self.shards:
-            x, y = s[0] - cx, s[1] - cy
-            if -10 < x < W and -10 < y < H:
-                if s[2] < 0:
-                    g.rect(x - 7, y - 2, 14, 4, (255, 236, 140))
-                    g.rect(x - 2, y - 7, 4, 14, (255, 236, 140))
-                    g.rect(x - 2, y - 2, 4, 4, (255, 255, 255))
-                else:
-                    gt = s[3] if len(s) > 3 else 0
-                    put(self.tx.get("gem%d" % gt, st), x - 5, y - 7)
-                    if gt >= 3 and int(t * 6 + s[0]) % 5 == 0:          # the rich ones sparkle
-                        g.rect(x + 3, y - 9, 2, 2, (255, 255, 255))
+        vis = [(s, s[0] - cx, (s[1] - cy) * T + ay) for s in self.shards]
+        vis = [v for v in vis if -10 < v[1] < W + 10 and -4 < v[2] < H + 20]
+        g.rects([(x - 4, y - 1, 8, 3) for _, x, y in vis], (0, 0, 0), 80)      # their little shadows first
+        for s, x, y in vis:
+            if s[2] < 0:
+                g.rect(x - 7, y - 10, 14, 4, (255, 236, 140))
+                g.rect(x - 2, y - 15, 4, 14, (255, 236, 140))
+                g.rect(x - 2, y - 10, 4, 4, (255, 255, 255))
+            else:
+                gt = s[3] if len(s) > 3 else 0
+                put(self.tx.get("gem%d" % gt, st), x - 5, y - 15)
+                if gt >= 3 and int(t * 6 + s[0]) % 5 == 0:          # the rich ones sparkle
+                    g.rect(x + 3, y - 17, 2, 2, (255, 255, 255))
         for m in self.mines:
-            x, y = m[0] - cx, m[1] - cy
-            g.rect(x - 6, y - 6, 12, 12, (255, 179, 71))
-            g.rect(x - 3, y - 3, 6, 6, (255, 250, 220) if int(t * 4) % 2 else (255, 179, 71))
+            x, y = m[0] - cx, (m[1] - cy) * T + ay
+            g.rect(x - 6, y - 5, 12, 9, (255, 179, 71))
+            g.rect(x - 3, y - 3, 6, 5, (255, 250, 220) if int(t * 4) % 2 else (255, 179, 71))
         for w in self.whites:
-            x, y = w[0] - cx, w[1] - cy
+            x, y = w[0] - cx, (w[1] - cy) * T + ay
             k = 1 - w[2] / 1.1
-            put(vr.tex["aura"], x - 26 - 10 * k, y - 26 - 10 * k, 52 + 20 * k, 52 + 20 * k)
-            g.rect(x - 8, y - 8, 16, 16, (255, 255, 255))
+            rw = 26 + 10 * k
+            put(vr.tex["aura"], x - rw, y - rw * T, rw * 2, rw * 2 * T)
+            g.rect(x - 8, y - 14, 16, 16, (255, 255, 255))
             dots(x, y, 150 * self.area() * (1 - k), 10, (255, 255, 255), 200, 4, t * 3)
-        # enemies + their wind-ups
-        ppx, ppy = W / 2, H / 2
+        # ---- everything that stands up: foes, chests, the runner - back to front, each with its shadow
+        hwx, hwy = self.hx, self.hy
+        lr2 = (lr * 0.8) ** 2
+        cast, contact, stand = [], [], []
+
+        def shadow(x, y, w, wx, wy):
+            """a soft pixel shadow at the feet, and near O GRAVE a longer one cast away from its light"""
+            sw = max(8.0, w * 0.8)
+            contact.append((x - sw / 2, y - 3, sw, 6))
+            contact.append((x - sw / 2 + 3, y - 4, sw - 6, 8))
+            dx, dy = wx - hwx, wy - hwy
+            d2 = dx * dx + dy * dy
+            if d2 < lr2:
+                d = math.sqrt(d2) + 0.01
+                ln = min(44.0, 10 + 0.12 * d) * (1.0 - d2 / lr2 * 0.5)
+                ux, uy = dx / d, dy / d * T
+                for k, f in ((0.4, 1.0), (0.75, 0.85), (1.0, 0.65)):
+                    cast.append((x + ux * ln * k - sw * f / 2, y + uy * ln * k - 3, sw * f, 6))
+        for c in self.chests:
+            x, y = c[0] - cx, (c[1] - cy) * T + ay
+            if -60 < x < W + 60 and -40 < y < H + 80:
+                stand.append((c[1], 1, c, x, y))
+                shadow(x, y, 42 * (1.5 if c[2] else 1.0), c[0], c[1])
         for e in self.enemies:
-            x, y = e.x - cx, e.y - cy
+            x, y = e.x - cx, (e.y - cy) * T + ay
             tx = e.tex
-            if not (-tx[1] < x < W + tx[1] and -tx[2] < y < H + tx[2]):
+            if not (-tx[1] < x < W + tx[1] and -4 < y < H + tx[2] + 24):
                 continue
+            stand.append((e.y, 0, e, x, y))
+            if e.st != "warp":
+                shadow(x, y, tx[1], e.x, e.y)
+        stand.append((self.py, 2, None, W / 2, ay))
+        shadow(W / 2, ay, 30, self.px, self.py)
+        small = [(s[0] - cx - 3, (s[1] - cy) * T + ay - 1, 6, 3) for s in self.eshots]
+        small += [(b[0] - cx - 3, (b[1] - cy) * T + ay - 1, 6, 3) for b in self.bullets]
+        g.rects(cast, (0, 0, 0), 46)
+        g.rects(contact, (0, 0, 0), 70)
+        g.rects(small, (0, 0, 0), 80)
+        stand.sort(key=lambda s: s[0])
+        ppx, ppy = W / 2, ay - 20                          # the runner's chest, where foes aim
+        ct = vr.tex["chest"]
+        for _, kind, e, x, y in stand:
+            if kind == 1:                                  # a chest, with its own little light
+                c = e
+                bob = math.sin(t * 4 + c[0]) * 3
+                gl = vr.tex["glowlight"]
+                put(gl, x - 46, y - 46 * T, 92, 92 * T)
+                k = 1.5 if c[2] else 1.0
+                put(ct, x - ct[1] * k / 2, y - ct[2] * k + 3 + bob, ct[1] * k, ct[2] * k)
+                continue
+            if kind == 2:
+                self.draw_runner(g, t, ay, put)
+                continue
+            tx = e.tex
             est = e.st
-            if est == "warp":
+            if est == "warp":                              # ambush marker on the ground
                 dots(x, y, 8 + 22 * max(0.0, e.cd), 8, (178, 60, 255), 220, 5, t * 5)
-                g.rect(x - 3, y - 3, 6, 6, (255, 60, 200))
+                g.rect(x - 3, y - 5, 6, 6, (255, 60, 200))
                 continue
+            lift = HOVER.get(e.k, 0)
+            if lift:
+                lift += math.sin(t * 3 + e.t * 2) * 3
             if e.flash > 0 or (e.k == "seer" and e.t > 3.6):
                 tx = self.tx[e.k + "_w"] if (e.k + "_w") in self.tx else tx
+            elif (e.x - hwx) ** 2 + (e.y - hwy) ** 2 < lr2 and (e.k + "_lit") in self.tx:
+                tx = self.tx[e.k + "_lit"]
             alpha = 255
             if est == "fade":
                 alpha = int(255 * max(0.0, e.cd) / 0.5)
-                mx, my = e.ax - cx, e.ay - cy
+                mx, my = e.ax - cx, (e.ay - cy) * T + ay
                 if int(t * 12) % 2:
-                    g.rects([(mx - 10, my - 2, 20, 4), (mx - 2, my - 10, 4, 20)], (178, 60, 255), 220)
+                    g.rects([(mx - 10, my - 4, 20, 4), (mx - 2, my - 10, 4, 14)], (178, 60, 255), 220)
             elif est == "appear":
                 alpha = int(255 * (1 - max(0.0, e.cd) / 0.35))
             elif e.k == "phantom":
@@ -1636,101 +1773,93 @@ class Run(object):
                 sdl2.SDL_SetTextureAlphaMod(tx[0], max(0, alpha))
             if cold:
                 sdl2.SDL_SetTextureColorMod(tx[0], *((90, 200, 255) if e.slowk < 0.05 else (130, 170, 255)))
-            put(tx, sx - tx[1] / 2, y - tx[2] / 2)
+            sy = y - tx[2] + 4 - lift                      # feet on the ground (floaters above their shadow)
+            put(tx, sx - tx[1] / 2, sy)
             if alpha < 255:
                 sdl2.SDL_SetTextureAlphaMod(tx[0], 255)
             if cold:
                 sdl2.SDL_SetTextureColorMod(tx[0], 255, 255, 255)
-            if est == "wind":
-                g.rects([(x + e.ax * k - 3, y + e.ay * k - 3, 6, 6) for k in range(24, 190, 18)], (255, 60, 90), 170)
+            mid = sy + tx[2] / 2
+            if est == "wind":                              # the dash it is about to make, on the ground
+                g.rects([(x + e.ax * k - 3, y + e.ay * k * T - 3, 6, 6) for k in range(24, 190, 18)],
+                        (255, 60, 90), 170)
             elif est == "aim":
-                base = math.atan2(ppy - y, ppx - x)
+                base = math.atan2(self.py - e.y, self.px - e.x)
                 rr = e.rad + 6 + 18 * (1 - max(0.0, e.cd) / 0.8)
-                g.rects([(x + math.cos(base + (j - 2) * 0.26) * rr - 3, y + math.sin(base + (j - 2) * 0.26) * rr - 3,
-                          6, 6) for j in range(5)], (255, 60, 200), 230)
+                g.rects([(x + math.cos(base + (j - 2) * 0.26) * rr - 3, mid + math.sin(base + (j - 2) * 0.26) * rr * T
+                          - 3, 6, 6) for j in range(5)], (255, 60, 200), 230)
             elif est == "armed":
                 blink = int(t * (6 + 14 * (1 - max(0.0, e.cd) / 0.9))) % 2
                 dots(x, y, 74, 16, (255, 80, 60), 220 if blink else 90, 5)
             elif est == "inhale":
                 for j in range(9):
                     f = (t * 2.5 + j / 9.0) % 1.0
-                    g.rect(ppx + (x - ppx) * f - 3, ppy + (y - ppy) * f - 3, 6, 6,
+                    g.rect(ppx + (x - ppx) * f - 3, ppy + (mid - ppy) * f - 3, 6, 6,
                            (255, 255, 255) if j % 2 else (255, 60, 200), int(90 + 150 * f))
             if e.k == "warden":
-                base = math.atan2(ppy - y, ppx - x)
-                g.rects([(x + math.cos(base + j * 0.3) * (e.rad + 8) - 3, y + math.sin(base + j * 0.3) * (e.rad + 8) - 3,
-                          6, 6) for j in range(-3, 4)], (120, 220, 255), 230)
+                base = math.atan2(self.py - e.y, self.px - e.x)
+                g.rects([(x + math.cos(base + j * 0.3) * (e.rad + 8) - 3, mid + math.sin(base + j * 0.3) * (e.rad + 8) *
+                          T - 3, 6, 6) for j in range(-3, 4)], (120, 220, 255), 230)
             if e.boss:
-                g.rect(x - 40, y - tx[2] / 2 - 10, 80, 5, (40, 0, 30))
-                g.rect(x - 40, y - tx[2] / 2 - 10, 80 * max(0, e.hp) / e.maxhp, 5, (255, 60, 200))
-        # shots
-        g.rects([(s[0] - cx - 4, s[1] - cy - 4, 8, 8) for s in self.eshots], (255, 60, 200))
-        g.rects([(s[0] - cx - 2, s[1] - cy - 2, 4, 4) for s in self.eshots], (255, 230, 255))
+                g.rect(x - 40, sy - 10, 80, 5, (40, 0, 30))
+                g.rect(x - 40, sy - 10, 80 * max(0, e.hp) / e.maxhp, 5, (255, 60, 200))
+        # ---- shots fly above the ground (their shadows are already down there)
+        es = [(s[0] - cx, (s[1] - cy) * T + ay - 12) for s in self.eshots]
+        g.rects([(x - 4, y - 4, 8, 8) for x, y in es], (255, 60, 200))
+        g.rects([(x - 2, y - 2, 4, 4) for x, y in es], (255, 230, 255))
         for L in self.lobs:
             f = L[4] / L[5]
-            tx_, ty_ = L[2] - cx, L[3] - cy
+            tx_, ty_ = L[2] - cx, (L[3] - cy) * T + ay
             if int(t * 8) % 2:
                 dots(tx_, ty_, 40, 12, (235, 235, 255), 140, 4)
             x = L[0] - cx + (L[2] - L[0]) * f
-            y = L[1] - cy + (L[3] - L[1]) * f - math.sin(math.pi * f) * 50
+            y = (L[1] - cy + (L[3] - L[1]) * f) * T + ay - 10 - math.sin(math.pi * f) * 50
             g.rect(x - 5, y - 5, 10, 10, (235, 235, 255))
-        b0 = [(b[0] - cx - 3, b[1] - cy - 3, 6, 6) for b in self.bullets if b[7] == 0]
-        b1 = [(b[0] - cx - 3, b[1] - cy - 3, 6, 6) for b in self.bullets if b[7] == 1]
-        b2 = [(b[0] - cx - 4, b[1] - cy - 4, 8, 8) for b in self.bullets if b[7] == 2]
-        g.rects(b0, (60, 242, 255))
-        g.rects(b1, (110, 255, 170))
+        bl = [((b[0] - cx), (b[1] - cy) * T + ay - 14, b[7]) for b in self.bullets]
+        g.rects([(x - 3, y - 3, 6, 6) for x, y, k in bl if k == 0], (60, 242, 255))
+        g.rects([(x - 3, y - 3, 6, 6) for x, y, k in bl if k == 1], (110, 255, 170))
+        b2 = [(x - 4, y - 4, 8, 8) for x, y, k in bl if k == 2]
         if b2:
             g.rects(b2, (160, 250, 255))
             g.rects([(x + 2, y + 2, 4, 4) for x, y, _, _ in b2], (255, 255, 255))
         for m in self.missiles:
-            x, y = m[0] - cx, m[1] - cy
-            ux, uy = math.cos(m[2]), math.sin(m[2])
+            x, y = m[0] - cx, (m[1] - cy) * T + ay - 14
+            ux, uy = math.cos(m[2]), math.sin(m[2]) * T
             g.rects([(x - ux * k * 6 - 2, y - uy * k * 6 - 2, 4, 4) for k in (1, 2, 3)], (255, 179, 71), 160)
             g.rect(x - 4, y - 4, 8, 8, (255, 120, 80))
             g.rect(x - 2, y - 2, 4, 4, (255, 240, 200))
         for b in self.boomers:
-            x, y = b[0] - cx, b[1] - cy
+            x, y = b[0] - cx, (b[1] - cy) * T + ay - 10
             s = b[7]
             rot = t * 14
-            g.rects([(x + math.cos(rot + j * 0.5) * s - 3, y + math.sin(rot + j * 0.5) * s - 3, 6, 6)
+            g.rects([(x + math.cos(rot + j * 0.5) * s - 3, y + math.sin(rot + j * 0.5) * s * T - 3, 6, 6)
                      for j in range(-2, 3)], (190, 230, 255))
-            g.rect(x + math.cos(rot) * s - 2, y + math.sin(rot) * s - 2, 4, 4, (255, 255, 255))
-        # player
-        px, py = W / 2, H / 2
-        put(vr.tex["glowlight"], px - 46, py - 40)
-        if self.dash_t > 0:
-            ux, uy = self.dir
-            g.rects([(px - 18 - ux * k * 10, py - 10 - uy * k * 10, 36, 30) for k in range(1, 4)], (60, 242, 255), 70)
-        if not (self.inv > 0 and int(t * 20) % 2):
-            frame = "run2" if (self.moving and int(self.anim * 8) % 2) else "run1"
-            put(vr.tex[frame + ("" if self.fx_dir > 0 else "_l")], px - 18, py - 20)
-        if self.slowed:
-            g.rects([(px - 14 + i * 7, py + 16 + (i % 2) * 3, 4, 4) for i in range(5)], (235, 235, 255), 200)
-        # prism ring(s)
+            g.rect(x + math.cos(rot) * s - 2, y + math.sin(rot) * s * T - 2, 4, 4, (255, 255, 255))
+        # ---- the runner's weapons
+        px = W / 2
         lvr = self.weapons.get("ring", 0)
-        if lvr:
+        if lvr:                                          # prisms orbiting at waist height
             pts = []
             for n, rad, spin in self.ring_specs(lvr, "ring" in self.evo):
                 a0 = self.t * spin
-                pts += [(px + math.cos(a0 + i * math.tau / n) * rad - 5, py + math.sin(a0 + i * math.tau / n) * rad - 5,
-                         10, 10) for i in range(n)]
+                pts += [(px + math.cos(a0 + i * math.tau / n) * rad - 5, ay - 14 + math.sin(a0 + i * math.tau / n) * rad *
+                         T - 5, 10, 10) for i in range(n)]
             g.rects(pts, (210, 180, 255))
             g.rects([(x + 3, y + 3, 4, 4) for x, y, _, _ in pts], (255, 255, 255))
-        # sentinels
         lvd = self.weapons.get("drone", 0)
-        if lvd:
-            dp = [(x - cx - 5, y - cy - 5, 10, 10) for x, y in self.drone_pos(lvd, "drone" in self.evo)]
-            g.rects(dp, (110, 255, 170))
-            g.rects([(x + 3, y + 3, 4, 4) for x, y, _, _ in dp], (255, 255, 255))
-        # lighthouse beam(s)
+        if lvd:                                          # sentinels hovering, with their shadows
+            dp = [(x - cx, (y - cy) * T + ay) for x, y in self.drone_pos(lvd, "drone" in self.evo)]
+            g.rects([(x - 5, y - 2, 10, 4) for x, y in dp], (0, 0, 0), 70)
+            g.rects([(x - 5, y - 31, 10, 10) for x, y in dp], (110, 255, 170))
+            g.rects([(x - 2, y - 28, 4, 4) for x, y in dp], (255, 255, 255))
         lvb = self.weapons.get("beam", 0)
-        if lvb:
+        if lvb:                                          # lighthouse beam(s) sweeping at waist height
             L = self.beam_len(lvb, "beam" in self.evo)
             for a in self.beam_angles("beam" in self.evo):
-                ux, uy = math.cos(a), math.sin(a)
-                g.rects([(px + ux * k - 4, py + uy * k - 4, 8, 8) for k in range(24, int(L), 12)], (255, 110, 230), 170)
-                g.rects([(px + ux * k - 1, py + uy * k - 1, 3, 3) for k in range(24, int(L), 12)], (255, 255, 255))
-        # effects
+                ux, uy = math.cos(a), math.sin(a) * T
+                g.rects([(px + ux * k - 4, ay - 14 + uy * k - 4, 8, 8) for k in range(24, int(L), 12)], (255, 110, 230),
+                        170)
+                g.rects([(px + ux * k - 1, ay - 14 + uy * k - 1, 3, 3) for k in range(24, int(L), 12)], (255, 255, 255))
         now = self.t
         for f in self.fx:
             el = (now - f[1]) / f[2]
@@ -1739,27 +1868,29 @@ class Run(object):
                 _, _, _, x, y, ux, uy, wid = f
                 a = int(170 * (1 - el))
                 ww = max(4, int(wid * 0.6))
-                g.rects([(x - cx + ux * k - ww / 2, y - cy + uy * k - ww / 2, ww, ww) for k in range(0, 420, 16)],
-                        (255, 220, 120), a)
+                g.rects([(x - cx + ux * k - ww / 2, (y - cy + uy * k) * T + ay - 12 - ww / 2, ww, ww)
+                         for k in range(0, 420, 16)], (255, 220, 120), a)
             elif kind == "chain":
                 c = (255, 255, 255) if f[4] else (160, 230, 255)
                 sdl2.SDL_SetRenderDrawColor(ren, c[0], c[1], c[2], 255)
                 for x0, y0, x1, y1 in f[3]:
-                    sdl2.SDL_RenderDrawLine(ren, int(x0 - cx), int(y0 - cy), int(x1 - cx), int(y1 - cy))
-                    sdl2.SDL_RenderDrawLine(ren, int(x0 - cx) + 1, int(y0 - cy), int(x1 - cx) + 1, int(y1 - cy))
+                    a0, b0 = int(x0 - cx), int((y0 - cy) * T + ay - 12)
+                    a1, b1 = int(x1 - cx), int((y1 - cy) * T + ay - 12)
+                    sdl2.SDL_RenderDrawLine(ren, a0, b0, a1, b1)
+                    sdl2.SDL_RenderDrawLine(ren, a0 + 1, b0, a1 + 1, b1)
             elif kind in ("nova", "boom", "cboom", "bblast", "frost", "white"):
                 _, _, _, x, y, r = f
                 rr = r * (0.4 + 0.6 * el)
-                col = FX_COL[kind]
-                dots(x - cx, y - cy, rr, 20 if r > 120 else 16, col, int(255 * (1 - el)))
+                dots(x - cx, (y - cy) * T + ay, rr, 20 if r > 120 else 16, FX_COL[kind], int(255 * (1 - el)))
             elif kind == "crit":
-                x, y = f[3] - cx, f[4] - cy
+                x, y = f[3] - cx, (f[4] - cy) * T + ay - 16
                 g.rects([(x - 8, y - 2, 16, 4), (x - 2, y - 8, 4, 16)], (255, 236, 140), int(255 * (1 - el)))
             elif kind == "block":
-                x, y = f[3] - cx, f[4] - cy
+                x, y = f[3] - cx, (f[4] - cy) * T + ay - 16
                 g.rects([(x - 6 + i * 4, y - 6 + ((i * 7) % 12), 3, 3) for i in range(4)], (120, 220, 255),
                         int(255 * (1 - el)))
-        # danger vignette when the hole is close
+        # ---- depth: the far side in haze, the edges in the dark
+        put(vr.tex["vignette"], 0, 0, W, H)
         if self.boost_t > 7.6:
             g.rect(0, 0, W, H, (255, 255, 255), int(140 * (self.boost_t - 7.6) / 0.4))
         danger = max(0.0, 1 - (self.gd - self.R) / 180.0) if hasattr(self, "gd") else 0
@@ -1768,7 +1899,7 @@ class Run(object):
             g.rects([(0, 0, W, 14), (0, H - 14, W, 14), (0, 0, 14, H), (W - 14, 0, 14, H)], (255, 0, 100), a)
         # off-screen arrows: chests (gold) and O GRAVE
         for c in self.chests:
-            x, y = c[0] - cx, c[1] - cy
+            x, y = c[0] - cx, (c[1] - cy) * T + ay
             if not (0 < x < W and 0 < y < H):
                 ang = math.atan2(y - H / 2, x - W / 2)
                 ex = max(20, min(W - 20, W / 2 + math.cos(ang) * 400))
@@ -1784,6 +1915,23 @@ class Run(object):
             g.rect(ex - 5, ey - 5, 10, 10, (0, 0, 0))
             g.text("k16", "GRAVE %dm" % max(0, (self.gd - self.R) / 10), ex, ey + 12, (255, 60, 200), 255, "center")
         self.draw_hud(g, t)
+
+    def draw_runner(self, g, t, ay, put):
+        """the runner, feet on the feet line, with its little lamp, the dash trail and the web it is stuck in"""
+        vr = self.vr
+        px = W / 2
+        gl = vr.tex["glowlight"]
+        put(gl, px - 46, ay - 46 * TILT, 92, 92 * TILT)
+        if self.dash_t > 0:
+            ux, uy = self.dir
+            g.rects([(px - 18 - ux * k * 10, ay - 34 - uy * TILT * k * 10, 36, 30) for k in range(1, 4)],
+                    (60, 242, 255), 70)
+        if not (self.inv > 0 and int(t * 20) % 2):
+            frame = "run2" if (self.moving and int(self.anim * 8) % 2) else "run1"
+            tx = vr.tex[frame + ("" if self.fx_dir > 0 else "_l")]
+            put(tx, px - tx[1] / 2, ay - tx[2] + 3)
+        if self.slowed:
+            g.rects([(px - 14 + i * 7, ay - 2 + (i % 2) * 3, 4, 4) for i in range(5)], (235, 235, 255), 200)
 
     def draw_hud(self, g, t):
         vr = self.vr
@@ -1822,9 +1970,9 @@ class Run(object):
             g.text("kb16", "DROP · ARMAS 150%", W // 2, 70, (255, 220, 90), 255, "center")
             g.rect(W // 2 - 70, 90, 140 * self.boost_t / 8.0, 3, (255, 220, 90))
         # hp
-        px, py = W / 2, H / 2
-        g.rect(px - 18, py + 22, 36, 4, (40, 0, 20))
-        g.rect(px - 18, py + 22, 36 * max(0, self.hp) / self.maxhp, 4, (255, 70, 90))
+        px = W / 2                                    # just under the runner's feet
+        g.rect(px - 18, AY + 7, 36, 4, (40, 0, 20))
+        g.rect(px - 18, AY + 7, 36 * max(0, self.hp) / self.maxhp, 4, (255, 70, 90))
         # weapons (gold frame = evolved) + passives + dash
         x = 8
         for k in WEAPON_IDS:
@@ -1996,6 +2144,9 @@ class VoidRunner(object):
                 "chest": bake(ren, CHEST, CHEST_PAL, 3),
             }
             self.tex["pud"] = bake_disc(ren, 32, [(1.0, (255, 255, 255, 70)), (0.85, (255, 255, 255, 110))])
+            self.tex["pool"] = bake_pool(ren)                    # the 2.5D light: O GRAVE's pool and rays,
+            self.tex["ray"] = bake_ray(ren)                      # the haze and the dark edges of the screen
+            self.tex["vignette"] = bake_vignette(ren)
             self.tex["aura"] = bake_disc(ren, 64, [(1.0, (255, 214, 60, 46)), (0.93, (255, 214, 60, 20))])
 
             def icon(k, col, s):
@@ -2180,40 +2331,52 @@ class VoidRunner(object):
             return self.draw_scan(g, t)
         self.draw_menu(g, t)
 
-    def draw_grave(self, g, cx, cy, R, t, pulse, charge, waves, boost=False):
+    def draw_grave(self, g, cx, cy, R, t, pulse, charge, waves, boost=False, tilt=1.0, reach=None):
         """O GRAVE: glow, sound rings leaving it, frame with bolts, rubber surround, the cone pumping with the
-        beat, the dust cap. Charging before a drop it glows hotter."""
+        beat, the dust cap. Charging before a drop it glows hotter. tilt < 1 lays it on the ground of the 2.5D view
+        (its round parts become ellipses and a short box shows under the rim); reach = how far its rings travel."""
         dst = sdl2.SDL_Rect()
 
         def put(tx, x, y, w, h):
             dst.x, dst.y, dst.w, dst.h = int(x), int(y), int(w), int(h)
             sdl2.SDL_RenderCopy(self.app.ren, tx[0], None, dst)
+
+        def disc(tx, r, dy=0.0):
+            put(tx, cx - r, cy - r * tilt + dy, r * 2, r * 2 * tilt)
         gl = R * (3.0 + 0.6 * pulse + 1.2 * charge)
-        put(self.tex["glow"], cx - gl, cy - gl, gl * 2, gl * 2)
+        disc(self.tex["glow"], gl)
         for age, strength in waves:                   # rings of sound
             k = age / 0.9
-            rr = R * (1.1 + 3.2 * k)
-            n = 28 if rr < 200 else 44
+            rr = R * (1.1 + 3.2 * k) if reach is None else R * 1.1 + reach * k
+            n = 28 if rr < 200 else (44 if rr < 500 else 72)
             col = (60, 242, 255) if int(strength * 10) % 2 else (255, 60, 200)
             a = int(200 * (1 - k) * (0.4 + 0.6 * strength))
-            g.rects([(cx + math.cos(i * math.tau / n) * rr - 3, cy + math.sin(i * math.tau / n) * rr - 3, 6, 6)
+            g.rects([(cx + math.cos(i * math.tau / n) * rr - 3, cy + math.sin(i * math.tau / n) * rr * tilt - 3, 6, 6)
                      for i in range(n)], col, a)
         fr = R * 1.22
-        put(self.tex["g_frame"], cx - fr, cy - fr, fr * 2, fr * 2)
-        g.rects([(cx + math.cos(i * math.tau / 8 + 0.39) * R * 1.12 - 3, cy + math.sin(i * math.tau / 8 + 0.39) * R * 1.12 - 3,
-                  6, 6) for i in range(8)], (150, 148, 180))
-        put(self.tex["g_surr"], cx - R, cy - R, R * 2, R * 2)
+        if tilt < 1.0:                                # the speaker box under the rim: its bottom, then its side
+            depth = R * 0.45
+            frame = self.tex["g_frame"]
+            sdl2.SDL_SetTextureColorMod(frame[0], 90, 84, 120)
+            disc(frame, fr, depth)
+            sdl2.SDL_SetTextureColorMod(frame[0], 255, 255, 255)
+            g.rect(cx - fr, cy, fr * 2, depth, (26, 24, 40))
+            g.rect(cx - fr, cy + depth * 0.45, fr * 2, 2, (58, 56, 78))
+        disc(self.tex["g_frame"], fr)
+        g.rects([(cx + math.cos(i * math.tau / 8 + 0.39) * R * 1.12 - 3,
+                  cy + math.sin(i * math.tau / 8 + 0.39) * R * 1.12 * tilt - 3, 6, 6) for i in range(8)], (150, 148, 180))
+        disc(self.tex["g_surr"], R)
         cr = R * 0.8 * (1 + 0.1 * pulse)
-        put(self.tex["g_cone"], cx - cr, cy - cr, cr * 2, cr * 2)
+        disc(self.tex["g_cone"], cr)
         hot = charge > 0 or boost
         cap = R * 0.32 * (1 + 0.16 * pulse)
         if hot:
             sdl2.SDL_SetTextureColorMod(self.tex["g_cap"][0], 255, 140 + int(80 * (1 - charge)), 220)
-        put(self.tex["g_cap"], cx - cap, cy - cap, cap * 2, cap * 2)
+        disc(self.tex["g_cap"], cap, -R * 0.08 * pulse * (1.0 - tilt) * 4)     # the cap pumps up towards you
         if hot:
             sdl2.SDL_SetTextureColorMod(self.tex["g_cap"][0], 255, 255, 255)
         if charge > 0 and int(t * 10) % 2:
-            g.rects([(cx + math.cos(i * 0.785 + t) * R * 1.4 - 2, cy + math.sin(i * 0.785 + t) * R * 1.4 - 2, 5, 5)
+            g.rects([(cx + math.cos(i * 0.785 + t) * R * 1.4 - 2, cy + math.sin(i * 0.785 + t) * R * 1.4 * tilt - 2, 5, 5)
                      for i in range(8)], (255, 220, 90))
 
     def draw_menu(self, g, t):
