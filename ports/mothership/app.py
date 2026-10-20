@@ -2168,6 +2168,12 @@ class App(object):
             self.g.scanlines()
 
     def run(self):
+        try:
+            self.loop()
+        finally:
+            self.shutdown()
+
+    def loop(self):
         last = time.time()
         while self.running:
             now = time.time()
@@ -2185,11 +2191,15 @@ class App(object):
             spent = time.time() - now
             if spent < 1 / 30.0:
                 sdl2.SDL_Delay(int((1 / 30.0 - spent) * 1000))
-        self.save_cfg(sync=True)
-        self.rec.stop()
-        self.sections["forge"].save()
-        self.sections["vox"].stop()
-        self.sections["pet"].save()
-        self.sections["abductor"].proc and self.sections["abductor"].proc.terminate()
-        self.mixer.close()
-        sdl2.SDL_Quit()
+
+    def shutdown(self):
+        """saves everything and stops the recorders, also when the loop ended with an error (an ABDUCTOR arecord
+        left running would fill the card); each step on its own, so one that fails never skips the others"""
+        ab = self.sections["abductor"]
+        for step in (lambda: self.save_cfg(sync=True), self.rec.stop, self.sections["forge"].save,
+                     self.sections["vox"].stop, self.sections["pet"].save, lambda: ab.proc and ab.proc.terminate(),
+                     self.mixer.close, sdl2.SDL_Quit):
+            try:
+                step()
+            except Exception as e:
+                log("shutdown: %r" % (e,))
