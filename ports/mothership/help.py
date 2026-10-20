@@ -137,7 +137,7 @@ HELP = {
                     "Os baús melhoram o que já tens e trazem as evoluções primeiro.",
                     "Músicas curtas dão mais XP: dá para evoluir na mesma.",
                     "Arma no nível 5 + o passivo certo = carta de EVOLUÇÃO.",
-                    "O círculo cor-de-rosa muito ao longe é o fim do alcance do Grave.",
+                    "O baixo do Grave chega a quase todo o mapa: longe é só uma brisa, perto puxa a sério.",
                     "Logo a seguir a um DROP caem muito mais cristais raros.",
                     "Se ficar lento: pausa > INIMIGOS: MENOS."]),
     "beatduel": ("BEAT DUEL", "Jogo de ritmo a dois na mesma consola.",

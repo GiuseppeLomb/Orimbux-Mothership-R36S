@@ -20,8 +20,9 @@ from engine import C, W, H, SR, load_wav, Voice, SequenceVoice
 SAVE = os.path.join(engine.APP, "vr_save.json")
 VRD = os.path.join(engine.ASSETS, "vr")
 LEVEL_TIME = 300.0           # SEM FIM: the world changes every 5 minutes
-ROUT = 2000.0                # O GRAVE's reach: a huge zone of gentle pull, but not the whole map
-FALL = 180.0                 # how fast the pull fades with distance (px): half strength 180 px from its edge
+ROUT = 6000.0                # O GRAVE's reach: almost the whole map feels its bass
+FAR = 0.1                    # how strong that light pull is everywhere, as a part of the pull at its edge
+NEAR = 120.0                 # + 3 x its radius: how close it must get before the pull grows (with O GRAVE's size)
 GEMS = [   # crystal colours: name, XP, runner level that unlocks it, palette (dark, bright, glow, core)
     ("VIOLETA", 1, 1, ((106, 31, 176), (178, 60, 255), (255, 60, 200), (255, 230, 255))),
     ("AZUL", 3, 5, ((20, 60, 150), (40, 140, 255), (90, 210, 255), (225, 245, 255))),
@@ -400,15 +401,19 @@ class Run(object):
         return top * (0.32 + 0.68 * self.prog() ** 1.25) * (0.9 + 0.2 * self.I)
 
     def pull(self, x, y, k=1.0):
-        """velocity added by O GRAVE at (x, y): a huge, soft field - full strength at its edge, half 180 px
-        away, a light current far out, fading to nothing at its reach (ROUT). Beats pull a little harder."""
+        """velocity added by O GRAVE at (x, y). Its bass reaches almost the whole map as a light current (FAR of
+        the pull at its edge); only relatively near it does the pull grow, gradually, to full strength at its
+        edge - and that near zone grows with O GRAVE itself (NEAR + 3 x its radius). It fades out only at the very
+        end of its reach (ROUT). Beats pull a little harder."""
         dx, dy = self.hx - x, self.hy - y
         d = math.sqrt(dx * dx + dy * dy) + 0.01
         if d >= ROUT:
             return 0.0, 0.0, d
         e = max(0.0, d - self.R)
+        near = NEAR + 3.0 * self.R
         s = e / (ROUT - self.R)
-        p = self.G * k * (1.0 + 0.2 * self.pulse) * (1.0 - s * s) / (1.0 + e / FALL) / d
+        f = FAR + (1.0 - FAR) / ((1.0 + e / near) * (1.0 + e / near))
+        p = self.G * k * (1.0 + 0.2 * self.pulse) * f * (1.0 - s * s) / d
         return dx * p - dy * p * 0.2, dy * p + dx * p * 0.2, d
 
     # weapon geometry, shared by update and draw
