@@ -122,6 +122,37 @@ def new_pet(gen=1, history=None):
             "hue": random.random()}
 
 
+def clean_pet(p, fresh):
+    """fields of a damaged pet.json that would crash the app take the values of a new pet (fresh)"""
+    for k in ("age", "full", "happy", "energy", "hygiene", "health", "weight", "poop_t", "care_acc", "care_t",
+              "last_seen", "born_wall", "hue"):
+        p[k] = engine.num(p[k], fresh[k])
+    for k in ("gen", "poops", "games", "meals"):
+        p[k] = int(engine.num(p[k], fresh[k]))
+    for k in ("sick", "sleeping", "lights_off"):
+        if not isinstance(p[k], bool):
+            p[k] = fresh[k]
+    if not (isinstance(p["form"], str) and p["form"] in SPRITES):
+        p["form"] = "egg" if p["age"] < HATCH_AT else "baby"
+    if not (p["name"] is None or isinstance(p["name"], str)):
+        p["name"] = None
+    hist = p["history"] if isinstance(p["history"], list) else []
+    p["history"] = [clean_memorial(h) for h in hist if isinstance(h, dict)]
+
+
+def clean_memorial(h):
+    """one stone of the memorial: the fields the drawing reads directly must be there and be usable"""
+    e = dict(h)
+    e["gen"], e["days"] = engine.num(e.get("gen"), 1), engine.num(e.get("days"), 0.0)
+    for k in ("hue", "games"):
+        if k in e:
+            e[k] = engine.num(e[k], 0)
+    if not isinstance(e.get("form"), str):
+        e["form"] = "?"
+    e.setdefault("name", None)
+    return e
+
+
 _PAL_CACHE = {}
 
 
@@ -203,7 +234,10 @@ class XenoPet(object):
         p = engine.load_save(PET_FILE)
         base = new_pet()
         if p:
+            fresh = dict(base)
             base.update(p)
+            clean_pet(base, fresh)
+            engine.check_save(PET_FILE, p, base)
         return base
 
     def save(self, sync=True):

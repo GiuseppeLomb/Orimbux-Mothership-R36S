@@ -98,6 +98,24 @@ def load_save(path):
     return None
 
 
+def check_save(path, saved, clean):
+    """when loading had to correct a save (clean differs from what was in the file), a copy of the file is kept
+    with keep_bad before the app writes over it"""
+    if any(k not in clean or clean[k] != v for k, v in saved.items()):
+        keep_bad(path, move=False)
+
+
+def num(v, default, lo=None, hi=None):
+    """a number read from a saved file, clamped to lo..hi; anything that is not a usable number gives the default"""
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v in (float("inf"), float("-inf")):
+        return default
+    if lo is not None and v < lo:
+        v = lo
+    if hi is not None and v > hi:
+        v = hi
+    return v
+
+
 # ------------------------------------------------------------------ graphics
 def load_frm(path):
     """8-bit frames sharing one palette: FRM1, count, w, h, palette, [len + zlib(indices)]"""

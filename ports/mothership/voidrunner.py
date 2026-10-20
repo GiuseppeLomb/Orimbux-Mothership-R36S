@@ -1892,8 +1892,19 @@ class VoidRunner(object):
         d = engine.load_save(SAVE)
         if d is None:
             return {"unlocked": 1, "best": {}, "endless": 0}
+        saved = dict(d)
         d.setdefault("best", {})
         d.setdefault("unlocked", 1)
+        # values that would crash the game go back to their defaults (a copy of the file is kept first)
+        d["unlocked"] = int(engine.num(d["unlocked"], 1, 1, 6))
+        best = d["best"] if isinstance(d["best"], dict) else {}
+        d["best"] = dict((k, v) for k, v in best.items() if isinstance(v, dict) and
+                         engine.num(v.get("kills"), None) is not None and engine.num(v.get("t", 0), None) is not None)
+        if "endless" in d:
+            d["endless"] = engine.num(d["endless"], 0)
+        if "seen_en" in d:
+            d["seen_en"] = [k for k in d["seen_en"] if isinstance(k, str)] if isinstance(d["seen_en"], list) else []
+        engine.check_save(SAVE, saved, d)
         return d
 
     def write(self, sync=True):

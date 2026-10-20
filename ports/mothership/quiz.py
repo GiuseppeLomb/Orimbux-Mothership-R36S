@@ -50,6 +50,26 @@ def diff_of(level):
     return min(4, 1 + level // 4)
 
 
+def clean_stats(saved):
+    """quiz.json: values that would crash the quiz go back to their defaults"""
+    st = dict(saved)
+    st["best"] = int(engine.num(st.get("best"), -1, -1, len(LADDER) - 1))
+    for k in ("games", "right", "asked"):
+        st[k] = int(engine.num(st.get(k), 0))
+    pc = st.pop("party_cfg", None)
+    if isinstance(pc, dict):
+        names = pc.get("names") if isinstance(pc.get("names"), list) else []
+        names = [n if isinstance(n, str) and n else "JOGADOR %d" % (i + 1) for i, n in enumerate(names[:10])]
+        st["party_cfg"] = {"n": int(engine.num(pc.get("n"), 4, 2, 10)),
+                           "diff": int(engine.num(pc.get("diff"), 0, 0, len(PARTY_DIFF) - 1)),
+                           "rounds": int(engine.num(pc.get("rounds"), 1, 0, len(ROUNDS) - 1)),
+                           "names": names + ["JOGADOR %d" % (i + 1) for i in range(len(names), 10)]}
+    pb = st.pop("party_best", None)
+    if isinstance(pb, list) and len(pb) == 2 and engine.num(pb[1], None) is not None:
+        st["party_best"] = pb
+    return st
+
+
 class Quiz(object):
     name = "SOM DE OURO"
 
@@ -57,7 +77,10 @@ class Quiz(object):
         self.app = app
         self.ear = earlab.EarLab(app)          # tones, chords and clicks
         self.drums = {}
-        self.st = engine.load_save(SAVE) or {"best": -1, "games": 0, "right": 0, "asked": 0}
+        saved = engine.load_save(SAVE)
+        self.st = clean_stats(saved) if saved else {"best": -1, "games": 0, "right": 0, "asked": 0}
+        if saved:
+            engine.check_save(SAVE, saved, self.st)
         self.state = "menu"
         self.msel = 0
         self.psel = 0

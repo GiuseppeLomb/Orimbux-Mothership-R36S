@@ -72,6 +72,24 @@ def demo_patterns(ids):
     return pats
 
 
+def clean_step(s):
+    """[velocity 0-3, ratchet 1-4, chance 1-100] from a saved file; a damaged step becomes an empty one"""
+    if type(s) is list and len(s) == 3 and type(s[0]) is int and type(s[1]) is int and type(s[2]) is int \
+            and 0 <= s[0] <= 3 and 1 <= s[1] <= 4 and 1 <= s[2] <= 100:
+        return list(s)                           # the usual case: a valid step, checked cheaply
+    if isinstance(s, list) and len(s) in (2, 3):
+        v = [engine.num(x, None) for x in s] + [100] * (3 - len(s))
+        if None not in v:
+            return [int(min(3, max(0, v[0]))), int(min(4, max(1, v[1]))), int(min(100, max(1, v[2])))]
+    return [0, 1, 100]
+
+
+def clean_pattern(p):
+    rows = [r if isinstance(r, list) else [] for r in p["t"]]
+    return {"len": int(engine.num(p.get("len"), 16, 1, MAXS)),
+            "t": [[clean_step(s) for s in r[:MAXS]] + [[0, 1, 100] for _ in range(MAXS - len(r))] for r in rows]}
+
+
 def write_wav(path, data):
     wf = wave.open(path, "wb")
     wf.setnchannels(2)
@@ -118,34 +136,47 @@ class Forge(object):
     def load(self):
         nt = len(self.kit)
         st = engine.load_save(SAVE) or {}
-        tracks = st.get("tracks") or []
+        tracks = st.get("tracks") if isinstance(st.get("tracks"), list) else []
         self.tracks = []
         for i, t in enumerate(self.kit):
-            d = tracks[i] if i < len(tracks) else {}
+            d = tracks[i] if i < len(tracks) and isinstance(tracks[i], dict) else {}
             s = d.get("s", t["samples"][0]["file"])
-            if isinstance(s, int):                                   # v1 saved an index
+            if isinstance(s, int) and not isinstance(s, bool):      # v1 saved an index
                 s = t["samples"][min(s, len(t["samples"]) - 1)]["file"]
-            self.tracks.append({"s": s, "vol": int(d.get("vol", DEFAULT_VOL.get(t["id"], 7))),
-                                "pitch": int(d.get("pitch", 0)), "pan": int(d.get("pan", 0)),
-                                "mute": bool(d.get("mute", False))})
+            if not isinstance(s, str):
+                s = t["samples"][0]["file"]
+            self.tracks.append({"s": s, "vol": int(engine.num(d.get("vol"), DEFAULT_VOL.get(t["id"], 7), 0, 10)),
+                                "pitch": int(engine.num(d.get("pitch"), 0, -12, 12)),
+                                "pan": int(engine.num(d.get("pan"), 0, -2, 2)), "mute": bool(d.get("mute", False))})
         pats = st.get("pats")
-        if pats and isinstance(pats[0], list):                       # v1: 16-step lists
+        if isinstance(pats, list) and pats and isinstance(pats[0], list):     # v1: 16-step lists
             conv = []
             for p in pats:
                 np_ = new_pattern(nt)
+                p = p if isinstance(p, list) else []
                 for ti in range(min(nt, len(p))):
-                    for si in range(min(16, len(p[ti]))):
-                        np_["t"][ti][si] = list(p[ti][si])
+                    row = p[ti] if isinstance(p[ti], list) else []
+                    for si in range(min(16, len(row))):
+                        np_["t"][ti][si] = clean_step(row[si])
                 conv.append(np_)
             pats = conv
-        if not pats or len(pats) != NPAT or any(len(p["t"]) != nt for p in pats):
+        if not isinstance(pats, list) or len(pats) != NPAT or not all(
+                isinstance(p, dict) and isinstance(p.get("t"), list) and len(p["t"]) == nt for p in pats):
             pats = demo_patterns(self.ids)
-        self.pats = pats
-        self.swing = int(st.get("swing", 50))
-        self.song = [int(x) % NPAT for x in st.get("song", [])][:SONG_MAX]
+        self.pats = [clean_pattern(p) for p in pats]
+        self.swing = int(engine.num(st.get("swing"), 50))
+        song = st.get("song") if isinstance(st.get("song"), list) else []
+        self.song = [int(x) % NPAT for x in song if engine.num(x, None) is not None][:SONG_MAX]
         self.song_on = bool(st.get("song_on", st.get("chain", False)))
-        self.style = int(st.get("style", 0)) % len(forge_styles.STYLES)
-        self.vars = dict(st.get("vars", {}))
+        self.style = int(engine.num(st.get("style"), 0)) % len(forge_styles.STYLES)
+        v = st.get("vars")
+        self.vars = dict((k, int(n)) for k, n in v.items() if engine.num(n, None) is not None) \
+            if isinstance(v, dict) else {}
+        if st.get("v") == 2:                     # what had to be corrected: keep a copy of the file first
+            state = self.state()
+            engine.check_save(SAVE, dict((k, st[k]) for k in st if k in state), state)
+        elif st:                                 # an older (or unknown) format is converted: keep the original
+            engine.keep_bad(SAVE, move=False)
 
     def state(self):
         return {"v": 2, "tracks": self.tracks, "pats": self.pats, "swing": self.swing, "song": self.song,

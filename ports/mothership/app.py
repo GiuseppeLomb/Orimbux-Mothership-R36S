@@ -61,7 +61,29 @@ def load_cfg():
     saved = engine.load_save(CFG_PATH)
     if saved:
         cfg.update(saved)
+        clean_cfg(cfg)
+        engine.check_save(CFG_PATH, saved, cfg)
     return cfg
+
+
+def clean_cfg(cfg):
+    """settings that would crash the app (a damaged or hand-edited config.json) go back to their defaults"""
+    for k in ("scanlines", "anim", "swap_ab"):
+        if not isinstance(cfg[k], bool):
+            cfg[k] = DEFAULT_CFG[k]
+    for k, lo, hi in (("volume", 0, 100), ("bpm", 60, 220), ("pet_speed", None, None)):
+        cfg[k] = engine.num(cfg[k], DEFAULT_CFG[k], lo, hi)
+    if not isinstance(cfg["quantize"], str):
+        cfg["quantize"] = DEFAULT_CFG["quantize"]
+    pads, joy = cfg["custom_pads"], cfg["joy_map"]
+    cfg["custom_pads"] = dict((k, v) for k, v in pads.items() if isinstance(v, str)) if isinstance(pads, dict) else {}
+    cfg["joy_map"] = dict((k, v) for k, v in joy.items() if isinstance(v, int) and not isinstance(v, bool)) \
+        if isinstance(joy, dict) else {}
+    for k in ("seen", "missions"):
+        if k in cfg:
+            cfg[k] = [x for x in cfg[k] if isinstance(x, str)] if isinstance(cfg[k], list) else []
+    if "bd_offset" in cfg:
+        cfg["bd_offset"] = engine.num(cfg["bd_offset"], 0.0)
 
 
 # ====================================================================== shared UI pieces

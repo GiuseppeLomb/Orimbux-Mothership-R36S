@@ -553,7 +553,10 @@ class BeatDuel(object):
         self.msg = ("", 0.0)
 
     def load(self):
-        return engine.load_save(SAVE) or {}
+        saved = engine.load_save(SAVE) or {}
+        best = dict((k, v) for k, v in saved.items() if engine.num(v, None) is not None)    # best score per song
+        engine.check_save(SAVE, saved, best)
+        return best
 
     def write(self):
         try:
