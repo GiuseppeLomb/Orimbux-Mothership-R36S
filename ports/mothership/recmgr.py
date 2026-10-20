@@ -100,6 +100,23 @@ class RecManager(object):
         except Exception:
             self.say("Não consegui tocar este ficheiro.")
 
+    def remove(self, f):
+        try:
+            os.remove(f)
+        except OSError:
+            # Windows cannot delete a file that is still open (the stream fading out after stop() still reads it):
+            # close that stream and try again. On the console the first os.remove already works.
+            m = self.app.mixer
+            with m.lock:
+                mine = [s for s in m.streams if getattr(s, "path", None) == f]
+                for s in mine:
+                    s.done = True
+                    s.close()
+                    m.streams.remove(s)
+            if not mine:
+                raise
+            os.remove(f)
+
     def delete(self, it):
         p = it["path"]
         if self.playing == p:
@@ -108,7 +125,7 @@ class RecManager(object):
         for f in (p, p[:-4] + ".json", p + ".chart.json"):
             if os.path.exists(f):
                 try:
-                    os.remove(f)
+                    self.remove(f)
                     removed += 1
                 except Exception:
                     self.say("Não consegui apagar.")
