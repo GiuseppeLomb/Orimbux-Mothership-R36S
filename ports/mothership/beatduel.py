@@ -2,7 +2,6 @@
 # Songs: 5 built-in (charts generated from the notes we composed), sessions recorded in Loop Reactor /
 # Xeno Synth (chart = what you played), Abductor recordings and music/*.wav (chart made in the editor).
 import glob
-import json
 import math
 import os
 import random
@@ -42,18 +41,45 @@ ATTACKS = ["SPEED", "HIDDEN", "MIRROR"]
 HIT_Y = 404
 
 
+def clean_charts(c):
+    """note charts read from a file: [time, lane 0-3] or [time, lane, hold]; a damaged note (it would crash the
+    game) is left out"""
+    out = {}
+    if isinstance(c, dict):
+        for diff, notes in c.items():
+            if isinstance(notes, list):
+                out[diff] = [n for n in notes if isinstance(n, list) and len(n) in (2, 3) and
+                             engine.num(n[0], None) is not None and type(n[1]) is int and 0 <= n[1] <= 3 and
+                             (len(n) == 2 or engine.num(n[2], None) is not None)]
+    return out
+
+
+def read_song(p):
+    """a song description (built-in or a recorded session): None when it cannot be used"""
+    m = engine.read_json(p)
+    if not isinstance(m, dict) or not isinstance(m.get("file"), str):
+        return None
+    m["charts"] = clean_charts(m.get("charts"))
+    if not isinstance(m.get("title"), str):
+        m["title"] = os.path.splitext(m["file"])[0].upper()
+    if "bpm" in m and engine.num(m["bpm"], None) is None:
+        m["bpm"] = 120
+    m.setdefault("id", os.path.basename(p)[:-5])
+    return m
+
+
 def find_songs():
     out = []
     for p in sorted(glob.glob(os.path.join(BD, "*.json"))):
         try:
-            m = json.load(open(p))
+            m = read_song(p)
             m.update({"wav": os.path.join(BD, m["file"]), "src": "INCLUIDA", "chart_path": None})
             out.append(m)
         except Exception:
             pass
     for p in sorted(glob.glob(os.path.join(REC_DIR, "session_*.json")), reverse=True):
         try:
-            m = json.load(open(p))
+            m = read_song(p)
             m.update({"wav": os.path.join(REC_DIR, m["file"]), "src": "SESSAO", "chart_path": p})
             if not any(m.get("charts", {}).values()):
                 m["charts"] = {}            # e.g. a DJ mix: no notes yet -> editor (Y)
@@ -79,8 +105,8 @@ def find_songs():
              "charts": {}, "missing": not os.path.exists(wav)}
         if os.path.exists(cp):
             try:
-                c = json.load(open(cp))
-                m["charts"], m["bpm"] = c.get("charts", {}), c.get("bpm", 120)
+                c = engine.read_json(cp)
+                m["charts"], m["bpm"] = clean_charts(c.get("charts", {})), engine.num(c.get("bpm", 120), 120)
             except Exception:
                 pass
         out.append(m)

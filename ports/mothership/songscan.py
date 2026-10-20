@@ -1,7 +1,6 @@
 # SONGSCAN - listens to a song before you play it (VOID RUNNER): loudness at 10 Hz, hits (onsets) and drops.
 # Pure Python + audioop (fast C) so it runs on the console: a 4-minute song takes a second or two, and the
 # result is cached in vr_cache/ so the next time is instant.
-import json
 import os
 import threading
 import wave
@@ -21,31 +20,43 @@ def _key(path):
         return None
 
 
+def valid_scan(c):
+    """a cached scan has the shape Timeline.add reads (the cache is only ever written by scan_file, atomically:
+    checking the shape, not every value, keeps loading it instant)"""
+    return (isinstance(c, dict) and engine.num(c.get("dur"), None) is not None and isinstance(c.get("env"), list)
+            and isinstance(c.get("on"), list) and all(engine.num(v, None) is not None for v in c["env"][:1])
+            and all(isinstance(o, list) and len(o) == 2 for o in c["on"][:1]))
+
+
 def scan_file(path):
     """{'dur': seconds, 'env': loudness at 40 Hz (0..1 of full scale), 'on': [[t, strength 0..1], ...]}"""
     key = _key(path)
     cp = os.path.join(CACHE, key + ".json") if key else None
     if cp and os.path.exists(cp):
         try:
-            return json.load(open(cp))
+            c = engine.read_json(cp)
+            if valid_scan(c):              # a damaged cache file is simply scanned again
+                return c
         except Exception:
             pass
     w = wave.open(path, "rb")
-    ch, sw, rate = w.getnchannels(), w.getsampwidth(), w.getframerate()
-    hop = max(1, rate // 40)
-    full = float(1 << (8 * sw - 1))
-    env = []
-    while True:
-        d = w.readframes(hop)
-        if not d:
-            break
-        if sw == 1:
-            d = audioop.bias(d, 1, -128)
-        if ch == 2:
-            d = audioop.tomono(d, sw, 0.5, 0.5)
-        env.append(audioop.rms(d, sw) / full)
-    dur = w.getnframes() / float(rate)
-    w.close()
+    try:
+        ch, sw, rate = w.getnchannels(), w.getsampwidth(), w.getframerate()
+        hop = max(1, rate // 40)
+        full = float(1 << (8 * sw - 1))
+        env = []
+        while True:
+            d = w.readframes(hop)
+            if not d:
+                break
+            if sw == 1:
+                d = audioop.bias(d, 1, -128)
+            if ch == 2:
+                d = audioop.tomono(d, sw, 0.5, 0.5)
+            env.append(audioop.rms(d, sw) / full)
+        dur = w.getnframes() / float(rate)
+    finally:
+        w.close()
     # onsets: the loudness jumps above its recent level (kicks, snares, chords hitting)
     on, flux = [], []
     for i in range(len(env)):

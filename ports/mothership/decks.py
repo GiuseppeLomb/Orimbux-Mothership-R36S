@@ -2,7 +2,6 @@
 # tap BPM (no automatic analysis), sync from the taps, crossfader on the analog stick, SPLIT CUE for headphones
 # (left ear = what you cue, right ear = the mix), waveform overview + zoom, mix recording.
 import glob
-import json
 import os
 import threading
 import time
@@ -251,14 +250,14 @@ def library(app):
         meta = p[:-4] + ".json"
         if os.path.exists(meta):
             try:
-                bpm = json.load(open(meta)).get("bpm")
+                bpm = engine.num(engine.read_json(meta).get("bpm"), None, 1)     # the deck multiplies it
             except Exception:
                 pass
         out.append({"title": os.path.splitext(os.path.basename(p))[0], "src": p, "path": p, "bpm": bpm,
                     "tag": "GRAVACAO"})
     for p in sorted(glob.glob(os.path.join(BD, "*.json"))):
         try:
-            m = json.load(open(p))
+            m = engine.read_json(p)
             out.append({"title": m["title"], "src": os.path.join(BD, m["file"]), "path": os.path.join(BD, m["file"]),
                         "bpm": m.get("bpm"), "tag": "BEAT DUEL"})
         except Exception:

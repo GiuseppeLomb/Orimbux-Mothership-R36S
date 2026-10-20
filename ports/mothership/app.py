@@ -227,7 +227,7 @@ class Bank(object):
         if os.path.exists(path):
             beats = 4
             try:
-                beats = json.load(open(path[:-4] + ".json")).get("beats", 4)
+                beats = engine.num(engine.read_json(path[:-4] + ".json").get("beats", 4), 4, 0.25)
             except Exception:
                 pass
             return {"label": "FORGE " + forge.PAT_NAMES[p], "file": path, "mode": "loop", "beats": beats,

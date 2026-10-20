@@ -1,6 +1,5 @@
 # GRAVACOES - file manager for everything the ship records/exports (inside HANGAR): listen, see size, delete.
 import glob
-import json
 import os
 import time
 import wave
@@ -34,15 +33,18 @@ def scan():
             try:
                 size = os.path.getsize(p)
                 wf = wave.open(p, "rb")
-                secs = wf.getnframes() / float(wf.getframerate())
-                wf.close()
+                try:
+                    secs = wf.getnframes() / float(wf.getframerate())
+                finally:
+                    wf.close()
             except Exception:
                 size, secs = 0, 0.0
             title = os.path.splitext(os.path.basename(p))[0]
             meta = p[:-4] + ".json"
             if os.path.exists(meta) and kind_of(p) in ("SESSAO", "FORGE SONG"):
                 try:
-                    title = json.load(open(meta)).get("title", title)
+                    t = engine.read_json(meta).get("title", title)
+                    title = t if isinstance(t, str) else title
                 except Exception:
                     pass
             out.append({"path": p, "title": title, "kind": kind_of(p), "size": size, "secs": secs,
