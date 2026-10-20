@@ -1,5 +1,5 @@
 """v1.9 checks: START tap/hold (next app / music menu), the music transport, missions, SOM DE OURO, help glyphs."""
-import ctypes, os, sys, time
+import os, sys, time
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -7,6 +7,8 @@ APPD = os.path.join(ROOT, "ports", "mothership")
 sys.path.insert(0, os.path.join(APPD, "lib"))
 sys.path.insert(0, APPD)
 SAVES = ("config.json", "pet.json", "quiz.json", "forge.json")
+REC = os.path.join(APPD, "recordings")
+REC0 = set(os.listdir(REC)) if os.path.isdir(REC) else set()      # the session recorded below is removed after
 BACK = {}
 for f in SAVES:
     p = os.path.join(APPD, f)
@@ -183,3 +185,6 @@ finally:
             pass
         if f in BACK:
             open(p, "wb").write(BACK[f])
+    for f in (set(os.listdir(REC)) - REC0) if os.path.isdir(REC) else ():
+        if f.startswith("session_"):
+            os.remove(os.path.join(REC, f))

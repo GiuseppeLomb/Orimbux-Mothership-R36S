@@ -1,5 +1,5 @@
 # headless test for TWIN DECKS (fake clock). Snapshots to argv[1].
-import ctypes, json, os, shutil, sys, wave, time as _time
+import ctypes, os, sys, wave, time as _time
 os.environ["SDL_VIDEODRIVER"] = "dummy"; os.environ["SDL_AUDIODRIVER"] = "dummy"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPD = os.path.join(ROOT, "ports", "mothership")

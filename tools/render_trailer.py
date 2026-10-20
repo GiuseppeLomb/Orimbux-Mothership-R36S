@@ -26,7 +26,6 @@ if name == "trailer":
     total = trailer.END
     audio = os.path.join(ROOT, "tools", "build", "trailer_44k.wav")
 else:
-    import credits
     total = 96.0
     audio = os.path.join(ROOT, "tools", "build", "credits_44k.wav")
 buf = ctypes.create_string_buffer(640 * 480 * 4)

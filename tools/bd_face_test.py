@@ -1,6 +1,6 @@
 """Beat Duel FACE TO FACE: P1 (d-pad end) and P2 (buttons end) each see their half upright, notes travel
 from the centre to each player. Checks key mapping, scoring, the geometry of the turned halves, results."""
-import ctypes, os, sys, time
+import ctypes, os, sys
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

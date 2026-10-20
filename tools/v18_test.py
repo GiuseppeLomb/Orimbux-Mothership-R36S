@@ -16,7 +16,6 @@ import sdl2
 from PIL import Image
 import app as appmod
 import trailer as trm
-import credits as crm
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "/tmp/v18"
 os.makedirs(OUT, exist_ok=True)

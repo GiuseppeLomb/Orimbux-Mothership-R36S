@@ -1,6 +1,6 @@
 # headless test for BEAT DUEL: fake clock (runs a 70 s song in a few seconds), bots for both players,
 # session recording -> chart -> play, editor on a music/*.wav, calibration. Writes snapshots to argv[1].
-import ctypes, glob, json, os, random, shutil, sys, time as _time
+import ctypes, json, os, random, shutil, sys, time as _time
 os.environ["SDL_VIDEODRIVER"] = "dummy"; os.environ["SDL_AUDIODRIVER"] = "dummy"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPD = os.path.join(ROOT, "ports", "mothership")

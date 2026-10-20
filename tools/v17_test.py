@@ -1,6 +1,6 @@
 # v1.7 checks: first-visit cards, hold-SELECT help everywhere (no accidental "back"), GRAVACOES manager,
 # Comet Chop undo/redo, Twin Decks filter. Snapshots to argv[1].
-import ctypes, json, os, shutil, sys, time
+import ctypes, os, shutil, sys, time
 os.environ["SDL_VIDEODRIVER"] = "dummy"; os.environ["SDL_AUDIODRIVER"] = "dummy"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APPD = os.path.join(ROOT, "ports", "mothership")
