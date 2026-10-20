@@ -173,13 +173,16 @@ class Font(object):
         self.tex = sdl2.SDL_CreateTextureFromSurface(ren, surf)
         sdl2.SDL_FreeSurface(surf)
         sdl2.SDL_SetTextureBlendMode(self.tex, sdl2.SDL_BLENDMODE_BLEND)
-        self._src = sdl2.SDL_Rect()
+        # each glyph's rectangle in the atlas, made once: drawing a letter only moves the destination
+        self.src = dict((ch, (sdl2.SDL_Rect(gl[0], gl[1], gl[2], self.hf), gl[2])) for ch, gl in self.glyphs.items())
         self._dst = sdl2.SDL_Rect()
 
     def width(self, s):
         g = self.glyphs
         return sum(g[c][2] if c in g else g[" "][2] for c in s)
 
+
+RECTS = ctypes.POINTER(sdl2.SDL_Rect)
 
 FONT_ALIAS = {  # old name -> (Tiny5 size, y shift)
     "p8": ("k16", -7), "v20": ("k16", 0), "p16": ("kb24", -9), "v28": ("k24", -1), "p24": ("kb32", -11),
@@ -233,9 +236,12 @@ class Gfx(object):
         """batch fill: lst of (x,y,w,h) - one SDL call"""
         if not lst:
             return
-        arr = (sdl2.SDL_Rect * len(lst))(*[sdl2.SDL_Rect(int(x), int(y), int(w), int(h)) for x, y, w, h in lst])
+        flat = []                                 # straight into a C int array: the same bytes as an SDL_Rect
+        add = flat.extend                         # array, without making one Python SDL_Rect per rectangle
+        for x, y, w, h in lst:
+            add((int(x), int(y), int(w), int(h)))
         sdl2.SDL_SetRenderDrawColor(self.ren, col[0], col[1], col[2], a)
-        sdl2.SDL_RenderFillRects(self.ren, arr, len(lst))
+        sdl2.SDL_RenderFillRects(self.ren, ctypes.cast((ctypes.c_int * len(flat))(*flat), RECTS), len(lst))
 
     def frame(self, x, y, w, h, col, t=2, a=255):
         self.rects([(x, y, w, t), (x, y + h - t, w, t), (x, y, t, h), (x + w - t, y, t, h)], col, a)
@@ -259,19 +265,18 @@ class Gfx(object):
         if align != "left":
             w = f.width(s)
             x = x - (w if align == "right" else w // 2)
-        sdl2.SDL_SetTextureColorMod(f.tex, col[0], col[1], col[2])
-        sdl2.SDL_SetTextureAlphaMod(f.tex, a)
-        src, dst, g = f._src, f._dst, f.glyphs
+        tex, ren, src, dst = f.tex, self.ren, f.src, f._dst
+        sdl2.SDL_SetTextureColorMod(tex, col[0], col[1], col[2])
+        sdl2.SDL_SetTextureAlphaMod(tex, a)
         x = int(x)
-        y = int(y) - f.top
-        hf = f.hf
+        dst.y, dst.h = int(y) - f.top, f.hf       # the same for every letter: set once per string
+        copy = sdl2.SDL_RenderCopy
         for ch in s:
-            gl = g.get(ch) or g["?"]
+            r, w = src.get(ch) or src["?"]
             if ch != " ":
-                src.x, src.y, src.w, src.h = gl[0], gl[1], gl[2], hf
-                dst.x, dst.y, dst.w, dst.h = x, y, gl[2], hf
-                sdl2.SDL_RenderCopy(self.ren, f.tex, src, dst)
-            x += gl[2]
+                dst.x, dst.w = x, w
+                copy(ren, tex, r, dst)
+            x += w
         return x
 
     def tw(self, fname, s):
