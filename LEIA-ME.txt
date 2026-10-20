@@ -1,5 +1,5 @@
-ORIMBUX MOTHERSHIP v1.9.1  -  R36S (ArkOS / dArkOS)
-==================================================
+ORIMBUX MOTHERSHIP v1.10  -  R36S (ArkOS / dArkOS)
+=================================================
 
 INSTALAR (no PC)
 1. Desliga a consola e tira o cartao SD onde estao as ROMs (o que tem a pasta "ports").
@@ -15,8 +15,23 @@ INSTALAR (no PC)
 ATUALIZAR DE UMA VERSAO ANTERIOR
   Igual: copia o .sh e os .zip novos para "ports". A instalacao substitui os ficheiros da app e
   mantem os teus: pet.json (Xeno Pet), vr_save.json (Void Runner), bd_save.json (Beat Duel),
-  forge.json (ritmos), quiz.json (Som de Ouro) e as pastas recordings, music, samples, forge e chop.
+  forge.json (ritmos), quiz.json (Disco Voador) e as pastas recordings, music, samples, forge e chop.
   A v1.9 apaga as fontes antigas (agora ha uma so letra) e o video do antigo Ear Lab.
+
+NOVO NA v1.10
+  - VOID RUNNER com visual novo, ao estilo dos RPG da PlayStation 1: pixel 3D visto de cima e
+    inclinado. Chao de lajes em perspetiva, inimigos, baus e a tua nave de pe com sombras suaves, e
+    a luz do GRAVE (raios e um halo que iluminam a horda) com nevoeiro ao longe. O jogo e o mesmo.
+  - VOID RUNNER: o baixo do GRAVE chega a quase todo o mapa (6000 px). Longe e so uma brisa leve
+    (um decimo da forca); so relativamente perto dele cresce aos poucos, e a zona forte aumenta
+    quando o Grave cresce.
+  - XENO PET: ja nao pergunta quanto tempo estiveste fora. Vive o tempo que o relogio da consola
+    contar (sem pilha de relogio, desligada pode contar pouco ou nada).
+  - SOM DE OURO passa a chamar-se DISCO VOADOR. A responde logo, sem a pergunta "RESPOSTA FINAL?".
+    Os recordes (quiz.json) continuam.
+  - LOOP REACTOR: 7 bancos novos de outros generos, com sons livres (CC0) do VCSL e do Sonic Pi:
+    HIP HOP, TECHNO, LATINO, MUNDO, EPICO, LO-FI e ROCK. Sao 13 bancos; FORGE e CHOP ficam no fim.
+  - TRAILER: as imagens do Disco Voador e do Void Runner sao as novas.
 
 NOVO NA v1.9.1
   - VOID RUNNER: O GRAVE e agora uma progressao. Comeca fraco e cresce com a musica, persegue-te
@@ -42,9 +57,9 @@ NOVO NA v1.9
   - PONTE nova: MUSICA / JOGOS / SISTEMA, cada app explicada em palavras simples, e MISSOES para
     quem esta a comecar ("A tua primeira musica" e "O remix"): a missao diz o proximo passo e a app
     certa ja fica escolhida. Na primeira vez aparece um cartao com as 4 regras de ouro.
-  - SOM DE OURO (JOGOS) substitui o EAR LAB: concurso de musica ao estilo "Quem quer ser
-    milionario": 345 perguntas em 4 niveis (FACIL, MEDIO, DIFICIL, ESPECIALISTA) + perguntas de
-    teoria e de ouvido sem fim. Modo FESTA para 2 a 10 jogadores, com pontos para cada um.
+  - SOM DE OURO (JOGOS, agora DISCO VOADOR) substitui o EAR LAB: concurso de musica ao estilo
+    "Quem quer ser milionario": 345 perguntas em 4 niveis (FACIL, MEDIO, DIFICIL, ESPECIALISTA) +
+    perguntas de teoria e de ouvido sem fim. Modo FESTA para 2 a 10 jogadores, com pontos para cada um.
   - VOID RUNNER musical: escolhes uma musica e ela e o nivel. O buraco negro passou a ser O GRAVE,
     um subwoofer gigante que pulsa com o ritmo e puxa aos poucos. Drops, baus e armas que ficam
     mais fortes com a musica alta.
@@ -53,7 +68,7 @@ NOVO NA v1.9
     acaso e toca ate carregares START (esq/dir muda).
   - LETRA mais legivel: maiusculas desenhadas a mao, mais espaco entre letras, 8 e x redesenhados.
   - XENO PET: a consola nao tem pilha de relogio; quando liga com o relogio parado, o pet pergunta
-    quanto tempo estiveste fora (ver XENO PET).
+    quanto tempo estiveste fora (a v1.10 deixou de perguntar).
   - VOX NEBULA: o micro liga/desliga com R2 (START passa a app seguinte, como em todas).
   - TWIN DECKS: gravar a mistura passou para o menu da musica (segura START e carrega Y).
   - TRAILER novo (1 min 18 s): musica mais longa, nave e planetas em pixel art com o dobro do
@@ -112,8 +127,12 @@ ABDUCTOR       3 paineis com L1/R1: GRAVAR | CORTAR | TOCAR
 LOOP REACTOR   setas + X/Y/A/B = 8 pads | L1/R1 banco | L2 parar tudo | R2 (segurar) WARP
                analogico direito = volume | SELECT + cima/baixo = BPM
                SELECT + A = GRAVAR SESSAO (liga/desliga, max 3 min) -> vira musica jogavel no BEAT DUEL
-               Banco FORGE (5o) = padroes exportados do BEAT FORGE, ja em loop.
-               Banco CHOP (6o) = fatias exportadas do COMET CHOP (Abductor).
+               13 bancos: CORE, GRAVITY, NEBULA e SIGNAL, depois os generos HIP HOP, TECHNO, LATINO,
+               MUNDO (percussao do mundo), EPICO (orquestra), LO-FI e ROCK (sons CC0 do VCSL e
+               do Sonic Pi).
+               Banco FORGE (12o) = padroes exportados do BEAT FORGE, ja em loop.
+               Banco CHOP (13o) = fatias exportadas do COMET CHOP (Abductor).
+               L1 no CORE salta logo para o CHOP (e o FORGE logo a seguir).
 XENO SYNTH     8 botoes = notas | L1/R1 oitava | L2 hold | R2 acorde
                analogico esq. = bend | analogico dir. = filtro | SELECT+setas = onda/escala
                SELECT + A = GRAVAR SESSAO (igual ao Loop Reactor: as notas que tocas viram a pista)
@@ -145,17 +164,17 @@ XENO PET       (JOGOS) esquerda/direita escolhe a acao, A faz: COMER, BRINCAR (m
                Quando precisa de algo aparece um balao animado com o icone (fome, sono, banho, doente,
                triste) e um aviso no topo. O estado dele tambem aparece na PONTE (em cima a esquerda).
                Quando parte, fica uma lapide no MEMORIAL com a foto dele em crianca (X apaga a lapide).
-               O pet vive em tempo real. A R36S nao tem pilha de relogio: desligada, o relogio para (ou
-               volta atras). Quando ligas a consola e o relogio diz que quase nao passou tempo, o pet
-               PERGUNTA quanto tempo estiveste fora (pouco, umas horas, uma noite, um dia, varios dias)
-               e vive esse tempo. B = nao passou tempo. No PC o relogio conta sempre.
+               O pet vive em tempo real, pelo relogio da consola. A R36S nao tem pilha de relogio:
+               desligada, o relogio para (ou volta atras), e esse tempo nao conta para o pet. Se o
+               relogio andar para tras ou saltar mais de 60 dias, o pet nao perde nem ganha esse tempo.
+               No PC o relogio conta sempre.
                Gravado em ports/mothership/pet.json. Para mostrar aos amigos: HANGAR > PET VELOCIDADE.
-SOM DE OURO    (JOGOS) Concurso de musica. 345 perguntas de cultura (geral, instrumentos, teoria,
+DISCO VOADOR   (JOGOS) Concurso de musica. 345 perguntas de cultura (geral, instrumentos, teoria,
                generos, classica, pop & rock, Portugal, eletronica, ciencia do som, cinema & jogos) em
                4 niveis, mais perguntas de teoria e de ouvido geradas sem fim (qual e a nota mais aguda,
                que acorde e, que BPM...). X ouve o som outra vez.
                JOGAR: 15 perguntas, a dificuldade sobe de FACIL (1-4) a ESPECIALISTA (13-15).
-               Setas escolhem, A responde, A outra vez confirma a RESPOSTA FINAL.
+               Setas escolhem, A responde logo (sem pergunta de confirmacao).
                AJUDAS (uma vez por jogo): L1 = 50:50 | R1 = sondagem da tripulacao | L2 = pergunta ao Xeno.
                As perguntas 5 e 10 sao patamares: se errares depois, ficas com esse premio.
                B desiste e leva o premio que tens.
@@ -173,10 +192,13 @@ VOID RUNNER    (JOGOS) A tua musica e o nivel (inspirado no Beat Hazard). No men
                depois de abertas 1 vez no WARP FLOOR).
                A nave OUVE a musica primeiro (1-2 s, fica guardado em vr_cache): energia, batidas e drops.
                O nivel dura a musica. Sobrevive ate ao fim e O GRAVE IMPLODE.
+               Visto de cima e inclinado, em pixel 3D (como os RPG da PlayStation 1): tudo tem sombra e
+               a luz do GRAVE ilumina os inimigos perto dele.
                O GRAVE (no lugar do buraco negro): um subwoofer gigante que pulsa com cada batida e te
-               puxa - uma progressao: quase nada no inicio da musica, mais forte ate ao fim; suave ao
-               longe, mais forte perto. O alcance e enorme mas nao infinito (2000 px, o circulo
-               cor-de-rosa muito ao longe). Persegue-te devagar; se o deixas muito para tras, apanha-te.
+               puxa - uma progressao: quase nada no inicio da musica, mais forte ate ao fim. O baixo
+               chega a quase todo o mapa (6000 px): longe e so uma brisa leve, e so relativamente perto
+               dele a forca cresce aos poucos; quanto maior o Grave, maior a zona forte.
+               Persegue-te devagar; se o deixas muito para tras, apanha-te.
                Cresce com a musica e com o que engole (a horda e mais leve que tu).
                CRISTAIS (XP): VIOLETA 1, AZUL 3 (nivel 5), VERDE 8 (10), DOURADO 20 (15), RUBI 50 (21),
                PRISMA 120 (28). Os ricos sao raros; inimigos grandes e o pos-DROP dao mais.
@@ -250,6 +272,7 @@ SE ALGO FALHAR
 
 CREDITOS
   Samples: Sonic Pi sample pack, CC0 (dominio publico) - assets/samples/CREDITS-sonic-pi-samples.md
+           VCSL (Versilian Community Sample Library), CC0 - assets/samples/CREDITS-packs.md
   Letra: Tiny5 - SIL Open Font License (assets/fonts)
   Pixel art (nave, planetas, nebulosa): desenhada em codigo (tools/build_art.py)
   Motor: Python + SDL2 via PySDL2 (dominio publico / zlib)

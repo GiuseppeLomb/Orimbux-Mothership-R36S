@@ -9,8 +9,8 @@ Também corre no PC. Escrita em Python + SDL2, com a interface em português.
 |---|---|---|
 | ![Ponte](docs/ponte.png) | ![Beat Forge](docs/beat_forge.png) | ![Void Runner](docs/void_runner.png) |
 | A ponte: missões e as 12 apps | Beat Forge: caixa de ritmos | Void Runner: a tua música é o nível |
-| ![Som de Ouro](docs/som_de_ouro_festa.png) | ![Beat Duel](docs/beat_duel_frente_a_frente.png) | |
-| Som de Ouro: quiz até 10 jogadores | Beat Duel frente a frente | |
+| ![Disco Voador](docs/disco_voador_festa.png) | ![Beat Duel](docs/beat_duel_frente_a_frente.png) | |
+| Disco Voador: quiz até 10 jogadores | Beat Duel frente a frente | |
 
 ## Download
 
@@ -29,7 +29,7 @@ Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das ap
 1. **PULSAR**: o tempo (BPM) e o metrónomo, com tap tempo.
 2. **BEAT FORGE**: caixa de ritmos com grelha de 8 pistas, construtor por estilo e arranjo.
 3. **ABDUCTOR**: grava a voz (micro USB) ou corta músicas em fatias para tocar.
-4. **LOOP REACTOR**: 8 pads de loops sempre no compasso.
+4. **LOOP REACTOR**: 8 pads de loops sempre no compasso, em 13 bancos (de HIP HOP, LATINO e ÉPICO a ROCK).
 5. **XENO SYNTH**: sintetizador em escala, sem notas erradas.
 6. **VOX NEBULA**: a tua voz com efeitos ao vivo.
 7. **TWIN DECKS**: dois decks com crossfader, como um DJ.
@@ -38,8 +38,8 @@ Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das ap
 **Jogos**
 
 - **XENO PET**: um bicho alien que cresce contigo, em tempo real.
-- **SOM DE OURO**: quiz de música com 345 perguntas em 4 níveis. Modo FESTA para 2 a 10 jogadores.
-- **VOID RUNNER**: a tua música é o nível (ao estilo do Beat Hazard). Os drops trazem hordas e baús, e O GRAVE, um subwoofer gigante, puxa-te aos poucos.
+- **DISCO VOADOR**: quiz de música com 345 perguntas em 4 níveis. Modo FESTA para 2 a 10 jogadores.
+- **VOID RUNNER**: a tua música é o nível (ao estilo do Beat Hazard), em pixel 3D visto de cima, com sombras suaves e a luz do Grave. Os drops trazem hordas e baús, e O GRAVE, um subwoofer gigante, puxa-te com um baixo que chega a quase todo o mapa.
 - **BEAT DUEL**: jogo de ritmo a dois, também frente a frente na mesma consola deitada.
 
 Há ainda trailer, créditos, cinco ambientes de música na intro, missões para quem está a começar e uma ajuda em todas as apps (segurar SELECT). O manual completo está em [`LEIA-ME.txt`](LEIA-ME.txt).
@@ -75,12 +75,12 @@ ports/
     ui.py, help.py        componentes da interface e textos de ajuda
     forge.py, chop.py, decks.py, vox.py, ...   uma app por ficheiro
     voidrunner.py, songscan.py   o jogo e a análise da música (intensidade, batidas, drops)
-    quiz.py, quizbank.py  o Som de Ouro e o banco de perguntas
+    quiz.py, quizbank.py  o Disco Voador e o banco de perguntas
     trailer.py, credits.py   o trailer e os créditos (desenhados em tempo real)
     lib/sdl2/             pysdl2, incluído para a consola
     assets/               sons, músicas, pixel art (.frm), fontes
 tools/
-  build_*.py              geram os assets: sons, músicas, fontes, arte, trailer
+  build_*.py              geram os assets: sons, músicas, fontes, arte, trailer, sample packs
   render_trailer.py       grava o trailer/créditos em MP4 (precisa do ffmpeg)
   package.py              faz os zips da release
   *_test.py               testes headless (SDL_VIDEODRIVER=dummy)
@@ -89,13 +89,13 @@ Orimbux Mothership (PC).bat   abre a app no Windows a partir deste repositório
 ```
 
 - Sem dependências pesadas na consola: só Python 3, SDL2 e `audioop`.
-- Os assets estão no repositório já gerados. As ferramentas em `tools/` usam `numpy` e `Pillow`.
+- Os assets estão no repositório já gerados. As ferramentas em `tools/` usam `numpy` e `Pillow` (`build_packs.py` também `soundfile`).
 - Testes: `python3 tools/v19_test.py /tmp/out`, `python3 tools/vr_test.py /tmp/out 0` (um bot joga o Void Runner), etc.
 
 ## Licença
 
 - **Código:** MIT (ver [`LICENSE`](LICENSE)).
-- **Samples:** da biblioteca do Sonic Pi, todos CC0, incluindo os doados por Arovane e The Black Dog.
+- **Samples:** da biblioteca do Sonic Pi (incluindo os doados por Arovane e The Black Dog) e do VCSL (Versilian Community Sample Library), todos CC0.
 - **Letra:** Tiny5, SIL Open Font License.
 - Detalhes em [`CREDITS.md`](CREDITS.md).
 
@@ -108,4 +108,4 @@ ORIMBUX MOTHERSHIP is a set of 12 music and game apps for the R36S handheld (Ark
 - **Music:** tempo, drum machine, sampler/slicer, loop pads, synth, voice FX, two DJ decks and a player.
 - **Games:** a virtual pet, a music quiz for up to 10 players, a Beat Hazard-like shooter driven by your own song, and a two-player rhythm duel.
 - **Download:** [ZIP of the repository](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip). R36S: copy the contents of `ports/` to the SD card's `ports` folder. Windows: run `Orimbux Mothership (PC).bat`.
-- **Code:** MIT. Samples are CC0 (Sonic Pi library), the font is Tiny5 (OFL).
+- **Code:** MIT. Samples are CC0 (Sonic Pi library and VCSL), the font is Tiny5 (OFL).

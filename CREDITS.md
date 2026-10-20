@@ -8,6 +8,6 @@
 | **PySDL2** | `ports/mothership/lib/sdl2` | Domínio público (CC0) / zlib |
 | **SDL2** | fornecido pelo sistema (consola) ou por `pysdl2-dll` (PC) | zlib |
 
-Tudo o resto (código, músicas originais NEON DRIFT, PIXEL RUSH, VOID BASS, MOON HOP, MOTHERSHIP ANTHEM, tema do trailer e dos créditos, os 5 ambientes da intro, a pixel art e as perguntas do Som de Ouro) foi feito para este projeto e está sob a licença MIT do repositório.
+Tudo o resto (código, músicas originais NEON DRIFT, PIXEL RUSH, VOID BASS, MOON HOP, MOTHERSHIP ANTHEM, tema do trailer e dos créditos, os 5 ambientes da intro, a pixel art e as perguntas do Disco Voador) foi feito para este projeto e está sob a licença MIT do repositório.
 
 Feito por Orimbux, com Claude.

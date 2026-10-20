@@ -12,7 +12,7 @@ import trailer
 from engine import C, W, H, SR, StreamVoice, draw_ship
 
 D = os.path.join(engine.ASSETS, "trailer")
-VERSION = "v1.9"
+VERSION = "v1.10"
 GOLD = (255, 214, 80)
 OPENER = ["Num cartão microSD,", "dentro de uma consola de bolso..."]
 CRAWL = [
