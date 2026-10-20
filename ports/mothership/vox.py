@@ -190,9 +190,10 @@ class VoxStream(object):
 
     def read(self, n, clock=None):
         v = self.vox
-        if not v.mic:
+        mic = v.mic                      # read once: the main thread can switch the mic off at any moment
+        if not mic:
             return None
-        x = v.mic.take(n)
+        x = mic.take(n)
         lvl = audioop.rms(x, 2)
         v.level = v.level * 0.5 + 0.5 * min(1.0, lvl / 6000.0)
         if lvl < v.gate:

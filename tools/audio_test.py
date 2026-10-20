@@ -93,6 +93,34 @@ try:
     k = 20 * 4096                                      # once both are gone: exactly the loop alone
     assert len(m.voices) == 1 and got[k:] == expect[k:len(got)]
     print("a wav cut short and a playlist with a missing file are dropped, the loop keeps playing")
+
+    # ---- VOX NEBULA: the mic switched off (main thread) between the check and the use (audio thread)
+    import vox
+
+    class Mic(object):
+        def take(self, n):
+            return b"\1\0" * n
+
+    class FlakyVox(vox.Vox):
+        """the mic is there for the first look only, as when R2 turns it off in between"""
+        looks = 0
+
+        @property
+        def mic(self):
+            FlakyVox.looks += 1
+            return Mic() if FlakyVox.looks == 1 else None
+
+        @mic.setter
+        def mic(self, v):
+            pass
+
+    class FakeApp(object):
+        pass
+    fv = FlakyVox(FakeApp())
+    FlakyVox.looks = 0
+    out = vox.VoxStream(fv).read(512)
+    assert out is not None and len(out) == 512 * 4
+    print("the VOX stream survives the mic being switched off mid-callback")
     print("ok")
 finally:
     shutil.rmtree(TMP, ignore_errors=True)
