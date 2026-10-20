@@ -2024,7 +2024,7 @@ class VoidRunner(object):
         if self.run:
             self.run.free()
             self.run = None
-        self.scanner = None
+        self.drop_scan()
         self.state = "menu"
 
     def start(self, level, song):
@@ -2040,6 +2040,12 @@ class VoidRunner(object):
         self.scan_t0 = time.time()
         self.state = "scan"
 
+    def drop_scan(self):
+        """back to the menu while a song is being listened to: the scan stops instead of running on"""
+        if self.scanner:
+            self.scanner.cancel()
+        self.scanner = None
+
     def start_now(self, level, song):
         """the same, without the thread (tests, footage capture)"""
         if song.get("endless"):
@@ -2053,7 +2059,7 @@ class VoidRunner(object):
             self.state = "pause"
             self.psel = 0
         elif self.state == "scan":
-            self.scanner = None
+            self.drop_scan()
             self.state = "menu"
         elif self.state == "menu":
             self.app.go("bridge")
@@ -2083,7 +2089,7 @@ class VoidRunner(object):
             return
         if st == "scan":
             if kind == "press" and b == "b":
-                self.scanner = None
+                self.drop_scan()
                 self.state = "menu"
             return
         if st == "pause":

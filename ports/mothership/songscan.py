@@ -193,14 +193,22 @@ class Scanner(threading.Thread):
         self.error = None
         self.done = False
         self.progress = 0.0
+        self.cancelled = False
+
+    def cancel(self):
+        """the player went back to the menu: stop after the file being scanned (the CPU is needed elsewhere)"""
+        self.cancelled = True
 
     def run(self):
         try:
             tl = Timeline()
             for i, p in enumerate(self.paths):
+                if self.cancelled:
+                    break
                 tl.add(scan_file(p))
                 self.progress = (i + 1) / float(len(self.paths))
-            self.timeline = tl
+            if not self.cancelled:
+                self.timeline = tl
         except Exception as e:
             self.error = e
         self.done = True

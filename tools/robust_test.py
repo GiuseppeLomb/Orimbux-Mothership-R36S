@@ -146,6 +146,30 @@ try:
     unclosed = [str(w.message) for w in caught if issubclass(w.category, ResourceWarning)]
     assert not unclosed, unclosed[:5]
     print("the waveform scan closes its files; starting the app leaves no file open")
+
+    # ---- going back from the Void Runner's "listening to the song" screen stops the scan between files
+    import songscan
+    calls = []
+    real_scan = songscan.scan_file
+
+    def slow_scan(p):
+        calls.append(p)
+        time.sleep(0.4)
+        return real_scan(p)
+    songscan.scan_file = slow_scan
+    try:
+        vr = c.sections["voidrunner"]
+        c.go("voidrunner")
+        wavs = [os.path.join(bd_dir, f) for f in ("moon_hop.wav", "neon_drift.wav", "pixel_rush.wav", "void_bass.wav")]
+        vr.start(0, {"id": "T", "title": "T", "paths": wavs, "col": (255, 255, 255)})
+        time.sleep(0.1)
+        sc = vr.scanner
+        vr.on("press", "b")
+        sc.join(5)
+    finally:
+        songscan.scan_file = real_scan
+    assert vr.state == "menu" and not sc.is_alive() and len(calls) == 1 and sc.timeline is None, calls
+    print("going back stops the Void Runner's song scan")
     print("ok")
 finally:
     for p in procs:
