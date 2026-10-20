@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.join(APPD, "lib")); sys.path.insert(0, APPD)
 class FakeTime(object):
     def __init__(self): self.now = _time.time()
     def time(self): return self.now
+    perf_counter = time     # pump() and the frame loop use the monotonic clock
     def __getattr__(self, k): return getattr(_time, k)
 
 

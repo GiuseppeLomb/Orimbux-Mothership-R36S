@@ -13,6 +13,7 @@ for f in ("forge.json", "config.json", "pet.json"):
 class FakeTime(object):
     def __init__(self): self.now = _time.time()
     def time(self): return self.now
+    perf_counter = time     # pump() and the frame loop use the monotonic clock
     def __getattr__(self, k): return getattr(_time, k)
 
 

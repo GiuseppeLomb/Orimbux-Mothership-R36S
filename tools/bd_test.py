@@ -14,6 +14,8 @@ class FakeTime(object):
     def time(self):
         return self.now
 
+    perf_counter = time          # the frame loop, pump() and the Beat Duel clock use the monotonic clock
+
     def __getattr__(self, k):
         return getattr(_time, k)
 
