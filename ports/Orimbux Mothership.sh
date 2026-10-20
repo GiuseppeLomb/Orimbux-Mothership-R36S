@@ -21,13 +21,32 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 # install/update packages: mothership.zip or mothership_1.zip, mothership_2.zip, ...
+# Only what is inside mothership/ is unpacked, never the player's own files (saves, recordings, music...), and
+# never a name with ".." or an absolute path: a zip made by hand from a PC copy cannot wipe the console's saves.
+UNZIP='
+import sys, zipfile
+SAVES = {"config.json", "pet.json", "vr_save.json", "bd_save.json", "bd_scores.json", "forge.json", "earlab.json",
+         "quiz.json", "missions.json", "log.txt"}
+PLAYER_DIRS = {"recordings", "music", "samples", "forge", "chop", "vr_cache"}
+z = zipfile.ZipFile(sys.argv[1])
+for m in z.infolist():
+    name = m.filename.replace("\\", "/")
+    parts = name.split("/")
+    if name.startswith("/") or ":" in parts[0] or ".." in parts or parts[0] != "mothership" or len(parts) < 2:
+        continue
+    top, last = parts[1], parts[-1]
+    if (len(parts) == 2 and (top in SAVES or ".bad-" in top or top.endswith(".tmp"))) or \
+            (top in PLAYER_DIRS and last != "LEIA-ME.txt"):
+        continue
+    z.extract(m, sys.argv[2])
+'
 set -- "$PORTDIR"/mothership*.zip
 if [ -f "$1" ]; then
   say "ORIMBUX MOTHERSHIP"
   say "A instalar / atualizar... (pode demorar 1 minuto)"
   for Z in "$@"; do
     say "  $(basename "$Z")"
-    if python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' "$Z" "$PORTDIR"; then
+    if python3 -c "$UNZIP" "$Z" "$PORTDIR"; then
       rm -f "$Z"
     else
       say "Falhou: $(basename "$Z"). Copia esse ficheiro outra vez."

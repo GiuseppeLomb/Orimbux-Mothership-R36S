@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORTS = os.path.join(ROOT, "ports")
 APPD = os.path.join(PORTS, "mothership")
 USER_FILES = {"config.json", "pet.json", "vr_save.json", "bd_save.json", "bd_scores.json", "forge.json",
-              "earlab.json", "quiz.json", "log.txt"}
+              "earlab.json", "quiz.json", "missions.json", "log.txt"}       # the launcher never unpacks these either
 USER_DIRS = {"recordings", "music", "samples", "forge", "chop", "vr_cache"}      # only their LEIA-ME ships
 PART = 15 * 1024 * 1024
 
@@ -24,7 +24,7 @@ def files():
         for f in sorted(fs):
             if f.endswith((".pyc", ".pyo")) or f.startswith("."):
                 continue
-            if rel == "." and f in USER_FILES:
+            if rel == "." and (f in USER_FILES or f.endswith(".tmp") or ".bad-" in f):   # + leftovers of a save
                 continue
             if top in USER_DIRS and f != "LEIA-ME.txt":
                 continue
