@@ -254,3 +254,38 @@ estivesse na pasta (uma gravação interrompida).
   sem lock na thread principal são só de leitura (seguras com o GIL). A única corrida encontrada é a M4.
 - **Caminhos:** usam sempre `os.path.join`; a app corre igual a partir do `.bat` (que define `PYTHONUTF8=1`).
 - **Python 3.7:** nada a corrigir.
+
+---
+
+## 3. Progresso (trabalho interrompido pelo limite de utilização)
+
+### Corrigido, um commit por assunto, cada um com o seu teste em `tools/`
+
+| Falha | Commit | Teste |
+|---|---|---|
+| C3 escrita atómica (`engine.write_json`: tmp + fsync + `os.replace`) | `a78e44c` | `saves_test.py` |
+| C2 ficheiros ilegíveis guardados como `<nome>.bad-<data>` | `56955b8` | `saves_test.py` |
+| C1 validação campo a campo dos 6 ficheiros guardados | `08f4d83` | `saves_test.py` (9 casos + ida e volta + formatos antigos) |
+| M7 (novo) sessões, pistas, metadados e cache lidos sem validação: uma nota na pista 7 rebentava o Beat Duel | `cae1082` | `files_test.py` |
+| A1 thread de áudio: a fonte que falha é retirada, o log regista cada erro uma vez | `2f8b462` | `audio_test.py` |
+| A2 gravar tudo e parar o `arecord` também quando a app sai por erro | `933f854` | `robust_test.py` |
+| A3 relógio monotónico no ciclo, no `pump()` e no Beat Duel | `c67f366` (+ `af532a3` nos relógios falsos dos testes) | `robust_test.py` |
+| A4 Windows: apagar a gravação que está a tocar | `6098de9` | `v17_test.py` passa a passar |
+| M1 lançador só extrai `mothership/`, nunca os ficheiros do jogador (+ B4 `package.py`) | `87ec129` | `launcher_test.py` (inclui o `.sh` inteiro no bash) |
+| M2 ficheiros fechados (Twin Decks, conversão do Warp, leituras) (+ B5) | `b146a99` | `robust_test.py` |
+| M3 cancelar a análise de música do Void Runner | `b3f748f` | `robust_test.py` |
+| M4 corrida do micro no VOX | `0fbad12` | `audio_test.py` |
+| Ferramenta: hash de 50 ecrãs para provar que nada mudou no aspeto | `f24370f` | `screens_test.py`: idêntico ao `main` |
+
+### Por fazer
+
+- **M5 desempenho:** as quatro otimizações estão medidas e provadas em bancada (texto -37%, array de retângulos
+  -38%, ambos com píxeis idênticos; `ui.tokens` em cache; saltar ×1,0 no misturador), mas ainda não estão aplicadas.
+- **M6** `build_extra.py`, **B1** imports não usados, **B2** código morto, **B3** testes que deixam lixo.
+- **Verificação final:** pyflakes, todos os testes, tempos do `vr_test` e `perf_test`, e `screens_test` contra o `main`.
+- **Relatório final** (propostas que mudariam a app: cache do Warp com nomes repetidos em subpastas, reabrir o
+  comando no PC, temporizadores de interface em `time.time()`, etc.).
+
+Testes já confirmados no ramo, depois das correções: todos os 13 de partida passam, incluindo o `v17_test`,
+que falhava no `main`. Os novos `saves_test`, `files_test`, `audio_test`, `robust_test` e `launcher_test` também
+passam, e os 50 ecrãs são idênticos ao `main`. Nada foi enviado para o GitHub.
