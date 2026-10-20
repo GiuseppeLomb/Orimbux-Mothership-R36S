@@ -22,7 +22,7 @@ SAVE = os.path.join(engine.APP, "vr_save.json")
 VRD = os.path.join(engine.ASSETS, "vr")
 LEVEL_TIME = 300.0           # SEM FIM: the world changes every 5 minutes
 ROUT = 6000.0                # O GRAVE's reach: almost the whole map feels its bass
-FAR = 0.1                     # how strong that light pull is everywhere, as a part of the pull at its edge
+FAR = 0.1                    # how strong that light pull is everywhere, as a part of the pull at its edge
 NEAR = 120.0                 # + 3 x its radius: how close it must get before the pull grows (with O GRAVE's size)
 GEMS = [   # crystal colours: name, XP, runner level that unlocks it, palette (dark, bright, glow, core)
     ("VIOLETA", 1, 1, ((106, 31, 176), (178, 60, 255), (255, 60, 200), (255, 230, 255))),
