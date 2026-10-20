@@ -87,4 +87,57 @@ for fname in sorted(g.alias):
                 res.append((end, pixels()))
             assert res[0] == res[1], "text differs: %s %r %s" % (fname, s, align)
 print("text: every font, %d strings x 3 alignments, identical pixels and return values" % len(texts))
+
+# ---- ui: key glyphs, line breaks and shortened texts come from a cache, with the same results
+import help as helpmod  # noqa: E402
+import ui  # noqa: E402
+specs = set()
+for h in helpmod.HELP.values():
+    specs.update(k for k, _ in h[3])
+specs.update(("START", "SELECT", "L1/R1", "SEL+X", "esq/dir", "setas + X/Y/A/B", "analogico esq.", "R2+L1/R1"))
+for spec in sorted(specs):
+    first = ui.tokens(spec)
+    assert first == tuple(ui._tokens(spec)) == ui.tokens(spec), spec
+words = [h[1] for h in helpmod.HELP.values()] + [t for h in helpmod.HELP.values() for t in h[4]]
+for s in words:
+    for font in (ui.SMALL, ui.BODY, ui.HEAD):
+        for w in (120, 300, 560):
+            lines = ui.wrap(g, font, s, w)
+            assert lines == ui._wrap(g, font, s, w)
+            lines.append("changed by the caller")          # a caller changing its copy never reaches the cache
+            assert ui.wrap(g, font, s, w) == ui._wrap(g, font, s, w)
+            assert ui.fit(g, font, s, w) == ui._fit(g, font, s, w) == ui.fit(g, font, s, w)
+print("ui: %d key specs, %d texts: cached glyphs, line breaks and shortened texts are the same" % (
+    len(specs), len(words)))
+
+# ---- Void Runner: the onsets of a frame, found by bisection, are the ones the old filter found
+import glob  # noqa: E402
+import songscan  # noqa: E402
+
+
+def ref_onsets(tl, t0, t1):
+    return [o for o in tl.on if t0 < o[0] <= t1]
+
+
+songs = sorted(glob.glob(os.path.join(APPD, "assets", "bd", "*.wav")))
+tl = songscan.Timeline()
+for p in songs:
+    tl.add(songscan.scan_file(p))
+assert tl.ordered and len(tl.on) > 500
+frames = 0
+for _ in range(3000):
+    t0 = rnd.uniform(-1, tl.dur + 1)
+    t1 = t0 + rnd.choice((0.0, 1 / 30.0, 1 / 20.0, 0.5, 3.0))
+    assert tl.onsets(t0, t1) == ref_onsets(tl, t0, t1)
+    frames += 1
+for o in tl.on[:200]:                                   # windows that end or start exactly on an onset
+    for t0, t1 in ((o[0], o[0] + 0.03), (o[0] - 0.03, o[0])):
+        assert tl.onsets(t0, t1) == ref_onsets(tl, t0, t1)
+odd = songscan.Timeline()                               # out of order: the old filter is used
+odd.add({"dur": 2.0, "env": [0.1] * 80, "on": [[0.5, 1.0], [1.99, 0.5]]})
+odd.on.insert(0, [1.5, 0.2])
+odd.on_t.insert(0, 1.5)
+odd.ordered = False
+assert odd.onsets(0.0, 2.0) == [[1.5, 0.2], [0.5, 1.0], [1.99, 0.5]]
+print("Void Runner onsets: %d windows over %d onsets, the same as the old filter" % (frames, len(tl.on)))
 print("ok")

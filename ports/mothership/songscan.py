@@ -1,6 +1,7 @@
 # SONGSCAN - listens to a song before you play it (VOID RUNNER): loudness at 10 Hz, hits (onsets) and drops.
 # Pure Python + audioop (fast C) so it runs on the console: a 4-minute song takes a second or two, and the
 # result is cached in vr_cache/ so the next time is instant.
+import bisect
 import os
 import threading
 import wave
@@ -97,6 +98,8 @@ class Timeline(object):
 
     def __init__(self):
         self.on = []           # [t, strength]
+        self.on_t = []         # their times, to find the ones of a frame by bisection
+        self.ordered = True    # the times only go up (they always do: a file is scanned in order)
         self.dur = 0.0
         self.I10 = []          # 10 Hz intensity
         self.drops = []
@@ -125,6 +128,8 @@ class Timeline(object):
             self.I10 += [max(0.0, min(1.0, 0.85 * (v - lo) / rng + 0.35 * min(1.0, dens[i] / 6.0)))
                          for i, v in enumerate(sm)]
         self.on += on
+        self.on_t += [o[0] for o in on]
+        self.ordered = all(a <= b for a, b in zip(self.on_t, self.on_t[1:]))
         self.dur += scan["dur"]
         self._drops()
 
@@ -166,6 +171,8 @@ class Timeline(object):
         return self.I10[i] * (1 - f) + self.I10[i + 1] * f
 
     def onsets(self, t0, t1):
+        if self.ordered:              # every frame of the Void Runner: no need to walk the whole song
+            return self.on[bisect.bisect_right(self.on_t, t0):bisect.bisect_right(self.on_t, t1)]
         return [o for o in self.on if t0 < o[0] <= t1]
 
     def next_drop(self, t):
