@@ -140,4 +140,12 @@ odd.on_t.insert(0, 1.5)
 odd.ordered = False
 assert odd.onsets(0.0, 2.0) == [[1.5, 0.2], [0.5, 1.0], [1.99, 0.5]]
 print("Void Runner onsets: %d windows over %d onsets, the same as the old filter" % (frames, len(tl.on)))
+
+# ---- mixer: skipping a multiplication by exactly 1.0 gives the same bytes (every 16-bit value is checked)
+import struct  # noqa: E402
+every = struct.pack("<65536h", *range(-32768, 32768))
+assert engine.audioop.mul(every, 2, 1.0) == every == engine.scale(every, 1.0)
+for k in (0.0, 0.5, 0.85, 1.3, 2.0, 0.999999):
+    assert engine.scale(every, k) == engine.audioop.mul(every, 2, k)
+print("mixer: times 1.0 is the identity for all 65536 sample values; other gains still multiply")
 print("ok")

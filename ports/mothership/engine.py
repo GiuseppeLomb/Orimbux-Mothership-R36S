@@ -573,6 +573,12 @@ def same_len(a, b):
     return b[:len(a)]
 
 
+def scale(data, k):
+    """stereo s16 times k. Times exactly 1.0 gives the same bytes back (16-bit samples are exact in a double), so
+    that work is skipped: a steady stream or synth note, a Forge loop (gain 2 x headroom 0.5), the volume at 100"""
+    return data if k == 1.0 else audioop.mul(data, 2, k)
+
+
 # ------------------------------------------------------------------ voices
 class Voice(object):
     __slots__ = ("key", "group", "data", "dark", "pos", "loop", "gain", "start", "stop", "done")
@@ -681,7 +687,7 @@ class SynthVoice(object):
         gain = (g0 + self.g) * 0.5
         if self.g <= 0.0 and self.target == 0.0:
             self.done = True
-        return audioop.mul(out, 2, gain)
+        return scale(out, gain)
 
 
 class StreamVoice(object):
@@ -766,7 +772,7 @@ class StreamVoice(object):
                 self.g_step = 0.0
         if self.g <= 0.0 and self.g_to <= 0.0:
             self.done = True
-        return audioop.mul(data, 2, (g0 + self.g) * 0.5)
+        return scale(data, (g0 + self.g) * 0.5)
 
     def close(self):
         try:
@@ -902,7 +908,7 @@ class Mixer(object):
                 try:
                     ch = v.read(clock, n, self.warp)
                     if ch is not None:
-                        out = audioop.add(out, audioop.mul(ch, 2, v.gain * HEADROOM), 2)
+                        out = audioop.add(out, scale(ch, v.gain * HEADROOM), 2)
                 except Exception as e:          # one broken sound never silences the others
                     self._drop(v, e)
                     continue
@@ -913,7 +919,7 @@ class Mixer(object):
                 keep = []
                 for s in self.synth:
                     try:
-                        out = audioop.add(out, audioop.mul(s.read(n, self.synth_bend, self.synth_tone), 2, 1.0), 2)
+                        out = audioop.add(out, s.read(n, self.synth_bend, self.synth_tone), 2)
                     except Exception as e:
                         self._drop(s, e)
                         continue
@@ -935,7 +941,7 @@ class Mixer(object):
                     else:
                         keep.append(s)
                 self.streams = keep
-            out = audioop.mul(out, 2, self.master)
+            out = scale(out, self.master)
             self.last = out
             if self.rec is not None:
                 self.rec.append(out)
