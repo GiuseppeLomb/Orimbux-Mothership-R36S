@@ -32,7 +32,7 @@ APPS = [  # file, name, tag, colour (the same as on the bridge), one line
     ("decks", "TWIN DECKS", "MISTURA", C["violet"], "Dois decks para misturar como um DJ."),
     ("warp", "WARP FLOOR", "OUVIR", C["green"], "Ouve as tuas músicas com visuais."),
     ("pet", "XENO PET", "JOGO", PINK, "Um bicho alien que cresce contigo."),
-    ("quiz", "SOM DE OURO", "JOGO", GOLD, "Quiz musical: sozinho ou em festa, até 10."),
+    ("quiz", "DISCO VOADOR", "JOGO", GOLD, "Quiz musical: sozinho ou em festa, até 10."),
     ("voidrunner", "VOID RUNNER", "JOGO", C["violet"], "A tua música é o nível: foge do Grave ao ritmo."),
     ("beatduel", "BEAT DUEL", "JOGO", C["cyan"], "Duelo de ritmo, até frente a frente."),
 ]

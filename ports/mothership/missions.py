@@ -16,7 +16,7 @@ MISSIONS = [
         ("chop_to_reactor", "Leva as fatias", "ABDUCTOR: SELECT+X manda para o Reactor", "abductor"),
         ("decks_both", "Mistura duas", "TWIN DECKS: põe os dois decks a tocar", "decks"),
         ("vox_live", "Põe a tua voz", "VOX NEBULA: R2 liga o micro", "vox"),
-        ("quiz_5", "Treina o ouvido", "SOM DE OURO: chega à pergunta 5", "quiz"),
+        ("quiz_5", "Treina o ouvido", "DISCO VOADOR: chega à pergunta 5", "quiz"),
     ]),
 ]
 

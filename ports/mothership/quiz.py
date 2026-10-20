@@ -1,4 +1,4 @@
-# SOM DE OURO - a music quiz show.
+# DISCO VOADOR - a music quiz show.
 #  JOGAR: 15 questions from the garage to the Diamond Record, difficulty climbing from FÁCIL to ESPECIALISTA.
 #    Levels 5 and 10 are safe. Lifelines (once per game): 50:50 (L1), crew poll (R1), ask the Xeno Pet (L2).
 #  FESTA: 2 to 10 players pass the console; every player gets a question per round, points for right answers
@@ -71,7 +71,7 @@ def clean_stats(saved):
 
 
 class Quiz(object):
-    name = "SOM DE OURO"
+    name = "DISCO VOADOR"
 
     def __init__(self, app):
         self.app = app
@@ -425,12 +425,10 @@ class Quiz(object):
                     self.app.ui_move()
             elif kind != "press":
                 return
-            elif b == "a":
+            elif b == "a":                               # the answer is locked at once (no "final answer?")
+                self.lock_answer()
                 if self.practice is not None:
-                    self.lock_answer()
                     self.t0 = time.time() - 1.0          # practice: short suspense
-                else:
-                    self.state = "confirm"
             elif b == "x" and self.q["sound"]:
                 self.q["sound"]()
             elif b == "l1":
@@ -441,13 +439,6 @@ class Quiz(object):
                 self.use("xeno")
             elif b == "b":
                 self.state = "menu" if self.practice is not None else "quit"
-        elif st == "confirm" and kind == "press":
-            if b == "a":
-                self.lock_answer()
-            elif b == "b":
-                self.state = "q"
-            elif b == "x" and self.q["sound"]:
-                self.q["sound"]()
         elif st == "quit" and kind == "press":
             if b == "a":
                 self.result = ("quit", self.level - 1)
@@ -509,10 +500,7 @@ class Quiz(object):
         if st == "over":
             return self.draw_over(g, t)
         self.draw_question(g, t)
-        if st == "confirm":
-            self.dialog(g, "RESPOSTA FINAL?", "%s: %s" % (LETTERS[self.cur], self.q["opts"][self.cur]),
-                        [("A", "sim"), ("B", "não")])
-        elif st == "quit":
+        if st == "quit":
             prize = LADDER[self.level - 1] if self.level > 0 else "nada"
             self.dialog(g, "DESISTIR?", "Ficas com: %s" % prize, [("A", "desistir"), ("B", "continuar")])
         elif st == "climb":
@@ -525,8 +513,8 @@ class Quiz(object):
 
     def draw_menu(self, g, t):
         self.disc(g, W // 2, 92, 58, t)
-        g.text(ui.DISPLAY, "SOM DE OURO", W // 2 + 3, 165, (60, 30, 0), 255, "center")
-        g.text(ui.DISPLAY, "SOM DE OURO", W // 2, 162, GOLD, 255, "center")
+        g.text(ui.DISPLAY, "DISCO VOADOR", W // 2 + 3, 165, (60, 30, 0), 255, "center")
+        g.text(ui.DISPLAY, "DISCO VOADOR", W // 2, 162, GOLD, 255, "center")
         g.text(ui.SMALL, "%d perguntas de música, do fácil ao especialista" % len(TRIVIA), W // 2, 214,
                C["soft"], 255, "center")
         for i, (lab, sub) in enumerate((("JOGAR", "15 perguntas, do fácil ao especialista, 3 ajudas"),
@@ -616,7 +604,7 @@ class Quiz(object):
             fill, fg, letter = (44, 26, 84), C["text"], GOLD
             if gone:
                 fill, fg, letter = (20, 12, 36), C["dim"], C["dim"]
-            elif self.state in ("q", "confirm", "quit") and i == self.cur:
+            elif self.state in ("q", "quit") and i == self.cur:
                 fill, fg, letter = C["orange"], C["void"], C["void"]
             elif self.state == "suspense" and i == self.cur:
                 blink = int(t * 6) % 2

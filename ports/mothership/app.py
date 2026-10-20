@@ -555,7 +555,7 @@ CATS = [  # (name, section, colour, tag, what it is - in plain words)
     ]),
     ("JOGOS", [
         ("XENO PET", "pet", (255, 110, 170), "BICHO", "O teu bicho alien: dá-lhe comida, brinca com ele e vê-o crescer."),
-        ("SOM DE OURO", "quiz", (255, 214, 80), "CONCURSO", "Concurso de música: 15 perguntas, da garagem ao Disco de Diamante."),
+        ("DISCO VOADOR", "quiz", (255, 214, 80), "CONCURSO", "Concurso de música: 15 perguntas, da garagem ao Disco de Diamante."),
         ("VOID RUNNER", "voidrunner", C["violet"], "AÇÃO", "A tua música é o nível: foge do Grave e das hordas, que crescem com o ritmo."),
         ("BEAT DUEL", "beatduel", C["cyan"], "RITMO", "Jogo de ritmo a dois, com as músicas da nave ou as tuas."),
     ]),

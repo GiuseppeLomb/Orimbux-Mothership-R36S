@@ -197,7 +197,7 @@ try:
         if made_md:
             shutil.rmtree(md, ignore_errors=True)
 
-    # 10 SOM DE OURO: a question, the final answer, the reveal, the climb
+    # 10 DISCO VOADOR: a question, the answer locked, the reveal, the climb
     if want("quiz"):
         a.go("quiz"); q = a.cur
         random.seed(11)
@@ -223,7 +223,7 @@ try:
             if i == 1:
                 q.use("50")
             if i == 2:
-                q.cur = q.q["answer"]; q.on("press", "a")          # "RESPOSTA FINAL?"
+                q.cur = q.q["answer"]; q.on("press", "a")          # locked at once: suspense
             if i == 3:                                             # FESTA: 6 players
                 party_setup()
                 q.party_ask()

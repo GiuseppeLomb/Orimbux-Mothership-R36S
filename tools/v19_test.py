@@ -1,4 +1,4 @@
-"""v1.9 checks: START tap/hold (next app / music menu), the music transport, missions, SOM DE OURO, help glyphs."""
+"""v1.9 checks: START tap/hold (next app / music menu), the music transport, missions, DISCO VOADOR, help glyphs."""
 import os, sys, time
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -126,7 +126,7 @@ try:
     br.on("press", "down"); a.go("pulsar"); a.go("bridge")
     assert appmod.CATS[br.cat][1][br.sel[br.cat]][1] == "xeno", "same step: the bridge keeps the user's choice"
     print("missions ok")
-    # ---- SOM DE OURO: a full game with the right answers, lifelines, the safe level and a wrong answer
+    # ---- DISCO VOADOR: a full game with the right answers, lifelines, the safe level and a wrong answer
     q = a.sections["quiz"]
     a.go("quiz"); frame()
     q.start_game(); frame()
@@ -140,15 +140,14 @@ try:
     for level in range(6):
         assert q.state == "q", q.state
         q.cur = q.q["answer"]
-        q.on("press", "a"); assert q.state == "confirm"
-        q.on("press", "a"); assert q.state == "suspense"
+        q.on("press", "a"); assert q.state == "suspense", "A answers at once (no final-answer question)"
         q.t0 -= 3; q.update(0.1); assert q.state == "reveal" and q.q["ok"]
         q.t0 -= 3; q.update(0.1); assert q.state == "climb", q.state
         q.t0 -= 3; q.update(0.1)
     assert q.level == 6 and "quiz_5" in ms.done_set
     # wrong answer at 7 -> you keep the safe level 5 ("Primeiro single")
     q.cur = [i for i in range(4) if i != q.q["answer"]][0]
-    q.on("press", "a"); q.on("press", "a")
+    q.on("press", "a")
     q.t0 -= 3; q.update(0.1); q.t0 -= 3; q.update(0.1)
     assert q.state == "over" and q.result == ("lose", 4), q.result
     # every question kind builds a valid question at every level

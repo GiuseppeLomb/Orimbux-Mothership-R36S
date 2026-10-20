@@ -1,4 +1,4 @@
-"""SOM DE OURO checks: the question bank in the game, difficulty per rung, FESTA with 10 players (turns, points,
+"""DISCO VOADOR checks: the question bank in the game, difficulty per rung, FESTA with 10 players (turns, points,
 standings, podium, ties, name editor), practice themes. Screens -> argv[1]."""
 import ctypes, os, sys
 os.environ["SDL_VIDEODRIVER"] = "dummy"

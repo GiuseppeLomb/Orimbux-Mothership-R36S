@@ -328,7 +328,7 @@ def music():
             put(sq(mtof(84 + (0, 3, 7, 12)[i % 4]), nn, 0.5) * perc(nn, 0.001, 0.04), b, i, 0.06, "arpR")
     for b, s, smp in ((g0, 0, chirp), (g0, 6, chirp), (g0, 10, happy), (g0 + 1, 4, chirp), (g0 + 1, 12, star)):
         put(smp, b, s, 0.5, "pet")
-    qb = g0 + 2                                                 # 10 SOM DE OURO: the quiz clock, then the reveal
+    qb = g0 + 2                                                 # 10 DISCO VOADOR: the quiz clock, then the reveal
     for s in range(16):
         put(click_hi if s % 2 == 0 else click_lo, qb, s, 0.5, "click")
     for s in (0, 3, 8, 11):

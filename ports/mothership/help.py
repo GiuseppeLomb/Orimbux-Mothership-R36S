@@ -105,7 +105,7 @@ HELP = {
                ("START", "segura e Y: gravar a mistura")],
               ["Filtro para baixo abafa o som, para cima tira os graves.",
                "Truque de DJ: tira os graves da música que entra e devolve-os no 1 do compasso."]),
-    "quiz": ("SOM DE OURO", "Concurso de música: sozinho até ao Disco de Diamante, ou em FESTA até 10 jogadores.",
+    "quiz": ("DISCO VOADOR", "Concurso de música: sozinho até ao Disco de Diamante, ou em FESTA até 10 jogadores.",
              ["JOGAR: 15 perguntas, do fácil ao especialista. As 5 e 10 são patamares garantidos.",
               "FESTA: escolhe quantos jogadores (2 a 10) e as rondas. Passem a consola: cada um responde à sua.",
               "Setas escolhem a resposta, A responde. X ouve outra vez o som da pergunta."],

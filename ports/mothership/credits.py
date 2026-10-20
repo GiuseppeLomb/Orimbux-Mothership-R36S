@@ -34,7 +34,7 @@ CRAWL = [
     ("role", "PILOTO DE TESTES"), ("name", "ORIMBUX"),
     ("role", "MÓDULOS DE MÚSICA"), ("name", "PULSAR · BEAT FORGE"), ("name", "ABDUCTOR · LOOP REACTOR"),
     ("name", "XENO SYNTH · VOX NEBULA"), ("name", "TWIN DECKS · WARP FLOOR"),
-    ("role", "MÓDULOS DE JOGO"), ("name", "XENO PET · SOM DE OURO"), ("name", "VOID RUNNER · BEAT DUEL"),
+    ("role", "MÓDULOS DE JOGO"), ("name", "XENO PET · DISCO VOADOR"), ("name", "VOID RUNNER · BEAT DUEL"),
     ("role", "MÚSICA ORIGINAL"), ("name", "NEON DRIFT · PIXEL RUSH"), ("name", "VOID BASS · MOON HOP"),
     ("name", "MOTHERSHIP ANTHEM"), ("name", "Tema do trailer e tema dos créditos"),
     ("role", "SONS"), ("name", "Samples do Sonic Pi (CC0)"), ("name", "com doações de The Black Dog"),

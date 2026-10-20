@@ -1,4 +1,4 @@
-# SOM DE OURO - the question bank. Difficulty: 1 FÁCIL, 2 MÉDIO, 3 DIFÍCIL, 4 ESPECIALISTA.
+# DISCO VOADOR - the question bank. Difficulty: 1 FÁCIL, 2 MÉDIO, 3 DIFÍCIL, 4 ESPECIALISTA.
 # TRIVIA rows: (level, category, question, right answer, wrong, wrong, wrong).
 # THEORY generators build endless music-theory questions that are always correct (computed, not typed).
 import random

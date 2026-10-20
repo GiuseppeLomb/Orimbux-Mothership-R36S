@@ -125,7 +125,7 @@ def phase_make():
     fg.on("press", "right")
     fg.on("press", "a")
     fg.mode = "grid"
-    # Som de Ouro: a game and a party with a name
+    # Disco Voador: a game and a party with a name
     q = a.sections["quiz"]
     q.start_game()
     q.cur = q.q["answer"]
