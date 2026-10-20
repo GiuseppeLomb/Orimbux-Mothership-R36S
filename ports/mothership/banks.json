@@ -40,6 +40,76 @@
       {"label": "TABLA",   "file": "loop_tabla",      "mode": "loop", "beats": 32},
       {"label": "SCRATCH", "file": "vinyl_scratch",   "mode": "shot"},
       {"label": "PING",    "file": "elec_ping",       "mode": "shot"}
+    ]},
+    {"name": "HIP HOP", "color": "orange", "pads": [
+      {"label": "808",     "file": "bd_808",          "mode": "shot"},
+      {"label": "SNAP",    "file": "perc_snap",       "mode": "shot"},
+      {"label": "HAT",     "file": "hat_cab",         "mode": "shot"},
+      {"label": "CLAP",    "file": "vcsl_clap",       "mode": "shot"},
+      {"label": "BEAT",    "file": "loop_mika",       "mode": "loop", "beats": 16},
+      {"label": "BASS",    "file": "bass_hit_c",      "mode": "shot"},
+      {"label": "VOX",     "file": "bass_voxy_hit_c", "mode": "shot"},
+      {"label": "SPIN",    "file": "vinyl_backspin",  "mode": "shot"}
+    ]},
+    {"name": "TECHNO", "color": "cyan", "pads": [
+      {"label": "KICK",    "file": "bd_klub",         "mode": "shot"},
+      {"label": "SNARE",   "file": "elec_snare",      "mode": "shot"},
+      {"label": "HAT",     "file": "hat_noiz",        "mode": "shot"},
+      {"label": "RIDE",    "file": "ride_via",        "mode": "shot"},
+      {"label": "INDUST",  "file": "loop_industrial", "mode": "loop", "beats": 2},
+      {"label": "LOOP",    "file": "loop_compus",     "mode": "loop", "beats": 16},
+      {"label": "GLITCH",  "file": "glitch_perc1",    "mode": "shot"},
+      {"label": "METAL",   "file": "hat_metal",       "mode": "shot"}
+    ]},
+    {"name": "LATINO", "color": "green", "pads": [
+      {"label": "CONGA",   "file": "vcsl_conga",      "mode": "shot"},
+      {"label": "BONGO",   "file": "vcsl_bongo",      "mode": "shot"},
+      {"label": "CAJON",   "file": "vcsl_cajon",      "mode": "shot"},
+      {"label": "SHAKE",   "file": "vcsl_shaker",     "mode": "shot"},
+      {"label": "AGOGO",   "file": "vcsl_agogo",      "mode": "shot"},
+      {"label": "CLAVE",   "file": "vcsl_claves",     "mode": "shot"},
+      {"label": "GUIRO",   "file": "vcsl_guiro",      "mode": "shot"},
+      {"label": "BELL",    "file": "vcsl_cowbell",    "mode": "shot"}
+    ]},
+    {"name": "MUNDO", "color": "violet", "pads": [
+      {"label": "DARBU",   "file": "vcsl_darbuka",    "mode": "shot"},
+      {"label": "FRAME",   "file": "vcsl_frame",      "mode": "shot"},
+      {"label": "WOOD",    "file": "vcsl_logdrum",    "mode": "shot"},
+      {"label": "DIDGE",   "file": "vcsl_didge",      "mode": "shot"},
+      {"label": "SANZA",   "file": "vcsl_kalimba",    "mode": "shot"},
+      {"label": "XILO",    "file": "vcsl_balafon",    "mode": "shot"},
+      {"label": "MBIRA",   "file": "vcsl_mbira",      "mode": "shot"},
+      {"label": "SAFARI",  "file": "loop_safari",     "mode": "loop", "beats": 16}
+    ]},
+    {"name": "ÉPICO", "color": "orange", "pads": [
+      {"label": "TIMP",    "file": "vcsl_timpani",    "mode": "shot"},
+      {"label": "DRUM",    "file": "vcsl_bassdrum",   "mode": "shot"},
+      {"label": "CRASH",   "file": "vcsl_crash",      "mode": "shot"},
+      {"label": "SNARE",   "file": "vcsl_rope_snare", "mode": "shot"},
+      {"label": "GONG",    "file": "vcsl_gong",       "mode": "shot"},
+      {"label": "BELLS",   "file": "vcsl_bells",      "mode": "shot"},
+      {"label": "GLOCK",   "file": "vcsl_glock",      "mode": "shot"},
+      {"label": "ROLL",    "file": "vcsl_roll",       "mode": "shot"}
+    ]},
+    {"name": "LO-FI", "color": "cyan", "pads": [
+      {"label": "PIANO",   "file": "vcsl_fm_piano",   "mode": "shot"},
+      {"label": "VIBES",   "file": "vcsl_vibes",      "mode": "shot"},
+      {"label": "MARIM",   "file": "vcsl_marimba",    "mode": "shot"},
+      {"label": "CLAVI",   "file": "vcsl_clavi",      "mode": "shot"},
+      {"label": "GUITAR",  "file": "guit_em9",        "mode": "shot"},
+      {"label": "HISS",    "file": "vinyl_hiss",      "mode": "loop", "beats": 16},
+      {"label": "BEAT",    "file": "loop_garzul",     "mode": "loop", "beats": 16},
+      {"label": "KEYS",    "file": "tbd_highkey_c4",  "mode": "shot"}
+    ]},
+    {"name": "ROCK", "color": "green", "pads": [
+      {"label": "KICK",    "file": "drum_heavy_kick", "mode": "shot"},
+      {"label": "SNARE",   "file": "vcsl_snare",      "mode": "shot"},
+      {"label": "HAT",     "file": "vcsl_hihat",      "mode": "shot"},
+      {"label": "TOM",     "file": "vcsl_tom",        "mode": "shot"},
+      {"label": "POWER",   "file": "guit_e_fifths",   "mode": "shot"},
+      {"label": "SLIDE",   "file": "guit_e_slide",    "mode": "shot"},
+      {"label": "OPEN",    "file": "vcsl_open_hat",   "mode": "shot"},
+      {"label": "CRASH",   "file": "drum_splash_hard", "mode": "shot"}
     ]}
   ]
 }

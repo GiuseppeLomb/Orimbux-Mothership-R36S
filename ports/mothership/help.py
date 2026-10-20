@@ -20,7 +20,7 @@ HELP = {
     "reactor": ("LOOP REACTOR", "8 pads de loops e sons, sempre no tempo da nave.",
                 ["Cada botão (setas e X/Y/A/B) é um pad: carrega para tocar.",
                  "Os loops entram no início do compasso; carrega outra vez para parar.",
-                 "L1/R1 troca de banco: há 6, incluindo os teus ritmos (FORGE) e fatias (CHOP)."],
+                 "L1/R1 troca de banco: há 13, de HIP HOP a ROCK, mais os teus ritmos (FORGE) e fatias (CHOP)."],
                 [("setas + X/Y/A/B", "8 pads"), ("L1/R1", "banco"), ("L2", "parar tudo"),
                  ("R2", "segura: som abafado"), ("analogico dir.", "volume"),
                  ("SELECT+cima/baixo", "BPM"), ("SELECT+A", "gravar sessão")],
