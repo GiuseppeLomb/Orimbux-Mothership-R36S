@@ -1,4 +1,4 @@
-ORIMBUX MOTHERSHIP v1.10  -  R36S (ArkOS / dArkOS)
+ORIMBUX MOTHERSHIP v1.11  -  R36S (ArkOS / dArkOS)
 =================================================
 
 INSTALAR (no PC)
@@ -17,6 +17,20 @@ ATUALIZAR DE UMA VERSAO ANTERIOR
   mantem os teus: pet.json (Xeno Pet), vr_save.json (Void Runner), bd_save.json (Beat Duel),
   forge.json (ritmos), quiz.json (Disco Voador) e as pastas recordings, music, samples, forge e chop.
   A v1.9 apaga as fontes antigas (agora ha uma so letra) e o video do antigo Ear Lab.
+
+NOVO NA v1.11
+  - MUSICA DO MENU DA CONSOLA: as musicas que o ArkOS toca no menu (pasta bgmusic do cartao) aparecem
+    no WARP FLOOR, TWIN DECKS, ABDUCTOR (Comet Chop), BEAT DUEL e VOID RUNNER. A app so as le: nunca
+    copia nem muda nada nessa pasta.
+  - MUSICA DE JOGOS: .spc (SNES), .nsf/.nsfe (NES), .vgm/.vgz (Master System, Mega Drive...), .gbs
+    (Game Boy), .gym, .hes (PC Engine), .kss (MSX), .ay (ZX Spectrum), .sap (Atari) e musica tracker
+    (.mod .xm .s3m .it), na pasta music ou bgmusic. Cada faixa de um ficheiro e uma musica, com o
+    nome do jogo lido do proprio ficheiro. Usa o ffmpeg do ArkOS (ja vem na consola).
+  - As musicas convertem-se sozinhas quando as escolhes: ja nao e preciso abri-las antes no WARP
+    FLOOR. Ficam em music/.cache, que nunca passa do espaco livre do cartao (guarda sempre 48 MB
+    livres): as usadas ha mais tempo saem primeiro e voltam a converter-se se precisares delas.
+  - BEAT DUEL: uma musica sem pista ganha uma PISTA AUTOMATICA feita das batidas da propria musica
+    (facil, normal e dificil). Y continua a abrir o editor para fazeres a tua.
 
 NOVO NA v1.10
   - VOID RUNNER com visual novo, ao estilo dos RPG da PlayStation 1: pixel 3D visto de cima e
@@ -148,12 +162,14 @@ TWIN DECKS     Dois leitores para misturar a ouvido (sem analise automatica).
                DECK B: R1 play | R2 cue | X/B pitch | Y/A nudge (parado: procurar)
                CUE: a tocar volta ao ponto de cue; parado marca o cue; segurar = ouvir dali.
                Analogico esquerdo = crossfader. Gravar a mistura (ate 20 min): segura START, depois Y.
-               SELECT+L1/R1 carregar musica (pasta music, gravacoes e as 5 do Beat Duel)
+               SELECT+L1/R1 carregar musica (pastas music e bgmusic, musica de jogos, gravacoes e as
+               5 do Beat Duel)
                SELECT+cima / SELECT+X bater o BPM | SELECT+Y SYNC (o deck em espera iguala o outro)
                SELECT+baixo / SELECT+B pitch a zero | SELECT+esq/dir crossfader
                SELECT+A SPLIT CUE: com auscultadores, ouvido esquerdo = cue, direito = mistura
                (SELECT+L2/R2 escolhe o deck no cue). So funciona com auscultadores.
-WARP FLOOR     musica em ports/mothership/music. A play/pausa | esq/dir faixa | X shuffle | B parar
+WARP FLOOR     musicas da pasta ports/mothership/music e do menu da consola (bgmusic), incluindo musica
+               de jogos. A play/pausa | esq/dir faixa | X shuffle | B parar
 CHIP TRACKER   Nao e feito por nos: usa o LittleGPTracker (tracker open-source completo) pelo PortMaster
                da consola, se estiver disponivel para o teu sistema.
 
@@ -188,8 +204,8 @@ DISCO VOADOR   (JOGOS) Concurso de musica. 345 perguntas de cultura (geral, inst
 VOID RUNNER    (JOGOS) A tua musica e o nivel (inspirado no Beat Hazard). No menu: cima/baixo escolhe a
                MUSICA, esq/dir o MUNDO (6, do calmo a Matriarca; ganhar num abre o seguinte).
                Musicas: SEM FIM (ambientes da nave sem parar), MIX DA NAVE (as 5 seguidas, ~6 min), cada
-               musica da nave, as tuas sessoes, gravacoes e as musicas da pasta music (.wav; mp3/ogg
-               depois de abertas 1 vez no WARP FLOOR).
+               musica da nave, as tuas sessoes, gravacoes, as musicas das pastas music e bgmusic e a
+               musica de jogos (as que ainda nao foram convertidas convertem-se ao escolher).
                A nave OUVE a musica primeiro (1-2 s, fica guardado em vr_cache): energia, batidas e drops.
                O nivel dura a musica. Sobrevive ate ao fim e O GRAVE IMPLODE.
                Visto de cima e inclinado, em pixel 3D (como os RPG da PlayStation 1): tudo tem sombra e
@@ -244,9 +260,9 @@ BEAT DUEL      (JOGOS) Jogo de ritmo. As notas descem, carrega quando chegam a l
                L1 = CALIBRAR AUDIO (faz isto 1 vez com o som que usas: carrega A a cada clique).
                MUSICAS: NEON DRIFT (synthwave), PIXEL RUSH (chiptune), VOID BASS (drum & bass),
                MOON HOP (lo-fi hip hop), MOTHERSHIP ANTHEM (house) + SESSOES gravadas (pista automatica)
-               + gravacoes do ABDUCTOR e musicas da pasta music (Y = editor de pista: escolhes o BPM,
-               tocas o ritmo por cima da musica e as notas ficam alinhadas a grelha).
-               Musicas em .mp3/.ogg da pasta music: abre-as 1 vez no WARP FLOOR para converter.
+               + gravacoes do ABDUCTOR, musicas das pastas music e bgmusic e musica de jogos. Sem pista,
+               A faz uma PISTA AUTOMATICA (ouve as batidas da musica). Y = editor de pista: escolhes o
+               BPM, tocas o ritmo por cima da musica e as notas ficam alinhadas a grelha.
                Recordes em ports/mothership/bd_save.json.
 
 INTRO          Ao abrir a nave toca um de 5 ambientes de musica (melancolico, alegre, energetico, triste,
@@ -274,6 +290,7 @@ CREDITOS
   Samples: Sonic Pi sample pack, CC0 (dominio publico) - assets/samples/CREDITS-sonic-pi-samples.md
            VCSL (Versilian Community Sample Library), CC0 - assets/samples/CREDITS-packs.md
   Letra: Tiny5 - SIL Open Font License (assets/fonts)
+  Musica de jogos: descodificada pelo ffmpeg da consola (libgme, libopenmpt); nada disso vem com a app.
   Pixel art (nave, planetas, nebulosa): desenhada em codigo (tools/build_art.py)
   Motor: Python + SDL2 via PySDL2 (dominio publico / zlib)
   Musicas (Beat Duel, trailer, creditos): originais, sintetizadas para a nave.

@@ -35,12 +35,14 @@ Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das ap
 7. **TWIN DECKS**: dois decks com crossfader, como um DJ.
 8. **WARP FLOOR**: leitor de música com visuais.
 
+**As tuas músicas** aparecem no Warp Floor, Twin Decks, Abductor, Void Runner e Beat Duel: as da pasta `music` da app, as do menu da consola (pasta `bgmusic` do ArkOS) e música de jogos (`.spc` `.nsf` `.vgm` `.gbs` `.hes` `.kss` `.ay` `.sap` e módulos `.mod` `.xm` `.s3m` `.it`), com cada faixa de um jogo como uma música. A consola converte-as com o seu próprio ffmpeg quando as escolhes, numa cache que nunca enche o cartão.
+
 **Jogos**
 
 - **XENO PET**: um bicho alien que cresce contigo, em tempo real.
 - **DISCO VOADOR**: quiz de música com 345 perguntas em 4 níveis. Modo FESTA para 2 a 10 jogadores.
 - **VOID RUNNER**: a tua música é o nível (ao estilo do Beat Hazard), em pixel 3D visto de cima, com sombras suaves e a luz do Grave. Os drops trazem hordas e baús, e O GRAVE, um subwoofer gigante, puxa-te com um baixo que chega a quase todo o mapa.
-- **BEAT DUEL**: jogo de ritmo a dois, também frente a frente na mesma consola deitada.
+- **BEAT DUEL**: jogo de ritmo a dois, também frente a frente na mesma consola deitada. Qualquer música tua ganha uma pista automática feita das batidas dela.
 
 Há ainda trailer, créditos, cinco ambientes de música na intro, missões para quem está a começar e uma ajuda em todas as apps (segurar SELECT). O manual completo está em [`LEIA-ME.txt`](LEIA-ME.txt).
 
@@ -76,6 +78,7 @@ ports/
     forge.py, chop.py, decks.py, vox.py, ...   uma app por ficheiro
     voidrunner.py, songscan.py   o jogo e a análise da música (intensidade, batidas, drops)
     quiz.py, quizbank.py  o Disco Voador e o banco de perguntas
+    musiclib.py           as músicas do jogador: pastas music e bgmusic, música de jogos, a cache
     trailer.py, credits.py   o trailer e os créditos (desenhados em tempo real)
     lib/sdl2/             pysdl2, incluído para a consola
     assets/               sons, músicas, pixel art (.frm), fontes
