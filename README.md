@@ -20,6 +20,8 @@ O zip traz a app pronta a usar:
 - **Consola R36S:** a pasta `ports/` tem tudo o que vai para o cartão (ver *Instalar na R36S*).
 - **Windows:** faz duplo clique em `Orimbux Mothership (PC).bat` (ver *Correr no PC*).
 
+**[⬇ Versão PC para Windows (ZIP, 97 MB)](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip)**: um `Orimbux Mothership.exe` que não precisa de Python nem de instalação (também em *Releases*, ver *Correr no PC*).
+
 Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das apps, e [créditos](docs/video/creditos.mp4).
 
 ## As 12 apps
@@ -55,7 +57,8 @@ Há ainda trailer, créditos, cinco ambientes de música na intro, missões para
 
 ## Correr no PC
 
-- **Windows:** descomprime o zip e faz duplo clique em `Orimbux Mothership (PC).bat`. Precisa do Python 3 (python.org); na primeira vez instala o resto sozinho (precisa de internet, ~1 minuto).
+- **Windows, versão PC (sem Python):** descarrega a [versão PC](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip), descomprime-a (botão direito > *Extrair tudo*) e faz duplo clique em `Orimbux Mothership.exe`. Não instala nada nem precisa de internet. Na primeira vez o Windows pode dizer "O Windows protegeu o computador" (a app não tem uma assinatura digital paga): *Mais informações > Executar mesmo assim*. As tuas músicas vão para `mothership\music`; para `.mp3`, `.ogg` e música de jogos põe um `ffmpeg.exe` ao lado do `.exe`.
+- **Windows, a partir deste repositório:** descomprime o zip e faz duplo clique em `Orimbux Mothership (PC).bat`. Precisa do Python 3 (python.org); na primeira vez instala o resto sozinho (precisa de internet, ~1 minuto).
 - **Linux / macOS:** a partir deste repositório:
 
 ```bash
@@ -86,14 +89,17 @@ tools/
   build_*.py              geram os assets: sons, músicas, fontes, arte, trailer, sample packs
   render_trailer.py       grava o trailer/créditos em MP4 (precisa do ffmpeg)
   package.py              faz os zips da release
+  package_pc.py           faz a versão PC: Orimbux Mothership.exe (PyInstaller) + a pasta mothership
   *_test.py               testes headless (SDL_VIDEODRIVER=dummy)
   pc/                     lançador para Windows (versão para o zip da release)
+  pc/exe/                 o lançador do .exe e o LEIA-ME da versão PC
 Orimbux Mothership (PC).bat   abre a app no Windows a partir deste repositório
 ```
 
 - Sem dependências pesadas na consola: só Python 3, SDL2 e `audioop`.
 - Os assets estão no repositório já gerados. As ferramentas em `tools/` usam `numpy` e `Pillow` (`build_packs.py` também `soundfile`).
 - Testes: `python3 tools/v19_test.py /tmp/out`, `python3 tools/vr_test.py /tmp/out 0` (um bot joga o Void Runner), etc.
+- Versão PC: `python tools/package_pc.py v1.11 tools/build` no Windows, com `pip install pyinstaller pysdl2-dll pillow` (e `audioop-lts` em Python >= 3.13). O `.exe` leva o Python e o SDL2 e corre o mesmo código da consola, que fica em `mothership/` ao lado dele.
 
 ## Licença
 
@@ -110,5 +116,5 @@ ORIMBUX MOTHERSHIP is a set of 12 music and game apps for the R36S handheld (Ark
 
 - **Music:** tempo, drum machine, sampler/slicer, loop pads, synth, voice FX, two DJ decks and a player.
 - **Games:** a virtual pet, a music quiz for up to 10 players, a Beat Hazard-like shooter driven by your own song, and a two-player rhythm duel.
-- **Download:** [ZIP of the repository](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip). R36S: copy the contents of `ports/` to the SD card's `ports` folder. Windows: run `Orimbux Mothership (PC).bat`.
+- **Download:** [ZIP of the repository](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip). R36S: copy the contents of `ports/` to the SD card's `ports` folder. Windows: run `Orimbux Mothership (PC).bat`, or get the [Windows build](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip), a portable `Orimbux Mothership.exe` that needs no Python and no installation.
 - **Code:** MIT. Samples are CC0 (Sonic Pi library and VCSL), the font is Tiny5 (OFL).

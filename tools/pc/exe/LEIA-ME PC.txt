@@ -1,0 +1,41 @@
+ORIMBUX MOTHERSHIP NO PC (Windows 10 / 11)
+==========================================
+
+ABRIR
+  1. Descomprime o zip inteiro (botao direito > Extrair tudo) para os Documentos ou o Ambiente de trabalho.
+  2. Abre a pasta "Orimbux Mothership" e faz duplo clique em "Orimbux Mothership.exe".
+  Nao e preciso instalar nada: nem Python, nem outros programas, nem internet. A janela ajusta-se ao
+  ecra; F11 = ecra inteiro.
+  Na primeira vez o Windows pode mostrar "O Windows protegeu o computador" (a app nao tem assinatura
+  digital paga): carrega em "Mais informacoes" > "Executar mesmo assim".
+  Nao separes o .exe das pastas "_internal" e "mothership": a nave precisa das tres juntas.
+
+TECLADO (os botoes da consola)
+  Setas ............ cruz
+  Z = A    X = B    S = X    A = Y
+  Q = L1   W = R1   1 = L2   2 = R2   3 = L3   4 = R3
+  Enter ............ START          (toque: app seguinte | segurar: menu da musica)
+  Backspace ........ SELECT         (toque: ponte | segurar: ajuda)
+  F11 .............. ecra inteiro   Esc ... sair
+
+COMANDO XBOX (ou compativel)
+  As letras sao as do comando (A, B, X, Y), LB/RB = L1/R1, gatilhos = L2/R2,
+  View/Back = SELECT, Menu/Start = START, analogicos e cruz como na consola.
+
+AS TUAS MUSICAS
+  Poe-nas em mothership\music. Os .wav tocam logo.
+  Para .mp3, .ogg, .flac, .m4a e musica de jogos (.spc, .nsf, .vgm, .mod...) a nave usa o ffmpeg:
+  poe o ffmpeg.exe nesta pasta (ao lado do Orimbux Mothership.exe) e ela encontra-o sozinha.
+
+O QUE NAO FUNCIONA NO PC
+  - Micro: GRAVAR do Abductor e o Vox Nebula usam o gravador do Linux da consola.
+    O CORTAR do Abductor funciona (corta qualquer .wav).
+  - Sem comando nao ha analogicos (no Twin Decks o crossfader tambem vai com SELECT + esq/dir).
+
+OS TEUS DADOS
+  O pet, os recordes, os ritmos e as gravacoes ficam na pasta mothership (pet.json, vr_save.json,
+  forge.json, recordings...) e sao separados dos da consola. Para atualizar para uma versao nova,
+  copia esses ficheiros e as pastas music, recordings, samples, forge e chop para a pasta nova.
+  Se a nave fechar com um erro, a descricao fica em mothership\log.txt.
+
+O manual completo de todas as apps esta em mothership\LEIA-ME.txt.
