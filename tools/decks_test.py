@@ -120,7 +120,7 @@ try:
     songs = bdm.find_songs()
     mine = [s for s in songs if s.get("chart_path") == rp + ".json"]
     assert mine and mine[0]["charts"] == {}, mine
-    # ---- a user file that needs conversion (48 kHz mono) through the WARP FLOOR cache
+    # ---- a user file of another format (48 kHz mono): the deck plays it as it is, converting on the fly
     os.makedirs(dm.os.path.join(APPD, "music"), exist_ok=True)
     src = os.path.join(APPD, "music", "teste 48k.wav")
     w = wave.open(src, "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(48000)
@@ -135,8 +135,8 @@ try:
         if dk.a.title == "teste 48k":
             break
         _time.sleep(0.01)
-    print("converted deck A:", dk.a.title, dk.a.rate, dk.a.ch)
-    assert dk.a.title == "teste 48k"
+    print("deck A plays the file itself:", dk.a.title, dk.a.rate, dk.a.ch)
+    assert dk.a.title == "teste 48k" and (dk.a.rate, dk.a.ch) == (48000, 1) and dk.a.path == src
     # ---- leaving for a game stops the decks
     dk.on("press", "l1"); step(5)
     a.go("trailer"); assert not dk.a.playing and not dk.b.playing
@@ -152,6 +152,12 @@ try:
     print("decks ms/frame: %.2f" % ((_time.perf_counter() - t0) / 90 * 1000))
     print("ok")
 finally:
+    try:
+        for d in (dk.a, dk.b):                     # Windows cannot delete a file a deck still has open
+            if d.wf:
+                d.wf.close()
+    except NameError:
+        pass
     for p in made:
         try: os.remove(p)
         except OSError: pass

@@ -8,6 +8,7 @@ import time
 import wave
 
 import engine
+import musiclib
 from engine import C, W, SR, audioop, load_wav
 
 EXPORT_DIR = os.path.join(engine.APP, "chop")
@@ -94,11 +95,11 @@ class Chop(object):
         it = self.lib[self.bsel]
         path = it.get("path")
         if path is None:
-            warp = self.app.sections["warp"]
-            warp.prepare(it["warp"])
-            path = warp.ready.get(it["src"])
+            path = musiclib.prepare(it["src"])
             if path is None:
-                self.say("A converter... escolhe outra vez daqui a pouco.")
+                err = musiclib.errors.get(it["src"])
+                self.say(err[:44] if err and not musiclib.busy(it["src"]) else
+                         "A converter... escolhe outra vez daqui a pouco.")
                 return
         self.browse = False
         self.load_path(path, it["title"])

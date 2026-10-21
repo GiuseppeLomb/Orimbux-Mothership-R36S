@@ -1,15 +1,18 @@
 # BEAT DUEL - rhythm duel for 2 players on one console (d-pad vs face buttons), vs CPU, or practice.
 # Songs: 5 built-in (charts generated from the notes we composed), sessions recorded in Loop Reactor /
-# Xeno Synth (chart = what you played), Abductor recordings and music/*.wav (chart made in the editor).
+# Xeno Synth (chart = what you played), Abductor recordings, the music folder, the console's menu music and game
+# tracks (musiclib). A song without a chart gets one made from its own hits (auto_chart); Y makes one by hand.
 import glob
 import math
 import os
 import random
+import threading
 import time
 
 import sdl2
 
 import engine
+import musiclib
 from engine import C, W, H, SR, BUF, StreamVoice
 
 BD = os.path.join(engine.ASSETS, "bd")
@@ -32,7 +35,10 @@ P1_GLYPH = ["left", "down", "up", "right"]
 P2_GLYPH = ["Y", "B", "X", "A"]
 DIFFS = ["easy", "normal", "hard"]
 DIFF_NAME = {"easy": "FÁCIL", "normal": "NORMAL", "hard": "DIFÍCIL"}
-SRC_NAME = {"INCLUIDA": "DA NAVE", "SESSAO": "A TUA SESSÃO", "ABDUCTOR": "GRAVAÇÃO", "MUSICA": "A TUA MÚSICA"}
+SRC_NAME = {"INCLUIDA": "DA NAVE", "SESSAO": "A TUA SESSÃO", "ABDUCTOR": "GRAVAÇÃO", "MUSICA": "A TUA MÚSICA",
+            "MENU": "MENU DA CONSOLA"}
+SRC_COL = {"INCLUIDA": C["violet"], "SESSAO": (255, 90, 100), "ABDUCTOR": C["cyan"], "MUSICA": C["green"],
+           "MENU": (255, 200, 80)}
 MODES = ["DUELO", FACE, "VS CPU", "TREINO"]
 WIN = {"perfect": 0.05, "great": 0.09, "good": 0.13}
 MISS = 0.16
@@ -87,30 +93,74 @@ def find_songs():
                 out.append(m)
         except Exception:
             pass
-    entries = [(w, "ABDUCTOR", w) for w in sorted(glob.glob(os.path.join(REC_DIR, "rec_*.wav")))]
-    for root, _, files in os.walk(MUSIC_DIR):
-        if ".cache" in root:
-            continue
-        for f in sorted(files):
-            src = os.path.join(root, f)
-            low = f.lower()
-            if low.endswith(".wav"):
-                entries.append((src, "MUSICA", src))
-            elif low.endswith((".mp3", ".ogg", ".flac", ".m4a")):
-                entries.append((src, "MUSICA", os.path.join(MUSIC_DIR, ".cache", f + ".wav")))
-    for src, tag, wav in entries:
-        cp = src + ".chart.json"
-        m = {"id": os.path.basename(src), "title": os.path.splitext(os.path.basename(src))[0][:34].upper(),
-             "artist": "TU" if tag == "ABDUCTOR" else "", "bpm": 120, "wav": wav, "src": tag, "chart_path": cp,
-             "charts": {}, "missing": not os.path.exists(wav)}
+    entries = []
+    for w in sorted(glob.glob(os.path.join(REC_DIR, "rec_*.wav"))):
+        entries.append({"id": os.path.basename(w), "title": os.path.splitext(os.path.basename(w))[0][:34].upper(),
+                        "artist": "TU", "wav": w, "src": "ABDUCTOR", "chart_path": w + ".chart.json"})
+    for t in musiclib.tracks():
+        plain = t["tag"] == "MUSICA" and t["key"] == t["src"]       # the ids (best scores) songs always had
+        entries.append({"id": os.path.basename(t["src"]) if plain else os.path.basename(musiclib.cache_path(t))[:-4],
+                        "title": t["title"][:34].upper(), "artist": "", "wav": musiclib.wav_for(t), "src": t["tag"],
+                        "chart_path": musiclib.chart_path(t), "key": t["key"], "system": t.get("system")})
+    for m in entries:
+        m.update(bpm=120, charts={}, missing=not os.path.exists(m["wav"]))
+        cp = m["chart_path"]
         if os.path.exists(cp):
             try:
                 c = engine.read_json(cp)
                 m["charts"], m["bpm"] = clean_charts(c.get("charts", {})), engine.num(c.get("bpm", 120), 120)
+                m["auto"] = c.get("auto") is True
             except Exception:
                 pass
         out.append(m)
     return out
+
+
+def estimate_bpm(on):
+    """the tempo whose beat grid the hits line up with best (70-180 BPM), weighted by how hard they hit"""
+    best, best_s = 120, -1.0
+    for bpm in range(70, 181):
+        k = 2 * math.pi * bpm / 60.0
+        c = s = 0.0
+        for t, w in on:
+            c += w * math.cos(k * t)
+            s += w * math.sin(k * t)
+        score = c * c + s * s
+        if score > best_s:
+            best, best_s = bpm, score
+    return best
+
+
+def auto_chart(wav):
+    """a chart made from the song itself: its hits (songscan's onsets), fewer and stronger ones on the easier
+    levels; lanes flow from one note to the next, a strong hit with room after it becomes a hold.
+    -> (bpm, {"easy": [...], "normal": [...], "hard": [...]})"""
+    import songscan
+    sc = songscan.scan_file(wav)
+    on = [(o[0], o[1]) for o in sc["on"] if 1.0 <= o[0] <= sc["dur"] - 1.0]
+    if not on:
+        return 120, {}
+    ranked = sorted(w for _, w in on)
+
+    def pct(p):
+        return ranked[min(len(ranked) - 1, int(p * len(ranked)))]
+
+    charts = {}
+    for diff, gap, thr in (("easy", 0.55, pct(0.55)), ("normal", 0.3, pct(0.25)), ("hard", 0.17, 0.0)):
+        kept = []
+        for t, w in on:
+            if w >= thr and (not kept or t - kept[-1][0] >= gap):
+                kept.append((t, w))
+        notes, lane = [], 0
+        for i, (t, w) in enumerate(kept):
+            lane = (lane + 1 + int(w * 997 + t * 13) % 3) % 4
+            room = (kept[i + 1][0] if i + 1 < len(kept) else t + 2.0) - t
+            if diff != "easy" and room >= 1.2 and w >= pct(0.7):
+                notes.append([round(t, 3), lane, round(min(1.0, room * 0.5), 3)])
+            else:
+                notes.append([round(t, 3), lane])
+        charts[diff] = notes
+    return estimate_bpm(on), charts
 
 
 class Clock(object):
@@ -576,6 +626,7 @@ class BeatDuel(object):
         self.save_d = self.load()
         self.calib = None
         self.edit = None
+        self.prep = None            # a song being decoded / listened to before it plays (prepare)
         self.msg = ("", 0.0)
 
     def load(self):
@@ -613,6 +664,7 @@ class BeatDuel(object):
         self.state = "select"
 
     def leave(self):
+        self.prep = None
         self.stop_all()
         self.app.mixer.metro = getattr(self, "metro_was", False)
         self.state = "select"
@@ -646,6 +698,11 @@ class BeatDuel(object):
     def on(self, kind, b):
         st = self.state
         if st == "select":
+            if self.prep:                       # a song is being prepared: B gives up, the rest waits
+                if kind == "press" and b == "b":
+                    self.prep = None
+                    self.say("Cancelado.")
+                return
             if not self.songs:
                 if kind == "press" and b == "b":
                     self.app.go("bridge")
@@ -661,27 +718,20 @@ class BeatDuel(object):
                 self.app.ui_move()
             elif kind == "press" and b == "y":
                 s = self.song()
-                if s.get("missing"):
-                    self.say("Abre-a primeiro no WARP FLOOR (converte o ficheiro).")
-                elif s["src"] == "INCLUIDA":
+                if s["src"] == "INCLUIDA":
                     self.say("As musicas incluidas ja tem pista.")
+                elif s.get("missing"):
+                    self.prepare(s, "edit")
                 else:
                     self.start_editor(s)
             elif kind == "press" and b == "l1":
                 self.start_calib()
             elif kind == "press" and b in ("a", "start"):
                 s = self.song()
-                if s.get("missing"):
-                    self.say("Abre-a primeiro no WARP FLOOR (converte o ficheiro).")
+                if s.get("missing") or not s["charts"]:
+                    self.prepare(s, "play")
                     return
-                if not s["charts"]:
-                    self.say("Sem pista: Y para criar no editor.")
-                    return
-                self.app.ui_ok()
-                if s.get("src") == "SESSAO" and hasattr(self.app, "mission"):
-                    self.app.mission("duel_session")
-                self.match = Match(self, s, DIFFS[self.diff], MODES[self.mode])
-                self.state = "play"
+                self.start_match(s)
             elif kind == "press" and b == "b":
                 self.app.go("bridge")
             return
@@ -823,9 +873,14 @@ class BeatDuel(object):
                 full = engine.read_json(s["chart_path"])
                 full["charts"] = data["charts"]
                 full["bpm"] = e["bpm"]
+                full.pop("auto", None)                # made by hand now
                 engine.write_json(s["chart_path"], full)
             else:
+                d = os.path.dirname(s["chart_path"])
+                if not os.path.isdir(d):              # music/.charts for the menu music and game tracks
+                    os.makedirs(d)
                 engine.write_json(s["chart_path"], data)
+            s.pop("auto", None)
             self.say("Pista guardada: %d notas" % len(notes))
         except Exception as ex:
             self.say("Erro a guardar: %s" % ex)
@@ -833,8 +888,80 @@ class BeatDuel(object):
         self.songs = find_songs()
         self.state = "select"
 
+    def start_match(self, s):
+        self.app.ui_ok()
+        if s.get("src") == "SESSAO" and hasattr(self.app, "mission"):
+            self.app.mission("duel_session")
+        self.match = Match(self, s, DIFFS[self.diff], MODES[self.mode])
+        self.state = "play"
+
+    # ---------------------------------------------------------------- songs that are not ready yet
+    def prepare(self, s, then):
+        """decode the song (musiclib) and, to play one without a chart, listen to it and make a chart from its
+        hits (auto_chart); then go on by itself. `then`: "play" or "edit\""""
+        if s.get("missing") and s.get("key"):
+            musiclib.prepare(s["key"])
+        self.prep = {"song": s, "then": then, "job": None, "result": None}
+        self.say("A preparar a música...")
+
+    def update_prep(self):
+        p = self.prep
+        s = p["song"]
+        if s.get("missing"):
+            if musiclib.busy(s.get("key")):
+                return
+            path = musiclib.ready_path(s.get("key"))
+            if not path:
+                self.say(musiclib.errors.get(s.get("key")) or "Nao consegui preparar esta musica.")
+                self.prep = None
+                return
+            s["wav"], s["missing"] = path, False
+        if p["then"] == "edit":
+            self.prep = None
+            self.start_editor(s)
+            return
+        if not s["charts"]:
+            if p["job"] is None:
+                self.say("A ouvir a música para fazer a pista...")
+                p["job"] = threading.Thread(target=self._chart_job, args=(p,), daemon=True)
+                p["job"].start()
+                return
+            if p["job"].is_alive():
+                return
+            bpm, charts = p["result"] or (120, {})
+            if not any(charts.values()):
+                self.say("Nao encontrei batidas nesta musica.")
+                self.prep = None
+                return
+            s.update(charts=charts, bpm=bpm, auto=True)
+            try:
+                full = {}
+                if os.path.exists(s["chart_path"]):
+                    full = engine.read_json(s["chart_path"])         # a session keeps everything else it had
+                if not isinstance(full, dict):
+                    full = {}
+                full.setdefault("title", s["title"])
+                full.update(bpm=bpm, charts=charts, auto=True)
+                d = os.path.dirname(s["chart_path"])
+                if not os.path.isdir(d):
+                    os.makedirs(d)
+                engine.write_json(s["chart_path"], full)
+            except Exception:
+                pass
+        self.prep = None
+        self.start_match(s)
+
+    @staticmethod
+    def _chart_job(p):
+        try:
+            p["result"] = auto_chart(p["song"]["wav"])
+        except Exception:
+            p["result"] = None
+
     # ---------------------------------------------------------------- update / results
     def update(self, dt):
+        if self.state == "select" and self.prep:
+            self.update_prep()
         if self.state == "play" and self.match:
             self.match.update()
             if self.match.done:
@@ -898,15 +1025,22 @@ class BeatDuel(object):
             s = self.songs[i]
             y = 60 + row * 40
             sel = i == self.sel
-            col = {"INCLUIDA": C["violet"], "SESSAO": (255, 90, 100), "ABDUCTOR": C["cyan"],
-                   "MUSICA": C["green"]}[s["src"]]
+            col = SRC_COL.get(s["src"], C["soft"])
             if sel:
                 g.glow(16, y, 400, 34, col, 0.4 + 0.3 * math.sin(t * 5))
             g.rect(16, y, 400, 34, C["hull"] if sel else (16, 12, 34))
             g.frame(16, y, 400, 34, col if sel else (40, 30, 70), 2)
-            g.text("p8", s["title"][:34], 28, y + 7, C["text"] if s["charts"] else C["dim"])
-            tag = "  -  ABRE NO WARP FLOOR" if s.get("missing") else ("" if s["charts"] else "  -  SEM PISTA (Y)")
-            g.text("v20", SRC_NAME.get(s["src"], s["src"]) + tag, 28, y + 15, col)
+            g.text("p8", s["title"][:34], 28, y + 7, C["text"])
+            if self.prep and self.prep["song"] is s:
+                tag = "  -  A PREPARAR..."
+            elif not s["charts"] or s.get("auto"):
+                tag = "  -  PISTA AUTOMÁTICA"
+            else:
+                tag = ""
+            src = SRC_NAME.get(s["src"], s["src"]) + (" · " + s["system"] if s.get("system") else "")
+            while g.tw("v20", src + tag) > 372 and len(src) > 8:
+                src = src[:-2] + "…"
+            g.text("v20", src + tag, 28, y + 15, col)
             best = self.save_d.get("%s|%s" % (s["id"], DIFFS[self.diff]))
             if best:
                 g.text("v20", "%d" % best, 406, y + 8, (255, 236, 140), 255, "right")

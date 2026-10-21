@@ -207,7 +207,8 @@ bd.enter()
 mi = [i for i, s in enumerate(bd.songs) if s["src"] == "MUSICA"][0]
 bd.sel = mi
 assert not bd.songs[mi]["charts"]
-bd.on("press", "a"); assert bd.state == "select"     # no chart -> message
+bd.on("press", "a"); assert bd.state == "select" and bd.prep   # no chart -> one is made from the song...
+bd.on("press", "b"); assert bd.prep is None                     # ...unless B gives up
 bd.on("press", "y"); assert bd.state == "editor"
 e = bd.edit
 for _ in range(20):

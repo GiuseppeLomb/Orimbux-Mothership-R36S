@@ -27,8 +27,9 @@ import help as helpmod
 import ui
 import musicmenu
 import missions
+import musiclib
 import recmgr
-from engine import C, W, H, SR, audioop, draw_ship, load_wav, to_std, fit, same_len, Voice, SynthVoice, StreamVoice
+from engine import C, W, H, SR, audioop, draw_ship, load_wav, fit, same_len, Voice, SynthVoice, StreamVoice
 
 APP = engine.APP
 CFG_PATH = os.path.join(APP, "config.json")
@@ -1465,16 +1466,14 @@ class Warp(Section):
 
     def __init__(self, app):
         Section.__init__(self, app)
-        self.tracks = []
+        self.tracks = []             # musiclib keys: the music folder, the console's menu music, game tracks
+        self.info = {}
         self.idx = -1
         self.cur = None
         self.shuffle = False
         self.paused = False
-        self.converting = set()
-        self.ready = {}
+        self.want = None             # (index, crossfade) to start as soon as that track is decoded
         self.msg = ""
-        self.conv = shutil.which("ffmpeg") or shutil.which("mpg123")
-        self.lock = threading.Lock()
 
     def scan(self):
         if not os.path.isdir(MUSIC_DIR):
@@ -1482,15 +1481,9 @@ class Warp(Section):
                 os.makedirs(MUSIC_DIR)
             except Exception:
                 pass
-        exts = (".wav", ".mp3", ".ogg", ".flac", ".m4a")
-        out = []
-        for root, _, files in os.walk(MUSIC_DIR):
-            if ".cache" in root:
-                continue
-            for f in sorted(files):
-                if f.lower().endswith(exts):
-                    out.append(os.path.join(root, f))
-        self.tracks = out
+        lib = musiclib.tracks()
+        self.tracks = [t["key"] for t in lib]
+        self.info = dict((t["key"], t) for t in lib)
 
     def enter(self):
         self.scan()
@@ -1499,69 +1492,14 @@ class Warp(Section):
         if self.cur is None and self.tracks:
             self.prepare(0)
 
-    def cache_path(self, src):
-        d = os.path.join(MUSIC_DIR, ".cache")
-        if not os.path.isdir(d):
-            os.makedirs(d)
-        return os.path.join(d, os.path.basename(src) + ".wav")
+    def title(self, key):
+        t = self.info.get(key)
+        return t["title"] if t else os.path.splitext(os.path.basename(key))[0]
 
     def prepare(self, i):
-        """make sure track i exists as 44.1k stereo s16 wav (converts in background)"""
-        if not self.tracks:
-            return
-        src = self.tracks[i % len(self.tracks)]
-        if src in self.ready or src in self.converting:
-            return
-        if src.lower().endswith(".wav"):
-            try:
-                wf = wave.open(src, "rb")
-                okfmt = (wf.getnchannels(), wf.getsampwidth(), wf.getframerate()) == (2, 2, SR)
-                wf.close()
-            except Exception:
-                okfmt = False
-            if okfmt:
-                self.ready[src] = src
-                return
-        dst = self.cache_path(src)
-        if os.path.exists(dst):
-            self.ready[src] = dst
-            return
-        self.converting.add(src)
-        threading.Thread(target=self._convert, args=(src, dst), daemon=True).start()
-
-    def _convert(self, src, dst):
-        ok = False
-        try:
-            tool = self.conv
-            if src.lower().endswith(".wav") and not tool:
-                wf = wave.open(src, "rb")
-                try:
-                    data = to_std(wf.readframes(wf.getnframes()), wf.getnchannels(), wf.getsampwidth(),
-                                  wf.getframerate())
-                finally:
-                    wf.close()
-                out = wave.open(dst + ".part", "wb")
-                out.setnchannels(2)
-                out.setsampwidth(2)
-                out.setframerate(SR)
-                out.writeframes(data)
-                out.close()
-                ok = True
-            elif tool and os.path.basename(tool) == "ffmpeg":
-                ok = subprocess.call([tool, "-v", "error", "-y", "-i", src, "-ar", str(SR), "-ac", "2", "-f", "wav",
-                                      dst + ".part"]) == 0
-            elif tool and src.lower().endswith(".mp3"):
-                ok = subprocess.call([tool, "-q", "-r", str(SR), "--stereo", "-w", dst + ".part", src]) == 0
-            if ok:
-                os.replace(dst + ".part", dst)
-        except Exception as e:
-            log("convert %s %r" % (src, e))
-        with self.lock:
-            self.converting.discard(src)
-            if ok:
-                self.ready[src] = dst
-            else:
-                self.msg = "nao consegui ler %s" % os.path.basename(src)[:30]
+        """make sure track i can be played: decoded to a 44.1k stereo wav in the background when needed"""
+        if self.tracks:
+            musiclib.prepare(self.info.get(self.tracks[i % len(self.tracks)]))
 
     def next_index(self):
         if not self.tracks:
@@ -1574,12 +1512,19 @@ class Warp(Section):
         return (self.idx + 1) % len(self.tracks)
 
     def start(self, i, xfade):
-        src = self.tracks[i % len(self.tracks)]
-        path = self.ready.get(src)
+        key = self.tracks[i % len(self.tracks)]
+        path = musiclib.ready_path(key)
         if not path:
             self.prepare(i)
-            self.msg = "a preparar faixa..."
+            err = musiclib.errors.get(key)
+            if err and not musiclib.busy(key):
+                self.msg = "%s: %s" % (self.title(key)[:24], err)
+                self.want = None
+            else:
+                self.msg = "a preparar faixa..."
+                self.want = (i % len(self.tracks), xfade)
             return False
+        self.want = None
         try:
             v = StreamVoice(path)
         except Exception as e:
@@ -1638,14 +1583,17 @@ class Warp(Section):
 
     def now_title(self):
         try:
-            return os.path.splitext(os.path.basename(self.tracks[self.idx]))[0]
+            return self.title(self.tracks[self.idx])
         except Exception:
             return "a tocar"
 
     def update(self, dt):
+        if self.want and self.tracks and not musiclib.busy(self.tracks[self.want[0] % len(self.tracks)]):
+            if self.start(*self.want):           # the track asked for is decoded now: play it
+                self.msg = ""
         if self.cur is not None and not self.paused and not self.cur.done and self.tracks:
             left = (self.cur.frames - self.cur.pos) / float(SR)
-            if left <= self.XFADE and self.cur.g_to > 0:
+            if left <= self.XFADE and self.cur.g_to > 0 and not self.want:
                 self.start(self.next_index(), self.XFADE)
 
     def draw(self, g, t, dt):
@@ -1675,8 +1623,11 @@ class Warp(Section):
         g.rect(16, 302, W - 32, 3, C["hullhi"])
         y = 318
         if self.tracks and self.idx >= 0:
-            name = os.path.splitext(os.path.basename(self.tracks[self.idx]))[0]
-            g.text(ui.SMALL, "A TOCAR" if not self.paused else "EM PAUSA", 24, y - 4, C["muted"])
+            key = self.tracks[self.idx]
+            name = self.title(key)
+            src = musiclib.label(self.info[key]) if key in self.info else ""
+            g.text(ui.SMALL, ("A TOCAR" if not self.paused else "EM PAUSA") + ("  ·  " + src if src else ""), 24,
+                   y - 4, C["muted"])
             g.text(ui.HEAD, ui.fit(g, ui.HEAD, name, W - 220), 24, y + 14, C["text"])
             if self.cur is not None:
                 pr = self.cur.pos / float(max(1, self.cur.frames))
@@ -1685,13 +1636,13 @@ class Warp(Section):
                 el, tot = self.cur.pos // SR, self.cur.frames // SR
                 g.text("v20", "%d:%02d / %d:%02d" % (el // 60, el % 60, tot // 60, tot % 60), W - 24, y + 54,
                        C["muted"], 255, "right")
-            nxt = os.path.splitext(os.path.basename(self.tracks[self.next_index()]))[0] if not self.shuffle else "?"
+            nxt = self.title(self.tracks[self.next_index()]) if not self.shuffle else "?"
             g.text(ui.SMALL, "a seguir: " + ui.fit(g, ui.SMALL, nxt, 300), 24, y + 54, C["dim"])
         else:
             g.text(ui.HEAD, "AINDA NÃO HÁ MÚSICA A BORDO", W // 2, y, C["text"], 255, "center")
-            ui.para(g, ui.SMALL, "No PC, copia músicas (.mp3 .wav .ogg .flac) para a pasta ports/mothership/music "
-                    "do cartão. As tuas gravações e sessões também aparecem no TWIN DECKS.", 40, y + 34, W - 80,
-                    C["muted"], 18, "left")
+            ui.para(g, ui.SMALL, "No PC, copia músicas (.mp3 .ogg .wav .flac) ou música de jogos (.spc .nsf .vgm "
+                    ".gbs...) para a pasta ports/mothership/music do cartão. A música do menu da consola (pasta "
+                    "bgmusic) também aparece aqui.", 40, y + 34, W - 80, C["muted"], 18, "left")
         status = "EM PAUSA" if self.paused else ("ALEATÓRIO" if self.shuffle else "PASSAGEM AUTOMÁTICA")
         if self.tracks:
             g.text(ui.SMALL, status, W - 24, y - 4, C["green"], 255, "right")

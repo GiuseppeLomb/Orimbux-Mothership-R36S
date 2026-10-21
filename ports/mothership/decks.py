@@ -8,6 +8,7 @@ import time
 import wave
 
 import engine
+import musiclib
 from engine import C, W, SR, audioop
 
 BD = os.path.join(engine.ASSETS, "bd")
@@ -239,14 +240,14 @@ class DeckMixer(object):
 
 
 def library(app):
-    """(title, path or None, src_key, bpm) - music folder (converted by WARP FLOOR when needed),
-    recordings, and the 5 Beat Duel songs so the decks work out of the box"""
+    """(title, path or None, src_key, bpm) - the music folder, the console's menu music and game tracks
+    (decoded by musiclib when needed), recordings, and the 5 Beat Duel songs so the decks work out of the box"""
     out = []
     warp = app.sections["warp"]
     warp.scan()
-    for i, src in enumerate(warp.tracks):
-        out.append({"title": os.path.splitext(os.path.basename(src))[0], "src": src, "warp": i, "bpm": None,
-                    "tag": "MUSICA"})
+    for i, key in enumerate(warp.tracks):
+        t = warp.info[key]
+        out.append({"title": t["title"], "src": key, "warp": i, "bpm": None, "tag": musiclib.short(t)})
     for p in sorted(glob.glob(os.path.join(REC_DIR, "*.wav")), reverse=True):
         bpm = None
         meta = p[:-4] + ".json"
@@ -319,12 +320,15 @@ class TwinDecks(object):
     def load_item(self, deck, it):
         path = it.get("path")
         if path is None:
-            warp = self.app.sections["warp"]
-            warp.prepare(it["warp"])
-            path = warp.ready.get(it["src"])
+            path = musiclib.prepare(it["src"])
             if path is None:
-                self.pending = (deck, it)
-                self.say("A converter %s..." % it["title"][:24])
+                err = musiclib.errors.get(it["src"])
+                if err and not musiclib.busy(it["src"]):
+                    self.pending = None
+                    self.say(err[:40])
+                else:
+                    self.pending = (deck, it)
+                    self.say("A converter %s..." % it["title"][:24])
                 return
         m = self.app.mixer
         try:
@@ -468,7 +472,7 @@ class TwinDecks(object):
                 f.pos = max(-6.0, min(6.0, f.pos - v * 6.0 * dt))
         if self.pending:
             deck, it = self.pending
-            if self.app.sections["warp"].ready.get(it["src"]):
+            if not musiclib.busy(it["src"]):
                 self.pending = None
                 self.load_item(deck, it)
 

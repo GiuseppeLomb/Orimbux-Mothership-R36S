@@ -14,6 +14,7 @@ import time
 import sdl2
 
 import engine
+import musiclib
 import songscan
 import vr_art as ART
 from engine import C, W, H, SR, load_wav, Voice, SequenceVoice
@@ -2035,6 +2036,7 @@ class VoidRunner(object):
         self.psel = 0
         self.songs = []
         self.durs = {}
+        self.prep = None             # a song being decoded (musiclib) before its level starts
         self.scanner = None
         self.pending = None
         self.msg = ("", 0.0)
@@ -2099,11 +2101,11 @@ class VoidRunner(object):
         if builtin:
             out.append({"id": "MIX_DA_NAVE", "title": "MIX DA NAVE", "tag": "AS %d MÚSICAS DA NAVE SEGUIDAS" % len(builtin),
                         "paths": [x["wav"] for x in builtin], "col": (255, 220, 90)})
-        cols = {"INCLUIDA": C["violet"], "SESSAO": (255, 90, 100), "ABDUCTOR": C["cyan"], "MUSICA": C["green"]}
         for x in found:
-            out.append({"id": x.get("id") or os.path.basename(x["wav"]), "title": x["title"],
-                        "tag": beatduel.SRC_NAME.get(x["src"], x["src"]), "paths": [x["wav"]],
-                        "missing": x.get("missing", False), "col": cols.get(x["src"], C["soft"])})
+            tag = beatduel.SRC_NAME.get(x["src"], x["src"]) + (" · " + x["system"] if x.get("system") else "")
+            out.append({"id": x.get("id") or os.path.basename(x["wav"]), "title": x["title"], "tag": tag,
+                        "paths": [x["wav"]], "key": x.get("key"), "missing": x.get("missing", False),
+                        "col": beatduel.SRC_COL.get(x["src"], C["soft"])})
         return out
 
     def dur(self, song):
@@ -2112,7 +2114,9 @@ class VoidRunner(object):
         tot = 0.0
         for p in song["paths"]:
             if p not in self.durs:
-                self.durs[p] = songscan.duration(p) if os.path.exists(p) else 0.0
+                if not os.path.exists(p):          # not decoded yet: no length to show (and none to remember)
+                    continue
+                self.durs[p] = songscan.duration(p)
             tot += self.durs[p]
         return tot
 
@@ -2181,6 +2185,7 @@ class VoidRunner(object):
             self.run.free()
             self.run = None
         self.drop_scan()
+        self.prep = None
         self.state = "menu"
 
     def start(self, level, song):
@@ -2233,15 +2238,20 @@ class VoidRunner(object):
                 if 0 <= w < 6:
                     self.world = w
                     self.app.ui_move()
-            elif kind == "press" and b in ("a", "start") and n:
+            elif kind == "press" and b in ("a", "start") and n and not self.prep:
                 song = self.songs[self.sel]
-                if song.get("missing"):
-                    return
                 if self.world < self.save_d.get("unlocked", 1):
                     self.app.ui_ok()
-                    self.start(self.world, song)
+                    if song.get("missing") and song.get("key"):
+                        musiclib.prepare(song["key"])     # decoded first; the level starts by itself after
+                        self.prep = (self.world, song)
+                    else:
+                        self.start(self.world, song)
             elif kind == "press" and b == "b":
-                self.app.go("bridge")
+                if self.prep:
+                    self.prep = None
+                else:
+                    self.app.go("bridge")
             return
         if st == "scan":
             if kind == "press" and b == "b":
@@ -2290,6 +2300,15 @@ class VoidRunner(object):
         r.on(kind, b)
 
     def update(self, dt):
+        if self.prep and self.state == "menu" and not musiclib.busy(self.prep[1]["key"]):
+            level, song = self.prep
+            self.prep = None
+            path = musiclib.ready_path(song["key"])
+            if path:
+                song.update(paths=[path], missing=False)
+                self.start(level, song)
+            else:
+                self.msg = (musiclib.errors.get(song["key"]) or "Não consegui ler esta música.", time.time())
         if self.state == "scan" and self.scanner and self.scanner.done:
             sc, (level, song) = self.scanner, self.pending
             self.scanner = None
@@ -2405,11 +2424,10 @@ class VoidRunner(object):
                 ui.outline(g, x0, y, w0, rh - 4, col, 2)
             g.rect(x0 + 8, y + 9, 6, rh - 22, col)
             d = self.dur(sg)
-            dtxt = "sem fim" if sg.get("endless") else "%d:%02d" % (d // 60, d % 60)
+            dtxt = "sem fim" if sg.get("endless") else ("%d:%02d" % (d // 60, d % 60) if d else "")
             g.text("k16", dtxt, x0 + w0 - 10, y + 1, C["muted"], 255, "right")
             room = w0 - 22 - 10 - 12                    # each line gets what its right-hand text leaves free
-            g.text("kb16", ui.fit(g, "kb16", sg["title"], room - g.tw("k16", dtxt)), x0 + 22, y + 1,
-                   C["text"] if not sg.get("missing") else C["dim"])
+            g.text("kb16", ui.fit(g, "kb16", sg["title"], room - g.tw("k16", dtxt)), x0 + 22, y + 1, C["text"])
             right, rcol = "", C["muted"]
             if sg.get("endless"):
                 e = self.save_d.get("endless", 0)
@@ -2423,9 +2441,8 @@ class VoidRunner(object):
                     right = "%d abatidos" % best["kills"]
             if right:
                 g.text("k16", right, x0 + w0 - 10, y + 17, rcol, 255, "right")
-            tag = "ABRE NO WARP FLOOR" if sg.get("missing") else sg["tag"]
-            g.text("k16", ui.fit(g, "k16", tag, room - (g.tw("k16", right) if right else 0)), x0 + 22, y + 17,
-                   col if not sg.get("missing") else C["dim"])
+            tag = "A PREPARAR A MÚSICA..." if self.prep and self.prep[1] is sg else sg["tag"]
+            g.text("k16", ui.fit(g, "k16", tag, room - (g.tw("k16", right) if right else 0)), x0 + 22, y + 17, col)
         if n > vis:
             g.text("k16", "▲▼ %d/%d" % (self.sel + 1, n), x0 + w0 // 2, y0 + vis * rh - 2, C["muted"], 255, "center")
         # the world
