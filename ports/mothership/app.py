@@ -2018,6 +2018,11 @@ class App(object):
                 if kind == "press":
                     self.help.dismiss()
                 continue
+            if self.cur_name == "bridge" and self.cur.welcome():  # the welcome card too, START and SELECT
+                if kind == "press":                  # included (START used to open an app behind it, so the
+                    self.sel_t0 = time.time()        # card came back every time and hid the menu)
+                    self.cur.on(kind, b)
+                continue
             if self.music_menu.active:
                 self.music_menu.on(kind, b)
                 continue
