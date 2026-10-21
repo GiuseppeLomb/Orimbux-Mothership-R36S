@@ -194,20 +194,20 @@ try:
     # ---- the cache keeps the card's space: oldest first, never what was used in the last minute
     os.makedirs(M.CACHE, exist_ok=True)
     now = time.time()
-    for i, age in enumerate((3600, 1800, 30)):
+    for i, age in enumerate((3600, 1800, 5)):
         p = os.path.join(M.CACHE, "c%d.wav" % i)
         open(p, "wb").write(b"\0" * 1000)
         os.utime(p, (now - age, now - age))
     keep_max, keep_res = M.MAX_CACHE, M.RESERVE
     M.MAX_CACHE, M.RESERVE = 3200, 0
-    assert M.make_room(1000, now)                                       # 3084 + 1000 > 3200: only c0 goes
+    assert M.make_room(1000, now) == 0                                  # 3084 + 1000 > 3200: only c0 goes
     assert not os.path.exists(os.path.join(M.CACHE, "c0.wav")) and os.path.exists(os.path.join(M.CACHE, "c1.wav"))
-    assert not M.make_room(5000, now)                                   # c2 is fresh: it stays, it cannot fit
+    assert M.make_room(5000, now) > 0                                   # c2 was just decoded: it stays, no fit
     assert os.path.exists(os.path.join(M.CACHE, "c2.wav"))
     M.MAX_CACHE, M.RESERVE = keep_max, keep_res
     for f in os.listdir(M.CACHE):
         os.remove(os.path.join(M.CACHE, f))
-    print("cache: drops the oldest, keeps what was just used")
+    print("cache: drops the oldest, keeps only what was just decoded")
 
     def wait(keys, secs=120):
         t0 = time.time()
@@ -226,11 +226,13 @@ try:
         f3 = tone_freq(M.ready_path(n3["key"]))
         assert abs(f3 - 659.25) < 15, f3                                 # track 3 of the NSF, not track 1
         w = wave.open(M.ready_path(v["key"]), "rb")
-        secs = w.getnframes() / 44100.0
-        w.setpos(int((secs - 0.4) * 44100))
-        tail = w.readframes(int(0.3 * 44100))
-        w.setpos(int(1.0 * 44100))
-        head = w.readframes(int(0.3 * 44100))
+        rate = w.getframerate()
+        assert rate == M.CACHE_SR and w.getnchannels() == 2                # the smaller 32 kHz copy
+        secs = w.getnframes() / float(rate)
+        w.setpos(int((secs - 0.4) * rate))
+        tail = w.readframes(int(0.3 * rate))
+        w.setpos(int(1.0 * rate))
+        head = w.readframes(int(0.3 * rate))
         w.close()
         assert abs(secs - v["dur"]) < 0.1, (secs, v["dur"])               # cut, never looped forever
         assert M.engine.audioop.rms(tail, 2) < 0.2 * M.engine.audioop.rms(head, 2)   # faded out

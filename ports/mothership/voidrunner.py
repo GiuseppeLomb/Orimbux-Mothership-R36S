@@ -290,6 +290,7 @@ class Run(object):
         self.song, self.tl = song, timeline
         self.dur = max(20.0, timeline.dur) if not endless else 0.0
         self.mt = 0.0                      # time inside the song (the music clock)
+        self.held = False                  # a level-up or chest screen is open: the music goes on under it
         self.I = 0.4                       # music intensity 0..1 (smoothed)
         self.pulse = 0.0                   # beat pulse 0..1 (O GRAVE breathes and pulls harder)
         self.waves = []                    # sound rings leaving O GRAVE [t0, strength]
@@ -910,7 +911,11 @@ class Run(object):
     def update(self, dt):
         if self.state != "play" and self.rumble:
             self.rumble.gain = 0.0
-        if self.state in ("levelup", "chest", "dead", "won"):
+        if self.state in ("levelup", "chest"):
+            self.held = True               # the music never stops for these screens (and SEM FIM keeps adding)
+            self.extend_endless()
+            return
+        if self.state in ("dead", "won"):
             return
         if self.state == "collapse":
             el = time.time() - self.end_t
@@ -930,7 +935,12 @@ class Run(object):
             self.mt += dt
         self.extend_endless()
         self.I += (self.tl.I(self.mt) - self.I) * min(1.0, dt * 4.0)
-        for o in self.tl.onsets(prev, self.mt):
+        if self.held:                      # back from a menu: the beats it covered are gone (no burst of
+            self.held = False              # mites all at once); a drop it covered still comes, just below
+            beats_from = self.mt
+        else:
+            beats_from = prev
+        for o in self.tl.onsets(beats_from, self.mt):
             self.on_beat(o[1])
         nd = self.tl.next_drop(prev)
         if nd is not None and nd <= self.mt:
@@ -2178,6 +2188,7 @@ class VoidRunner(object):
             for st in m.streams:
                 if getattr(st, "group", "") != "vr":
                     st.fade(0.0, 0.5)
+        self.app.sections["warp"].cur = None   # its song fades out: let go of it (the file closes, the cache can drop it)
         self.state = "menu" if self.run is None else self.state
 
     def leave(self):
@@ -2320,7 +2331,7 @@ class VoidRunner(object):
                 self.state = "run"
         if self.run:
             r = self.run
-            r.music_pause(self.state == "pause" or r.state in ("levelup", "chest"))
+            r.music_pause(self.state == "pause")        # only a real pause stops the song
             if self.state == "run":
                 r.update(min(dt, 1 / 20.0))
         for p in self.parts:

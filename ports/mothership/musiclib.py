@@ -15,7 +15,6 @@ import time
 import wave
 
 import engine
-from engine import SR
 
 MUSIC_DIR = os.path.join(engine.APP, "music")
 CACHE = os.path.join(MUSIC_DIR, ".cache")
@@ -30,8 +29,10 @@ DEFAULT_LEN = 150.0           # a game track that loops forever: 2 min 30 s, lik
 FADE = 5.0                    # ... and then it fades out
 MAX_LEN = 600.0               # nothing longer than 10 minutes is decoded
 MAX_TRACKS = 64               # tracks listed per game-music file
-RESERVE = 48 << 20            # the cache never leaves the card with less free space than this
+RESERVE = 32 << 20            # the cache never leaves the card with less free space than this
 MAX_CACHE = 512 << 20
+CACHE_SR = 32000              # decoded copies at 32 kHz (the SNES's own rate): a quarter smaller than 44.1 kHz,
+                              # and the players resample on the fly
 
 _lock = threading.Lock()
 _meta = {}                    # (path, size, mtime) -> header info, so a scan of the folders stays instant
@@ -263,13 +264,11 @@ def chart_path(t):
     return os.path.join(CHARTS, os.path.basename(cache_path(t))[:-4] + ".chart.json")
 
 
-def _pcm_wav(path, std=False):
-    """a wav the players read as it is (any PCM: mono/stereo, 8-32 bit, any rate); std: 44.1k stereo 16-bit"""
+def _pcm_wav(path):
+    """a wav the players read as it is (any PCM: mono/stereo, 8-32 bit, any rate: they convert on the fly)"""
     try:
         w = wave.open(path, "rb")
         try:
-            if std:
-                return (w.getnchannels(), w.getsampwidth(), w.getframerate()) == (2, 2, SR) and w.getnframes() > 0
             return w.getnchannels() in (1, 2) and w.getsampwidth() in (1, 2, 3, 4) and w.getnframes() > 0
         finally:
             w.close()
@@ -365,9 +364,24 @@ def cache_files():
     return sorted(out)
 
 
+def _open_files():
+    """the files this app has open (Linux: /proc). Deleting one would not free its space until it is closed"""
+    out = set()
+    try:
+        for fd in os.listdir("/proc/self/fd"):
+            try:
+                out.add(os.path.realpath(os.readlink("/proc/self/fd/" + fd)))
+            except OSError:
+                pass
+    except OSError:
+        pass
+    return out
+
+
 def make_room(need, now=None):
-    """drop the cached songs used longest ago until `need` more bytes fit: the cache stays under MAX_CACHE and
-    the card keeps RESERVE bytes free. Songs decoded or used in the last minute stay. True when it fits."""
+    """drop cached songs, used longest ago first, until `need` more bytes fit: the cache stays under MAX_CACHE
+    and the card keeps RESERVE bytes free. Only a song being played (an open file) or one decoded in the last
+    15 seconds stays. Returns how many bytes are still missing (0: it fits)."""
     now = time.time() if now is None else now
     try:
         for f in os.listdir(CACHE):                  # a decode cut short (the console switched off) left this
@@ -382,46 +396,49 @@ def make_room(need, now=None):
         free = shutil.disk_usage(MUSIC_DIR).free
     except OSError:
         free = 1 << 40
-    budget = min(MAX_CACHE, used + free - RESERVE)
+    room = free - RESERVE                            # what can be written now
+    opened = _open_files()
     for mt, size, p in files:
-        if used + need <= budget:
+        if need <= room and used + need <= MAX_CACHE:
             break
-        if now - mt < 60:
+        if now - mt < 15 or os.path.realpath(p) in opened:
             continue
         try:
-            os.remove(p)
+            os.remove(p)                             # (Windows refuses an open file: it simply stays)
             used -= size
+            room += size
         except OSError:
             pass
-    return used + need <= budget
+    return max(0, need - room, used + need - MAX_CACHE)
 
 
 def _need(t):
     if t["dur"]:
-        return int(t["dur"] * SR * 4) + 4096
+        return int(t["dur"] * CACHE_SR * 4) + 4096
     tool = shutil.which("ffprobe")
     if tool:
         try:
             out = subprocess.check_output([tool, "-v", "error", "-show_entries", "format=duration", "-of",
                                            "default=nw=1:nk=1", t["src"]], timeout=10)
-            return int(min(MAX_LEN, float(out.strip())) * SR * 4) + 4096
+            return int(min(MAX_LEN, float(out.strip())) * CACHE_SR * 4) + 4096
         except Exception:
             pass
-    return min(int(MAX_LEN * SR * 4), os.path.getsize(t["src"]) * 12)
+    return min(int(MAX_LEN * CACHE_SR * 4), os.path.getsize(t["src"]) * 9)
 
 
 def _convert(t):
     dst = cache_path(t)
     if not os.path.isdir(CACHE):
         os.makedirs(CACHE)
-    if not make_room(_need(t)):
-        raise ConvError("pouco espaço no cartão para esta música")
+    short = make_room(_need(t))
+    if short:
+        raise ConvError("cartão cheio: faltam %d MB para esta música" % (short // (1 << 20) + 1))
     part = dst + ".part"
     try:
         tool = ffmpeg()
         if not tool and t["src"].lower().endswith(".mp3") and shutil.which("mpg123"):
-            subprocess.check_call([shutil.which("mpg123"), "-q", "-r", str(SR), "--stereo", "-w", part, t["src"]],
-                                  timeout=900)
+            subprocess.check_call([shutil.which("mpg123"), "-q", "-r", str(CACHE_SR), "--stereo", "-w", part,
+                                   t["src"]], timeout=900)
         elif not tool:
             raise ConvError("precisa do ffmpeg (não está instalado)")
         else:
@@ -431,9 +448,9 @@ def _convert(t):
             cmd += ["-i", t["src"], "-t", "%.2f" % (t["dur"] or MAX_LEN)]
             if t["kind"] == "game" and t["fade"]:
                 cmd += ["-af", "afade=t=out:st=%.2f:d=%.2f" % (max(0.0, t["dur"] - FADE), FADE)]
-            cmd += ["-ar", str(SR), "-ac", "2", "-sample_fmt", "s16", "-f", "wav", part]
+            cmd += ["-ar", str(CACHE_SR), "-ac", "2", "-sample_fmt", "s16", "-f", "wav", part]
             subprocess.check_call(cmd, timeout=900)
-        if not _pcm_wav(part, std=True):
+        if not _pcm_wav(part):
             raise ConvError("o ficheiro não tem som que se possa ler")
         os.replace(part, dst)
     finally:

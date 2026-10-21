@@ -661,6 +661,7 @@ class BeatDuel(object):
                 s.fade(0.0, 0.4)
             self.metro_was = m.metro
             m.metro = False
+        self.app.sections["warp"].cur = None   # its song fades out: let go of it (the file closes, the cache can drop it)
         self.state = "select"
 
     def leave(self):

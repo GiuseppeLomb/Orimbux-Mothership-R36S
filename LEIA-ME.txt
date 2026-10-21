@@ -27,8 +27,11 @@ NOVO NA v1.11
     (.mod .xm .s3m .it), na pasta music ou bgmusic. Cada faixa de um ficheiro e uma musica, com o
     nome do jogo lido do proprio ficheiro. Usa o ffmpeg do ArkOS (ja vem na consola).
   - As musicas convertem-se sozinhas quando as escolhes: ja nao e preciso abri-las antes no WARP
-    FLOOR. Ficam em music/.cache, que nunca passa do espaco livre do cartao (guarda sempre 48 MB
-    livres): as usadas ha mais tempo saem primeiro e voltam a converter-se se precisares delas.
+    FLOOR. Ficam em music/.cache (a 32 kHz, para ocuparem menos), que nunca passa do espaco livre do
+    cartao (guarda sempre 32 MB livres): as usadas ha mais tempo saem primeiro e voltam a converter-se
+    se precisares delas. Se mesmo assim nao couber, a app diz quantos MB faltam.
+  - VOID RUNNER: a musica nunca para quando sobes de nivel ou abres um bau (so a pausa, START ou
+    SELECT, a para).
   - BEAT DUEL: uma musica sem pista ganha uma PISTA AUTOMATICA feita das batidas da propria musica
     (facil, normal e dificil). Y continua a abrir o editor para fazeres a tua.
 
@@ -224,7 +227,8 @@ VOID RUNNER    (JOGOS) A tua musica e o nivel (inspirado no Beat Hazard). No men
                (1 ou 3 premios) e dao as EVOLUCOES primeiro. A seta dourada mostra onde estao.
                Musicas curtas dao mais XP. Setas/analogico movem-te, as armas disparam sozinhas.
                A ou B = VOID DASH (passa por tiros e explosoes sem dano). START ou SELECT = pausa e a
-               musica tambem para. Progresso em ports/mothership/vr_save.json.
+               musica tambem para (subir de nivel e abrir baus nao param a musica).
+               Progresso em ports/mothership/vr_save.json.
                ARMAS (12): Lumen Bolt, Prism Ring, Solar Lance, Nova Pulse, Chain Spark, Halo Mine,
                  Cometas (misseis teleguiados), Coroa Solar (aura), Lua Crescente (bumerangue),
                  Sentinela (drone), Crio (abranda/congela), Farol (laser rotativo).

@@ -80,6 +80,47 @@ try:
     assert 0 < V.TILT < 1 and V.ROUT == 6000.0
     run.free()
     vr.run = None
+
+    # --- v1.11: the song never stops for the level-up and chest screens; only a real pause stops it
+    vr.run = r = vr.start_now(0, [x for x in vr.songs if x["id"] == "MIX_DA_NAVE"][0])
+    r.die = lambda why: None
+    ok_was, a.mixer.ok = a.mixer.ok, True                      # as on the console: the song is the clock
+    for _ in range(60):
+        a.mixer.render(1470)
+        vr.update(1 / 30.0)
+    beats, drops = [], []
+    r.on_beat = lambda s: beats.append(s)
+    real_drop = r.drop
+    r.drop = lambda: (drops.append(r.mt), real_drop())
+    for menu in ("levelup", "chest"):
+        r.state, p0, mt0 = menu, r.music.pos, r.mt
+        for _ in range(150):                                   # 5 s with the menu open
+            a.mixer.render(1470)
+            vr.update(1 / 30.0)
+        assert not r.music.paused and r.music.pos - p0 > 4.5 * 44100, (menu, r.music.pos - p0)
+        assert r.held and r.mt == mt0                          # the game waits, the song goes on
+        del beats[:]
+        r.state = "play"
+        vr.update(1 / 30.0)
+        assert r.mt - mt0 > 4.5 and not beats and not r.held, (r.mt - mt0, len(beats))   # no burst of beats
+    nd = r.tl.next_drop(r.mt)                                  # a drop that comes while a menu is open...
+    del drops[:]
+    r.state = "levelup"
+    while r.music.pos / 44100.0 < nd + 0.5:
+        a.mixer.render(1470)
+        vr.update(1 / 30.0)
+    r.state = "play"
+    vr.update(1 / 30.0)
+    assert len(drops) == 1 and drops[0] >= nd, (drops, nd)    # ...still hits once, when the game goes on
+    vr.state = "pause"
+    vr.update(1 / 30.0)
+    assert r.music.paused                                      # START: a real pause stops the song
+    vr.state = "run"
+    vr.update(1 / 30.0)
+    assert not r.music.paused
+    a.mixer.ok = ok_was
+    r.free()
+    vr.run = None
     print("ok")
 finally:
     for f in SAVES:
