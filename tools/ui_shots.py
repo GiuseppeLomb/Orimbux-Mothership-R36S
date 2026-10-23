@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(APPD, "lib"))
 sys.path.insert(0, APPD)
 os.environ["VOX_FAKE"] = os.path.join(APPD, "assets", "bd", "moon_hop.wav")
 SAVES = ("vr_save.json", "pet.json", "config.json", "forge.json", "earlab.json", "bd_save.json", "quiz.json",
-         "missions.json")
+         "missions.json", "orimbox.json")
 BACKUP = {}
 for f in SAVES:
     p = os.path.join(APPD, f)

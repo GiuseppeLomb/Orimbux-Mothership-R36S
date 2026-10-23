@@ -78,13 +78,13 @@ try:
     tap("right")
     assert appmod.CATS[bridge.cat][0] == "JOGOS"
     tap("start")
-    assert a.cur_name == "pet", a.cur_name
+    assert a.cur_name == "orimbox", a.cur_name
     tap("select")
     assert a.cur_name == "bridge"
     tap("down")
     tap("a")
-    assert a.cur_name == "quiz", a.cur_name
-    print("after it, the bridge shows the games: XENO PET opens with START, DISCO VOADOR with A")
+    assert a.cur_name == "pet", a.cur_name
+    print("after it, the bridge shows the games: ORIMBOX opens with START, XENO PET with A")
     print("ok")
 finally:
     for f in SAVES:

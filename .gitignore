@@ -13,6 +13,7 @@ ports/mothership/forge.json
 ports/mothership/earlab.json
 ports/mothership/quiz.json
 ports/mothership/missions.json
+ports/mothership/orimbox.json
 ports/mothership/log.txt
 ports/mothership/vr_cache/
 ports/mothership/recordings/*

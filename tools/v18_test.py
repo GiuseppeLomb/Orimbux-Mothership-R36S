@@ -46,7 +46,7 @@ try:
     music = [it[1] for it in cats["MÚSICA"]]
     assert music[:8] == appmod.CYCLE, music
     games = [it[1] for it in cats["JOGOS"]]
-    assert games == ["pet", "quiz", "voidrunner", "beatduel"], games
+    assert games == ["orimbox", "pet", "quiz", "voidrunner", "beatduel"], games
     system = [it[1] for it in cats["SISTEMA"]]
     assert system == ["hangar", "trailer", "credits"], system
     assert "demo" not in a.sections and "trailer" in appmod.QUIET and "credits" in appmod.QUIET

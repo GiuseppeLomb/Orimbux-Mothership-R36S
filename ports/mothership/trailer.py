@@ -371,7 +371,7 @@ class Trailer(object):
             self.typed(g, "k24", "Algures entre as estrelas...", W // 2, 380, t - 0.8, C["soft"], 18, "center",
                        int(255 * (1 - ease((bar - 1.75) / 0.25))))
         else:
-            self.typed(g, "k24", "...uma nave-mãe guarda 12 apps.", W // 2, 380, t - 2 * BAR - 0.1, C["soft"], 20,
+            self.typed(g, "k24", "...uma nave-mãe guarda 13 apps.", W // 2, 380, t - 2 * BAR - 0.1, C["soft"], 20,
                        "center")
 
     # ------------------------------------------------------------ bars 4-5: the jump
@@ -398,7 +398,7 @@ class Trailer(object):
         self.ship(g, W / 2, 86 + bob, 3, t, 0.5 + 0.4 * math.sin(t * 6))
         draw_logo(g, self.logo, W // 2, 160, t, 255, max(0.0, 1 - k * 4), shine=(k - 0.6) / 0.5)
         g.text("kb24", "M O T H E R S H I P", W // 2, 248, C["orange"], int(255 * ease((k - 0.1) * 5)), "center")
-        self.typed(g, "k24", "12 apps de música e jogos na tua consola", W // 2, 292, (k - 0.6) * BAR, C["text"], 34,
+        self.typed(g, "k24", "13 apps de música e jogos na tua consola", W // 2, 292, (k - 0.6) * BAR, C["text"], 34,
                    "center")
         if k < 0.12:
             g.rect(0, 0, W, H, (255, 255, 255), int(255 * (1 - k / 0.12)))
@@ -628,7 +628,7 @@ class Trailer(object):
         self.ship(g, W / 2, 80 + bob, 3, t, 0.6 + 0.3 * math.sin(t * 5))
         draw_logo(g, self.logo, W // 2, 152, t, 255, max(0.0, 1 - k * 5), shine=(k % 1.0) / 0.6)
         g.text("kb24", "M O T H E R S H I P", W // 2, 240, C["orange"], 255, "center")
-        lines = ["12 apps de música e jogos", "cria · toca · mistura · joga", "feito para a R36S com ArkOS",
+        lines = ["13 apps de música e jogos", "cria · toca · mistura · joga", "feito para a R36S com ArkOS",
                  "Orimbux powered by Claude"]
         i = min(3, int(k))
         el = (k - i) * BAR

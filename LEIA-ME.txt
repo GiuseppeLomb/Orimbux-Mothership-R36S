@@ -1,4 +1,4 @@
-ORIMBUX MOTHERSHIP v1.11  -  R36S (ArkOS / dArkOS)
+ORIMBUX MOTHERSHIP v1.12  -  R36S (ArkOS / dArkOS)
 =================================================
 
 INSTALAR (no PC)
@@ -15,8 +15,16 @@ INSTALAR (no PC)
 ATUALIZAR DE UMA VERSAO ANTERIOR
   Igual: copia o .sh e os .zip novos para "ports". A instalacao substitui os ficheiros da app e
   mantem os teus: pet.json (Xeno Pet), vr_save.json (Void Runner), bd_save.json (Beat Duel),
-  forge.json (ritmos), quiz.json (Disco Voador) e as pastas recordings, music, samples, forge e chop.
+  forge.json (ritmos), quiz.json (Disco Voador), orimbox.json (segredos do Orimbox) e as pastas
+  recordings, music, samples, forge e chop.
   A v1.9 apaga as fontes antigas (agora ha uma so letra) e o video do antigo Ear Lab.
+
+NOVO NA v1.12
+  - ORIMBOX (JOGOS): uma tripulacao de 7 aliens que canta e faz beatbox, ao estilo do Incredibox. Das um
+    som a cada alien (20 sons em 4 grupos: BATIDAS, EFEITOS, MELODIAS, VOZES) e eles cantam juntos, sempre a
+    tempo e no mesmo tom. 5 SEGREDOS (combinacoes) desbloqueiam coros bonus com animacao. START grava a
+    mistura (aparece no BEAT DUEL e no TWIN DECKS). Personagens, arte e sons originais: samples livres
+    (CC0) do Sonic Pi e da Versilian Community Sample Library, e vozes sintetizadas.
 
 NOVO NA v1.11
   - MUSICA DO MENU DA CONSOLA: as musicas que o ArkOS toca no menu (pasta bgmusic do cartao) aparecem
@@ -176,6 +184,18 @@ WARP FLOOR     musicas da pasta ports/mothership/music e do menu da consola (bgm
 CHIP TRACKER   Nao e feito por nos: usa o LittleGPTracker (tracker open-source completo) pelo PortMaster
                da consola, se estiver disponivel para o teu sistema.
 
+ORIMBOX        (JOGOS) 7 aliens no palco, 20 sons em baixo (BATIDAS, EFEITOS, MELODIAS, VOZES; cada som so
+               pode estar num alien de cada vez). Tudo a 100 BPM em La menor (Lam-Fa-Do-Sol, 4 compassos):
+               qualquer mistura soa bem.
+               SONS: esq/dir escolhe o som, L1/R1 salta de grupo, A da-o a um alien (o escolhido, se estiver a
+                 dormir, senao o proximo livre), B tira-o.
+               PALCO (cima): esq/dir escolhe o alien, A silencia/volta, X solo, B tira o som. Baixo volta.
+               Y = mistura ao acaso | L2 = palco vazio | START = gravar/parar (fica nas tuas sessoes).
+               SEGREDOS: 5 combinacoes tocam um coro bonus de 2 voltas, com animacao: tres sons certos para
+                 CORO COSMICO, BATALHA DE BEATBOX, SELVA ALIEN e DANCA DOS ROBOS, e a tripulacao completa
+                 (7 aliens com os 4 grupos) para A NAVE-MAE. Os que ja encontraste ficam em orimbox.json.
+               Os sons foram feitos em tools/build_orimbox.py: samples CC0 (Sonic Pi, VCSL) + vozes por sintese
+               de formantes. Ao sair do ORIMBOX a musica para.
 XENO PET       (JOGOS) esquerda/direita escolhe a acao, A faz: COMER, BRINCAR (mini-jogo Star Catch), LIMPAR,
                LUZ (dormir), CURAR, MIMO, ESTADO (Y no Estado = Memorial).
                Vida de 30 dias: 1 dia de ovo, 7 dias de crianca (Bebe e depois Crianca) e ~22 de adulto.

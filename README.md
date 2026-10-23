@@ -1,6 +1,6 @@
 # ORIMBUX MOTHERSHIP
 
-**Uma nave-mãe de 12 apps de música e jogos para a consola portátil R36S (ArkOS / dArkOS).**
+**Uma nave-mãe de 13 apps de música e jogos para a consola portátil R36S (ArkOS / dArkOS).**
 Também corre no PC. Escrita em Python + SDL2, com a interface em português.
 
 ![Orimbux Mothership](docs/logo.png)
@@ -8,9 +8,9 @@ Também corre no PC. Escrita em Python + SDL2, com a interface em português.
 | | | |
 |---|---|---|
 | ![Ponte](docs/ponte.png) | ![Beat Forge](docs/beat_forge.png) | ![Void Runner](docs/void_runner.png) |
-| A ponte: missões e as 12 apps | Beat Forge: caixa de ritmos | Void Runner: a tua música é o nível |
-| ![Disco Voador](docs/disco_voador_festa.png) | ![Beat Duel](docs/beat_duel_frente_a_frente.png) | |
-| Disco Voador: quiz até 10 jogadores | Beat Duel frente a frente | |
+| A ponte: missões e as 13 apps | Beat Forge: caixa de ritmos | Void Runner: a tua música é o nível |
+| ![Disco Voador](docs/disco_voador_festa.png) | ![Beat Duel](docs/beat_duel_frente_a_frente.png) | ![ORIMBOX](docs/orimbox.png) |
+| Disco Voador: quiz até 10 jogadores | Beat Duel frente a frente | ORIMBOX: uma tripulação alien que canta |
 
 ## Download
 
@@ -20,11 +20,11 @@ O zip traz a app pronta a usar:
 - **Consola R36S:** a pasta `ports/` tem tudo o que vai para o cartão (ver *Instalar na R36S*).
 - **Windows:** faz duplo clique em `Orimbux Mothership (PC).bat` (ver *Correr no PC*).
 
-**[⬇ Versão PC para Windows (ZIP, 97 MB)](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip)**: um `Orimbux Mothership.exe` que não precisa de Python nem de instalação (também em *Releases*, ver *Correr no PC*).
+**[⬇ Versão PC para Windows (ZIP, 97 MB)](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip)**: um `Orimbux Mothership.exe` que não precisa de Python nem de instalação (também em *Releases*, ver *Correr no PC*). É a v1.11, ainda sem o ORIMBOX: o ZIP de cima já o tem.
 
-Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das apps, e [créditos](docs/video/creditos.mp4).
+Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das apps, e [créditos](docs/video/creditos.mp4). Áudio: [uma mistura do ORIMBOX](docs/audio/orimbox_demo.m4a).
 
-## As 12 apps
+## As 13 apps
 
 **Música**, um caminho do ritmo à mistura. Toda a nave toca no mesmo BPM.
 
@@ -41,6 +41,7 @@ Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das ap
 
 **Jogos**
 
+- **ORIMBOX**: uma tripulação de 7 aliens que canta e faz beatbox, ao estilo do Incredibox. Dás um som a cada um (20 sons em 4 grupos) e cantam juntos, sempre a tempo e no mesmo tom. 5 segredos desbloqueiam coros bónus.
 - **XENO PET**: um bicho alien que cresce contigo, em tempo real.
 - **DISCO VOADOR**: quiz de música com 345 perguntas em 4 níveis. Modo FESTA para 2 a 10 jogadores.
 - **VOID RUNNER**: a tua música é o nível (ao estilo do Beat Hazard), em pixel 3D visto de cima, com sombras suaves e a luz do Grave. Os drops trazem hordas e baús, e O GRAVE, um subwoofer gigante, puxa-te com um baixo que chega a quase todo o mapa.
@@ -80,6 +81,7 @@ ports/
     ui.py, help.py        componentes da interface e textos de ajuda
     forge.py, chop.py, decks.py, vox.py, ...   uma app por ficheiro
     voidrunner.py, songscan.py   o jogo e a análise da música (intensidade, batidas, drops)
+    orimbox.py            a tripulação que canta; os sons estão em assets/orimbox (tools/build_orimbox.py)
     quiz.py, quizbank.py  o Disco Voador e o banco de perguntas
     musiclib.py           as músicas do jogador: pastas music e bgmusic, música de jogos, a cache
     trailer.py, credits.py   o trailer e os créditos (desenhados em tempo real)
@@ -112,9 +114,9 @@ Orimbux Mothership (PC).bat   abre a app no Windows a partir deste repositório
 
 ### English
 
-ORIMBUX MOTHERSHIP is a set of 12 music and game apps for the R36S handheld (ArkOS), written in Python + SDL2. It also runs on a PC. The UI is in Portuguese.
+ORIMBUX MOTHERSHIP is a set of 13 music and game apps for the R36S handheld (ArkOS), written in Python + SDL2. It also runs on a PC. The UI is in Portuguese.
 
 - **Music:** tempo, drum machine, sampler/slicer, loop pads, synth, voice FX, two DJ decks and a player.
-- **Games:** a virtual pet, a music quiz for up to 10 players, a Beat Hazard-like shooter driven by your own song, and a two-player rhythm duel.
+- **Games:** an Incredibox-style crew of 7 singing, beatboxing aliens, a virtual pet, a music quiz for up to 10 players, a Beat Hazard-like shooter driven by your own song, and a two-player rhythm duel.
 - **Download:** [ZIP of the repository](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/archive/refs/heads/main.zip). R36S: copy the contents of `ports/` to the SD card's `ports` folder. Windows: run `Orimbux Mothership (PC).bat`, or get the [Windows build](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip), a portable `Orimbux Mothership.exe` that needs no Python and no installation.
 - **Code:** MIT. Samples are CC0 (Sonic Pi library and VCSL), the font is Tiny5 (OFL).

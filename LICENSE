@@ -23,5 +23,6 @@ SOFTWARE.
 ---
 Third-party parts keep their own licences (see CREDITS.md):
 - ports/mothership/assets/samples: Sonic Pi sample library, CC0 1.0
+- ports/mothership/assets/samples/vcsl_* and parts of assets/orimbox: VCSL (Versilian Community Sample Library), CC0 1.0
 - ports/mothership/assets/fonts (Tiny5): SIL Open Font License 1.1 (tiny5-OFL.txt)
 - ports/mothership/lib/sdl2: PySDL2, public domain (CC0) / zlib

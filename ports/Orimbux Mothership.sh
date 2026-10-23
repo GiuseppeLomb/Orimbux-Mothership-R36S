@@ -26,7 +26,7 @@ fi
 UNZIP='
 import sys, zipfile
 SAVES = {"config.json", "pet.json", "vr_save.json", "bd_save.json", "bd_scores.json", "forge.json", "earlab.json",
-         "quiz.json", "missions.json", "log.txt"}
+         "quiz.json", "missions.json", "orimbox.json", "log.txt"}
 PLAYER_DIRS = {"recordings", "music", "samples", "forge", "chop", "vr_cache"}
 z = zipfile.ZipFile(sys.argv[1])
 for m in z.infolist():

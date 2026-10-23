@@ -17,6 +17,7 @@ import pet
 import trailer
 import credits
 import voidrunner
+import orimbox
 import beatduel
 import forge
 import decks
@@ -41,7 +42,7 @@ DEFAULT_CFG = {"scanlines": True, "anim": True, "volume": 80, "quantize": "bar",
 PAD_ORDER = ["up", "left", "right", "down", "x", "y", "a", "b"]
 CYCLE = list(ui.MUSIC_KEYS)        # START (tap) follows the music workflow
 MUSIC_HUB = CYCLE + ["bridge", "hangar"]   # where holding START opens the music menu
-QUIET = ("pet", "voidrunner", "beatduel", "trailer", "credits", "quiz")      # sections with their own sound: drum machine stops
+QUIET = ("pet", "voidrunner", "beatduel", "trailer", "credits", "quiz", "orimbox")      # sections with their own sound: drum machine stops
 BANK_COL = {"orange": C["orange"], "violet": C["violet"], "cyan": C["cyan"], "green": C["green"]}
 
 
@@ -555,6 +556,7 @@ CATS = [  # (name, section, colour, tag, what it is - in plain words)
         ("CHIP TRACKER", SOON, C["cyan"], "EXTRA", "Para compor a sério: LittleGPTracker (grátis), instalado pelo PortMaster."),
     ]),
     ("JOGOS", [
+        ("ORIMBOX", "orimbox", (255, 110, 170), "BEATBOX", "Dá um som a cada alien e eles cantam juntos, sempre a tempo. Descobre os 5 segredos!"),
         ("XENO PET", "pet", (255, 110, 170), "BICHO", "O teu bicho alien: dá-lhe comida, brinca com ele e vê-o crescer."),
         ("DISCO VOADOR", "quiz", (255, 214, 80), "CONCURSO", "Concurso de música: 15 perguntas, da garagem ao Disco de Diamante."),
         ("VOID RUNNER", "voidrunner", C["violet"], "AÇÃO", "A tua música é o nível: foge do Grave e das hordas, que crescem com o ritmo."),
@@ -1858,6 +1860,7 @@ class App(object):
         self.sections["trailer"] = trailer.Trailer(self)
         self.sections["credits"] = credits.Credits(self)
         self.sections["voidrunner"] = voidrunner.VoidRunner(self)
+        self.sections["orimbox"] = orimbox.Orimbox(self)
         self.sections["beatduel"] = beatduel.BeatDuel(self)
         self.sections["forge"] = forge.Forge(self)
         self.sections["decks"] = decks.TwinDecks(self)

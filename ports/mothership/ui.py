@@ -33,7 +33,7 @@ def where(key):
     if key in MUSIC_KEYS:
         i = MUSIC_KEYS.index(key)
         return "MÚSICA", "PASSO %d DE %d · %s" % (i + 1, len(MUSIC_KEYS), MUSIC_FLOW[i][2]), CAT_COL["MÚSICA"]
-    if key in ("pet", "voidrunner", "beatduel", "quiz", "earlab"):
+    if key in ("pet", "voidrunner", "beatduel", "quiz", "earlab", "orimbox"):
         return "JOGOS", "", CAT_COL["JOGOS"]
     if key in ("hangar", "trailer", "credits"):
         return "SISTEMA", "", CAT_COL["SISTEMA"]

@@ -12,21 +12,21 @@ import trailer
 from engine import C, W, H, SR, StreamVoice, draw_ship
 
 D = os.path.join(engine.ASSETS, "trailer")
-VERSION = "v1.11"
+VERSION = "v1.12"
 GOLD = (255, 214, 80)
 OPENER = ["Num cartão microSD,", "dentro de uma consola de bolso..."]
 CRAWL = [
     ("title", "CAPÍTULO 1.9"),
     ("title", "A NAVE DAS APPS"),
     ("gap", ""),
-    ("p", "Uma pequena consola vagueia pelo espaço. Dentro dela, uma nave-mãe guarda doze módulos de música "
+    ("p", "Uma pequena consola vagueia pelo espaço. Dentro dela, uma nave-mãe guarda treze módulos de música "
           "e jogos, prontos para quem os quiser pilotar."),
     ("gap", ""),
     ("p", "Ritmos são forjados, loops reagem ao vivo, vozes atravessam nebulosas e as músicas misturam-se "
           "em dois decks."),
     ("gap", ""),
-    ("p", "Enquanto o Xeno Pet dorme, os pilotos sobem até ao disco de ouro e fogem de um grave gigante que "
-          "devora tudo pelo caminho."),
+    ("p", "Enquanto o Xeno Pet dorme, uma tripulação alien canta em coro, os pilotos sobem até ao disco de ouro "
+          "e fogem de um grave gigante que devora tudo pelo caminho."),
     ("gap", ""),
     ("p", "Esta é a tripulação que a pôs a voar..."),
     ("gap", ""), ("gap", ""),
@@ -34,11 +34,12 @@ CRAWL = [
     ("role", "PILOTO DE TESTES"), ("name", "ORIMBUX"),
     ("role", "MÓDULOS DE MÚSICA"), ("name", "PULSAR · BEAT FORGE"), ("name", "ABDUCTOR · LOOP REACTOR"),
     ("name", "XENO SYNTH · VOX NEBULA"), ("name", "TWIN DECKS · WARP FLOOR"),
-    ("role", "MÓDULOS DE JOGO"), ("name", "XENO PET · DISCO VOADOR"), ("name", "VOID RUNNER · BEAT DUEL"),
+    ("role", "MÓDULOS DE JOGO"), ("name", "ORIMBOX · XENO PET"), ("name", "DISCO VOADOR · VOID RUNNER"),
+    ("name", "BEAT DUEL"),
     ("role", "MÚSICA ORIGINAL"), ("name", "NEON DRIFT · PIXEL RUSH"), ("name", "VOID BASS · MOON HOP"),
     ("name", "MOTHERSHIP ANTHEM"), ("name", "Tema do trailer e tema dos créditos"),
     ("role", "SONS"), ("name", "Samples do Sonic Pi (CC0)"), ("name", "com doações de The Black Dog"),
-    ("name", "e Arovane"),
+    ("name", "e Arovane"), ("name", "Versilian Community Sample"), ("name", "Library - VCSL (CC0)"),
     ("role", "ARTE"), ("name", "Pixel art desenhada em código"),
     ("role", "LETRA"), ("name", "Tiny5 (SIL Open Font License)"),
     ("role", "MOTOR"), ("name", "Python + SDL2 (pysdl2)"),
