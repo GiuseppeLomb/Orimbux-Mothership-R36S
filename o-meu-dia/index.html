@@ -147,7 +147,7 @@ function inicio(){
   return `
   <div class="hello"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span></div>
   ${agora?`<button class="tile primary" onclick="ir('casaV','${agora.casa}')"><span class="ic">⏱️</span><span>Estou na ${esc(casa(agora.casa)?.nome)}<small style="color:inherit">Toque para ver ou sair</small></span></button>`:""}
-  <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · família</small></span></button>
+  <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · Antivenenos</small></span></button>
   <button class="tile" onclick="ir('casas')"><span class="ic">🏠</span><span>As minhas casas<small>Cheguei, saí, tarefas e notas</small></span></button>
   <button class="tile" onclick="ir('lembrete')"><span class="ic">⏰</span><span>Lembrar-me de…<small>O relógio vibra na hora</small></span></button>
   <button class="tile" onclick="ir('dinheiro')"><span class="ic">💶</span><span>Horas e pagamentos<small>Quem já pagou e quem falta</small></span></button>
@@ -162,7 +162,6 @@ function sos(){
   <p class="muted">Toque no número para ligar. Se não ligar, marque o número que aparece.</p>
   ${EMERGENCIA.map(e=>telBtn(e,e.red?"red":"")).join("")}
   ${c?`<h2>Família da ${esc(c.nome)}</h2>${c.contactos.map(x=>telBtn(x)).join("")}`:""}
-  <h2>A minha família</h2>${D.meus.map(x=>telBtn(x)).join("")}
   ${!c?`<h2>Famílias das casas</h2>${D.casas.flatMap(k=>k.contactos.map(x=>telBtn({...x,nota:k.nome}))).join("")}`:""}`;
 }
 
@@ -278,19 +277,9 @@ function tGerar(){
 function config(){
   return `${voltar()}<h1>Configurar</h1>
   <p class="muted">Esta parte é para o filho preencher uma vez.</p>
-  <div class="card"><h2>A minha família</h2>
-   ${D.meus.map((m,i)=>`<div class="grid2"><input id="mn${i}" value="${esc(m.nome)}" aria-label="Nome"><input id="mt${i}" value="${esc(m.num)}" inputmode="tel" placeholder="Número" aria-label="Número"></div>`).join("")}
-   <button class="big ghost" onclick="gMeus(true)">＋ Mais um contacto</button>
-   <button class="big primary" onclick="gMeus()">Guardar família</button></div>
   <div class="card"><h2>Casas</h2>${D.casas.map(c=>`<button class="tile" onclick="ir('casaEdit','${c.id}')"><span class="ic">✏️</span><span>${esc(c.nome)}<small>${eur(c.valor)} por hora</small></span></button>`).join("")}
-   <button class="big ghost" onclick="ir('casaEdit',null)">＋ Nova casa</button></div>
-  <div class="card"><h2>Cópia de segurança</h2><p class="muted">Os dados ficam só neste telemóvel. Copie isto de vez em quando para um sítio seguro.</p>
-   <textarea id="bk" aria-label="Cópia de segurança">${esc(JSON.stringify(D))}</textarea>
-   <div class="grid2"><button class="big ghost" onclick="copiar()">Copiar</button><button class="big ghost" onclick="repor()">Repor</button></div></div>`;
+   <button class="big ghost" onclick="ir('casaEdit',null)">＋ Nova casa</button></div>`;
 }
-function gMeus(mais){D.meus=D.meus.map((m,i)=>({nome:$("#mn"+i).value,num:$("#mt"+i).value})).filter(m=>m.nome||m.num);if(mais)D.meus.push({nome:"",num:""});guardar();if(!mais)toast("Guardado");render()}
-function copiar(){const t=$("#bk");navigator.clipboard?.writeText(t.value).then(()=>toast("Copiado"),()=>{t.select();toast("Selecionado: copie à mão")})}
-function repor(){try{D=JSON.parse($("#bk").value);guardar();toast("Reposto");ir("inicio")}catch(e){toast("Esse texto não é uma cópia válida")}}
 
 function casaEdit(){
   const c=arg?casa(arg):{id:"c"+Date.now(),nome:"",tipo:"idoso",valor:8,contactos:[{nome:"",num:""}],notas:"",tarefas:[]};
