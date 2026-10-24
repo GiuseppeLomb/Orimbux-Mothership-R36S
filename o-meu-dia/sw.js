@@ -1,6 +1,6 @@
 // O Meu Dia: funciona sem internet. A página tenta sempre a versão nova primeiro; sem rede usa a guardada.
-var CACHE = "omeudia-v2";
-var FILES = ["./", "index.html", "manifest.webmanifest", "img/icon-192.png", "img/icon-512.png", "img/icon-maskable-512.png", "img/icon-180.png"];
+var CACHE = "omeudia-v3";
+var FILES = ["./", "index.html", "manifest.webmanifest", "img/icon-192.png", "img/icon-512.png", "img/icon-maskable-512.png", "img/icon-180.png", "img/fundo.jpg"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
 });

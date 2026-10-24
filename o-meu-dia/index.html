@@ -18,22 +18,28 @@
 :root{
   --bg:#f3f6f5; --card:#ffffff; --ink:#18302e; --soft:#5b706d; --line:#d5e0dd;
   --teal:#1f5f5b; --teal-ink:#ffffff; --sun:#f2b84b; --sos:#c8372d; --sos-ink:#ffffff;
-  --ok:#2e7d4f; --gift:#7a4fa3;
+  --ok:#2e7d4f; --gift:#7a4fa3; --glass:rgba(255,255,255,.86); --veil:243,246,245; --shadow:0 6px 20px rgba(24,48,46,.10);
   --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
   --f-disp:"Fraunces",Georgia,serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#101a19; --card:#182624; --ink:#eaf2f0; --soft:#a3b6b2; --line:#2b3d3a;
   --teal:#4fb3a9; --teal-ink:#0c1716; --sun:#f2c46b; --sos:#e5554a; --sos-ink:#ffffff;
-  --ok:#5cc489; --gift:#b48ad8; color-scheme:dark}}
+  --ok:#5cc489; --gift:#b48ad8; --glass:rgba(24,38,36,.84); --veil:16,26,25; --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#101a19; --card:#182624; --ink:#eaf2f0; --soft:#a3b6b2; --line:#2b3d3a;
   --teal:#4fb3a9; --teal-ink:#0c1716; --sun:#f2c46b; --sos:#e5554a; --sos-ink:#ffffff;
-  --ok:#5cc489; --gift:#b48ad8; color-scheme:dark}
+  --ok:#5cc489; --gift:#b48ad8; --glass:rgba(24,38,36,.84); --veil:16,26,25; --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:20px;line-height:1.4;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
-main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;position:relative;z-index:1}
+#bg{position:fixed;inset:0;background:#3d5a2a url(img/fundo.jpg) center 28%/cover no-repeat;z-index:0}
+#veil{position:fixed;inset:0;z-index:0;background:rgba(var(--veil),.93);transition:background .35s}
+body.home #veil{background:linear-gradient(180deg,rgba(0,0,0,.45) 0,rgba(0,0,0,0) 18vh,rgba(var(--veil),0) 54vh,rgba(var(--veil),.82) 68vh,rgba(var(--veil),.97) 84vh)}
+.hero{min-height:52vh;display:flex;flex-direction:column;justify-content:flex-start;gap:4px;padding:6px 4px 10px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
+.hero h1{font-size:2.6rem;line-height:1.05}
+.hero .date{color:#fff;opacity:.95;font-size:1.1rem}
 h1{font-family:var(--f-disp);font-size:2rem;margin:0;font-weight:600;text-wrap:balance}
 h2{font-family:var(--f-disp);font-size:1.5rem;margin:0;font-weight:600}
 p{margin:0}
@@ -41,17 +47,23 @@ p{margin:0}
 .date{color:var(--soft)}
 button,.btn{font:inherit;border:0;border-radius:18px;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;gap:14px}
 button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--sun);outline-offset:2px}
-.tile{background:var(--card);border:2px solid var(--line);padding:20px;font-size:1.35rem;font-weight:700;width:100%;text-align:left;min-height:88px}
-.tile .ic{font-size:2.2rem;width:48px;text-align:center;flex:none}
+.tile{background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:var(--shadow);padding:16px 18px;font-size:1.35rem;font-weight:700;width:100%;text-align:left;min-height:88px}
+.tile .ic{font-size:1.9rem;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--teal) 13%,transparent)}
+.tile .ic.ph{background:none;overflow:hidden;border:3px solid var(--card)}
+.tile .ic.ph img{width:100%;height:100%;object-fit:cover}
+.tile .go{margin-left:auto;font-size:1.6rem;color:var(--soft);font-weight:400}
 .tile small{display:block;font-weight:400;font-size:1rem;color:var(--soft)}
 .sos{background:var(--sos);color:var(--sos-ink);border-color:var(--sos)}
+.sos .ic{background:rgba(255,255,255,.18)}
+.sos .go{color:var(--sos-ink)}
 .sos small{color:var(--sos-ink);opacity:.9}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .big{width:100%;justify-content:center;padding:22px;font-size:1.5rem;font-weight:700;min-height:84px}
 .primary{background:var(--teal);color:var(--teal-ink)}
-.ghost{background:var(--card);border:2px solid var(--line)}
+.ghost{background:var(--glass);border:2px solid var(--line)}
+.primary{box-shadow:0 6px 18px color-mix(in srgb,var(--teal) 35%,transparent)}
 .back{background:none;color:var(--teal);font-weight:700;padding:8px 0;font-size:1.15rem}
-.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:var(--shadow);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .muted{color:var(--soft);font-size:1rem}
 .num{font-variant-numeric:tabular-nums}
@@ -59,8 +71,19 @@ button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visib
 .pill.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
 .pill.due{background:color-mix(in srgb,var(--sun) 30%,transparent);color:var(--ink)}
 .pill.on{background:var(--teal);color:var(--teal-ink)}
-.call{background:var(--card);border:2px solid var(--line);padding:16px 18px;width:100%;justify-content:space-between;min-height:76px}
+.call{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);padding:16px 18px;width:100%;justify-content:space-between;min-height:76px}
 .call b{font-size:1.25rem}
+.call .who{display:flex;align-items:center;gap:12px;min-width:0}
+.av{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--card)}
+.family{position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.family img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;max-width:100%}
+.family .cap{position:absolute;inset:auto 0 0 0;padding:40px 18px 14px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff}
+.family .cap h1{color:#fff}
+.addph{border:3px dashed color-mix(in srgb,var(--teal) 55%,transparent);background:var(--glass);border-radius:22px;padding:26px 18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.addph .big-ic{font-size:2.6rem}
+.phbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.phbtns label{background:var(--glass);border:2px solid var(--line);border-radius:16px;padding:14px;align-items:center;justify-content:center;flex-direction:row;font-size:1.1rem;cursor:pointer;min-height:64px;text-align:center}
+.phbtns input{position:absolute;width:1px;height:1px;opacity:0}
 .call .tel{font-size:1.3rem;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums;user-select:all}
 .call.red{border-color:var(--sos)}
 .call.red .tel{color:var(--sos)}
@@ -68,17 +91,17 @@ input,textarea{font:inherit;width:100%;padding:14px;border-radius:14px;border:2p
 textarea{min-height:110px}
 label{font-weight:700;display:flex;flex-direction:column;gap:6px}
 .chips{display:flex;flex-wrap:wrap;gap:10px}
-.chip{background:var(--card);border:2px solid var(--line);padding:12px 16px;border-radius:14px;font-size:1.1rem}
+.chip{background:var(--glass);border:2px solid var(--line);padding:12px 16px;border-radius:14px;font-size:1.1rem}
 .chip[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
 .check{display:flex;gap:14px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:1.15rem;background:none;width:100%;text-align:left;border-radius:0}
 .check .box{width:34px;height:34px;border-radius:10px;border:3px solid var(--teal);flex:none;display:grid;place-items:center;font-weight:700}
 .check.done .box{background:var(--teal);color:var(--teal-ink)}
 .check.done span{text-decoration:line-through;color:var(--soft)}
 .timer{font-size:2.6rem;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
-.clue{background:var(--card);border:2px dashed var(--gift);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.clue{background:var(--glass);border:2px dashed var(--gift);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
 .clue .where{color:var(--gift);font-weight:700;font-size:1rem}
 .clue p{font-family:var(--f-disp);font-size:1.35rem}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:14px 22px;border-radius:14px;font-weight:700;z-index:20}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:14px 22px;border-radius:14px;font-weight:700;z-index:20;width:max-content;max-width:calc(100% - 32px);text-align:center}
 .example{font-size:.85rem;color:var(--soft);font-style:italic}
 hr{border:0;border-top:2px solid var(--line);margin:4px 0;width:100%}
 @media (prefers-reduced-motion:no-preference){.tile,.big,.call{transition:transform .08s}.tile:active,.big:active,.call:active{transform:scale(.98)}}
@@ -86,6 +109,7 @@ hr{border:0;border-top:2px solid var(--line);margin:4px 0;width:100%}
 
 </head>
 <body>
+<div id="bg" aria-hidden="true"></div><div id="veil" aria-hidden="true"></div>
 <main id="app"></main>
 <div class="toast" id="toast" hidden></div>
 
@@ -112,7 +136,7 @@ const SEED={
 };
 let D;
 try{D=JSON.parse(localStorage.getItem(KEY))||structuredClone(SEED)}catch(e){D=structuredClone(SEED)}
-function guardar(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+function guardar(){try{localStorage.setItem(KEY,JSON.stringify(D));return true}catch(e){return false}}
 
 /* ---------- utilidades ---------- */
 const $=s=>document.querySelector(s);
@@ -125,8 +149,9 @@ const aberta=id=>D.visitas.find(v=>v.casa===id&&!v.fim);
 function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
 function telBtn(c,extra=""){
   const n=(c.num||"").replace(/\s/g,"");
-  if(!n) return `<div class="call ${extra}"><span><b>${esc(c.nome)}</b><br><span class="muted">Sem número. Peça para acrescentar.</span></span></div>`;
-  return `<a class="btn call ${extra}" href="tel:${esc(n)}"><span><b>${esc(c.nome)}</b>${c.nota?`<br><span class="muted">${esc(c.nota)}</span>`:""}</span><span class="tel">📞 ${esc(c.num)}</span></a>`;
+  const av=c.foto?`<img class="av" src="${c.foto}" alt="">`:"";
+  if(!n) return `<div class="call ${extra}"><span class="who">${av}<span><b>${esc(c.nome)}</b><br><span class="muted">Sem número. Peça para acrescentar.</span></span></span></div>`;
+  return `<a class="btn call ${extra}" href="tel:${esc(n)}"><span class="who">${av}<span><b>${esc(c.nome)}</b>${c.nota?`<br><span class="muted">${esc(c.nota)}</span>`:""}</span></span><span class="tel">📞 ${esc(c.num)}</span></a>`;
 }
 
 /* ---------- ecrãs ---------- */
@@ -137,6 +162,7 @@ function voltar(){return `<button class="back" onclick="ir('inicio')">← Voltar
 function render(){
   clearInterval(tick);
   const app=$("#app");
+  document.body.classList.toggle("home",ecra==="inicio");
   app.innerHTML=({inicio,sos,casas,casaV,dinheiro,lembrete,tesouro,config,casaEdit})[ecra]();
   if(ecra==="casaV"&&aberta(arg)) tick=setInterval(()=>{const v=aberta(arg),t=$("#t");if(v&&t)t.textContent=hm(Date.now()-v.ini)},20000);
 }
@@ -145,13 +171,13 @@ function inicio(){
   const d=new Date().toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
   const agora=D.visitas.find(v=>!v.fim);
   return `
-  <div class="hello"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span></div>
+  <div class="hero"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span></div>
   ${agora?`<button class="tile primary" onclick="ir('casaV','${agora.casa}')"><span class="ic">⏱️</span><span>Estou na ${esc(casa(agora.casa)?.nome)}<small style="color:inherit">Toque para ver ou sair</small></span></button>`:""}
-  <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · Antivenenos</small></span></button>
-  <button class="tile" onclick="ir('casas')"><span class="ic">🏠</span><span>As minhas casas<small>Cheguei, saí, tarefas e notas</small></span></button>
-  <button class="tile" onclick="ir('lembrete')"><span class="ic">⏰</span><span>Lembrar-me de…<small>O relógio vibra na hora</small></span></button>
-  <button class="tile" onclick="ir('dinheiro')"><span class="ic">💶</span><span>Horas e pagamentos<small>Quem já pagou e quem falta</small></span></button>
-  <button class="tile" onclick="ir('tesouro')"><span class="ic">🎁</span><span>Caça ao tesouro<small>Pistas prontas a esconder</small></span></button>
+  <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · Antivenenos</small></span><span class="go" aria-hidden="true">›</span></button>
+  <button class="tile" onclick="ir('casas')"><span class="ic">🏠</span><span>As minhas casas<small>Cheguei, saí, tarefas e notas</small></span><span class="go" aria-hidden="true">›</span></button>
+  <button class="tile" onclick="ir('lembrete')"><span class="ic">⏰</span><span>Lembrar-me de…<small>O relógio vibra na hora</small></span><span class="go" aria-hidden="true">›</span></button>
+  <button class="tile" onclick="ir('dinheiro')"><span class="ic">💶</span><span>Horas e pagamentos<small>Quem já pagou e quem falta</small></span><span class="go" aria-hidden="true">›</span></button>
+  <button class="tile" onclick="ir('tesouro')"><span class="ic">🎁</span><span>Caça ao tesouro<small>Pistas prontas a esconder</small></span><span class="go" aria-hidden="true">›</span></button>
   <button class="back" onclick="ir('config')" style="align-self:center">⚙️ Configurar (para o filho)</button>`;
 }
 
@@ -161,13 +187,13 @@ function sos(){
   return `${voltar()}<h1>Emergência</h1>
   <p class="muted">Toque no número para ligar. Se não ligar, marque o número que aparece.</p>
   ${EMERGENCIA.map(e=>telBtn(e,e.red?"red":"")).join("")}
-  ${c?`<h2>Família da ${esc(c.nome)}</h2>${c.contactos.map(x=>telBtn(x)).join("")}`:""}
-  ${!c?`<h2>Famílias das casas</h2>${D.casas.flatMap(k=>k.contactos.map(x=>telBtn({...x,nota:k.nome}))).join("")}`:""}`;
+  ${c?`<h2>Família da ${esc(c.nome)}</h2>${c.contactos.map(x=>telBtn({...x,foto:c.foto})).join("")}`:""}
+  ${!c?`<h2>Famílias das casas</h2>${D.casas.flatMap(k=>k.contactos.map(x=>telBtn({...x,nota:k.nome,foto:k.foto}))).join("")}`:""}`;
 }
 
 function casas(){
   return `${voltar()}<h1>As minhas casas</h1>
-  ${D.casas.map(c=>`<button class="tile" onclick="ir('casaV','${c.id}')"><span class="ic">${c.tipo==="idoso"?"👵":"🧽"}</span><span>${esc(c.nome)}<small>${aberta(c.id)?"⏱️ Está lá agora":(c.tipo==="idoso"?"Cuidar":"Limpeza")}</small></span></button>`).join("")}
+  ${D.casas.map(c=>`<button class="tile" onclick="ir('casaV','${c.id}')">${c.foto?`<span class="ic ph"><img src="${c.foto}" alt=""></span>`:`<span class="ic">${c.tipo==="idoso"?"👵":"🧽"}</span>`}<span>${esc(c.nome)}<small>${aberta(c.id)?"⏱️ Está lá agora":(c.tipo==="idoso"?"Cuidar":"Limpeza")}</small></span><span class="go" aria-hidden="true">›</span></button>`).join("")}
   <button class="big ghost" onclick="ir('casaEdit',null)">＋ Juntar uma casa</button>`;
 }
 
@@ -175,7 +201,13 @@ function casaV(){
   const c=casa(arg); if(!c) return casas();
   const v=aberta(c.id), k=c.id+"|"+hoje(), feito=D.feito[k]||[];
   return `<button class="back" onclick="ir('casas')">← Voltar às casas</button>
-  <h1>${esc(c.nome)}</h1>${c.exemplo?`<span class="example">Casa de exemplo. Pode alterar em ⚙️ Configurar.</span>`:""}
+  ${c.foto?`<div class="family"><img src="${c.foto}" alt="Foto da família da ${esc(c.nome)}"><div class="cap"><h1>${esc(c.nome)}</h1></div></div>`
+   :`<h1>${esc(c.nome)}</h1><div class="addph"><span class="big-ic">📷</span><b>Ainda não tem foto da família</b><span class="muted">Tire uma foto ou escolha da galeria</span></div>`}
+  <div class="phbtns">
+   <label for="fc">📷 ${c.foto?"Nova foto":"Tirar foto"}<input id="fc" type="file" accept="image/*" capture="environment" onchange="fotoCasa('${c.id}',this)"></label>
+   <label for="fg">🖼️ Galeria<input id="fg" type="file" accept="image/*" onchange="fotoCasa('${c.id}',this)"></label>
+  </div>
+  ${c.exemplo?`<span class="example">Casa de exemplo. Pode alterar em ⚙️ Configurar.</span>`:""}
   ${v?`<div class="card"><p class="muted" style="text-align:center">Chegou às ${new Date(v.ini).toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}</p><div class="timer" id="t">${hm(Date.now()-v.ini)}</div>
        <button class="big primary" onclick="sair('${c.id}')">👋 Saí</button></div>`
      :`<button class="big primary" onclick="cheguei('${c.id}')">✅ Cheguei</button>`}
@@ -191,6 +223,20 @@ function casaV(){
 function cheguei(id){D.visitas.forEach(v=>{if(!v.fim)v.fim=Date.now()});D.visitas.push({casa:id,ini:Date.now(),fim:null,pago:false});guardar();toast("Boa! Começou a contar.");render()}
 function sair(id){const v=aberta(id);if(v){v.fim=Date.now();guardar();toast("Saiu. Ficaram "+hm(v.fim-v.ini))}render()}
 function marcar(id,i){const k=id+"|"+hoje(),a=D.feito[k]||[];D.feito[k]=a.includes(i)?a.filter(x=>x!==i):[...a,i];guardar();render()}
+async function fotoCasa(id,inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  toast("A preparar a foto…");
+  try{
+    const url=URL.createObjectURL(f);
+    const img=await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=url});
+    const M=720,k=Math.min(1,M/Math.max(img.naturalWidth,img.naturalHeight));
+    const cv=document.createElement("canvas");cv.width=Math.round(img.naturalWidth*k);cv.height=Math.round(img.naturalHeight*k);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+    const c=casa(id),antes=c.foto;c.foto=cv.toDataURL("image/jpeg",0.72);
+    if(guardar()){toast("Foto guardada 💚")}else{c.foto=antes;toast("Sem espaço para mais fotos")}
+  }catch(e){toast("Não deu para abrir essa foto")}
+  render();
+}
 function gNotas(id){casa(id).notas=$("#notas").value;guardar();toast("Notas guardadas")}
 
 function dinheiro(){
@@ -299,7 +345,7 @@ function gCasa(id){
     valor:parseFloat($("#cv").value)||0,tarefas:$("#ct").value.split("\n").map(s=>s.trim()).filter(Boolean),
     contactos:$("#cc").value.split("\n").map(l=>{const[a,...b]=l.split(":");return{nome:(a||"").trim(),num:b.join(":").trim()}}).filter(x=>x.nome||x.num),
     notas:$("#cno").value};
-  const i=D.casas.findIndex(c=>c.id===id); if(i>=0)D.casas[i]=nova; else D.casas.push(nova);
+  const i=D.casas.findIndex(c=>c.id===id); if(i>=0){if(D.casas[i].foto)nova.foto=D.casas[i].foto;D.casas[i]=nova} else D.casas.push(nova);
   guardar();toast("Casa guardada");ir("config");
 }
 function aCasa(id){const b=$("#apagar");if(b.dataset.ok){D.casas=D.casas.filter(c=>c.id!==id);guardar();toast("Casa apagada");ir("config")}else{b.dataset.ok=1;b.textContent="Toque outra vez para apagar";b.style.borderColor="var(--sos)"}}
