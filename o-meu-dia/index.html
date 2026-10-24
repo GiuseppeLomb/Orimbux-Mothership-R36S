@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="img/icon-192.png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>O Meu Dia</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="theme-color" content="#1f5f5b">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* Layout: uma coluna, botões enormes, um ecrã de cada vez. Fonte Atkinson Hyperlegible (feita para baixa visão). */
+:root{
+  --bg:#f3f6f5; --card:#ffffff; --ink:#18302e; --soft:#5b706d; --line:#d5e0dd;
+  --teal:#1f5f5b; --teal-ink:#ffffff; --sun:#f2b84b; --sos:#c8372d; --sos-ink:#ffffff;
+  --ok:#2e7d4f; --gift:#7a4fa3;
+  --f-body:"Atkinson Hyperlegible",system-ui,sans-serif;
+  --f-disp:"Fraunces",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101a19; --card:#182624; --ink:#eaf2f0; --soft:#a3b6b2; --line:#2b3d3a;
+  --teal:#4fb3a9; --teal-ink:#0c1716; --sun:#f2c46b; --sos:#e5554a; --sos-ink:#ffffff;
+  --ok:#5cc489; --gift:#b48ad8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101a19; --card:#182624; --ink:#eaf2f0; --soft:#a3b6b2; --line:#2b3d3a;
+  --teal:#4fb3a9; --teal-ink:#0c1716; --sun:#f2c46b; --sos:#e5554a; --sos-ink:#ffffff;
+  --ok:#5cc489; --gift:#b48ad8; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:20px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--f-disp);font-size:2rem;margin:0;font-weight:600;text-wrap:balance}
+h2{font-family:var(--f-disp);font-size:1.5rem;margin:0;font-weight:600}
+p{margin:0}
+.hello{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.date{color:var(--soft)}
+button,.btn{font:inherit;border:0;border-radius:18px;cursor:pointer;color:inherit;text-decoration:none;display:flex;align-items:center;gap:14px}
+button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--sun);outline-offset:2px}
+.tile{background:var(--card);border:2px solid var(--line);padding:20px;font-size:1.35rem;font-weight:700;width:100%;text-align:left;min-height:88px}
+.tile .ic{font-size:2.2rem;width:48px;text-align:center;flex:none}
+.tile small{display:block;font-weight:400;font-size:1rem;color:var(--soft)}
+.sos{background:var(--sos);color:var(--sos-ink);border-color:var(--sos)}
+.sos small{color:var(--sos-ink);opacity:.9}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{width:100%;justify-content:center;padding:22px;font-size:1.5rem;font-weight:700;min-height:84px}
+.primary{background:var(--teal);color:var(--teal-ink)}
+.ghost{background:var(--card);border:2px solid var(--line)}
+.back{background:none;color:var(--teal);font-weight:700;padding:8px 0;font-size:1.15rem}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.muted{color:var(--soft);font-size:1rem}
+.num{font-variant-numeric:tabular-nums}
+.pill{border-radius:999px;padding:4px 12px;font-size:.95rem;font-weight:700}
+.pill.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.due{background:color-mix(in srgb,var(--sun) 30%,transparent);color:var(--ink)}
+.pill.on{background:var(--teal);color:var(--teal-ink)}
+.call{background:var(--card);border:2px solid var(--line);padding:16px 18px;width:100%;justify-content:space-between;min-height:76px}
+.call b{font-size:1.25rem}
+.call .tel{font-size:1.3rem;font-weight:700;color:var(--teal);font-variant-numeric:tabular-nums;user-select:all}
+.call.red{border-color:var(--sos)}
+.call.red .tel{color:var(--sos)}
+input,textarea{font:inherit;width:100%;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:110px}
+label{font-weight:700;display:flex;flex-direction:column;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:var(--card);border:2px solid var(--line);padding:12px 16px;border-radius:14px;font-size:1.1rem}
+.chip[aria-pressed="true"]{background:var(--teal);color:var(--teal-ink);border-color:var(--teal)}
+.check{display:flex;gap:14px;align-items:center;padding:12px 4px;border-bottom:1px solid var(--line);font-size:1.15rem;background:none;width:100%;text-align:left;border-radius:0}
+.check .box{width:34px;height:34px;border-radius:10px;border:3px solid var(--teal);flex:none;display:grid;place-items:center;font-weight:700}
+.check.done .box{background:var(--teal);color:var(--teal-ink)}
+.check.done span{text-decoration:line-through;color:var(--soft)}
+.timer{font-size:2.6rem;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.clue{background:var(--card);border:2px dashed var(--gift);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.clue .where{color:var(--gift);font-weight:700;font-size:1rem}
+.clue p{font-family:var(--f-disp);font-size:1.35rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:14px 22px;border-radius:14px;font-weight:700;z-index:20}
+.example{font-size:.85rem;color:var(--soft);font-style:italic}
+hr{border:0;border-top:2px solid var(--line);margin:4px 0;width:100%}
+@media (prefers-reduced-motion:no-preference){.tile,.big,.call{transition:transform .08s}.tile:active,.big:active,.call:active{transform:scale(.98)}}
+</style>
+
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- dados ---------- */
+const KEY="omeudia.v1";
+const EMERGENCIA=[
+  {nome:"Emergência",num:"112",nota:"Ambulância, bombeiros, polícia",red:true},
+  {nome:"SNS 24",num:"808 24 24 24",nota:"Dúvidas de saúde, 24 horas"},
+  {nome:"Centro Antivenenos",num:"800 250 250",nota:"Se alguém engolir produtos ou medicamentos a mais"},
+];
+const SEED={
+  meus:[{nome:"Filho",num:""}],
+  casas:[
+    {id:"c1",nome:"Casa D. Rosa",tipo:"idoso",valor:9,contactos:[{nome:"Filha da D. Rosa",num:""}],
+     notas:"Exemplo: comprimido da tensão às 9h e 21h. Gosta de chá sem açúcar.",
+     tarefas:["Dar comprimido da manhã","Pequeno-almoço","Higiene","Arrumar o quarto"],exemplo:true},
+    {id:"c2",nome:"Casa da família Silva",tipo:"limpeza",valor:8,contactos:[{nome:"Sra. Silva",num:""}],
+     notas:"Exemplo: chão de madeira na sala, não usar lixívia.",
+     tarefas:["Cozinha","Casas de banho","Aspirar","Passar a ferro"],exemplo:true},
+  ],
+  visitas:[], // {casa, ini, fim, pago}
+  feito:{},   // {"c1|2026-10-24": [0,2]}
+};
+let D;
+try{D=JSON.parse(localStorage.getItem(KEY))||structuredClone(SEED)}catch(e){D=structuredClone(SEED)}
+function guardar(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hoje=()=>new Date().toISOString().slice(0,10);
+const eur=n=>n.toLocaleString("pt-PT",{style:"currency",currency:"EUR"});
+const hm=ms=>{const m=Math.round(ms/60000);return `${Math.floor(m/60)}h${String(m%60).padStart(2,"0")}`};
+const casa=id=>D.casas.find(c=>c.id===id);
+const aberta=id=>D.visitas.find(v=>v.casa===id&&!v.fim);
+function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+function telBtn(c,extra=""){
+  const n=(c.num||"").replace(/\s/g,"");
+  if(!n) return `<div class="call ${extra}"><span><b>${esc(c.nome)}</b><br><span class="muted">Sem número. Peça para acrescentar.</span></span></div>`;
+  return `<a class="btn call ${extra}" href="tel:${esc(n)}"><span><b>${esc(c.nome)}</b>${c.nota?`<br><span class="muted">${esc(c.nota)}</span>`:""}</span><span class="tel">📞 ${esc(c.num)}</span></a>`;
+}
+
+/* ---------- ecrãs ---------- */
+let ecra="inicio", arg=null, tick=null;
+function ir(e,a=null){ecra=e;arg=a;render();window.scrollTo(0,0)}
+function voltar(){return `<button class="back" onclick="ir('inicio')">← Voltar ao início</button>`}
+
+function render(){
+  clearInterval(tick);
+  const app=$("#app");
+  app.innerHTML=({inicio,sos,casas,casaV,dinheiro,lembrete,tesouro,config,casaEdit})[ecra]();
+  if(ecra==="casaV"&&aberta(arg)) tick=setInterval(()=>{const v=aberta(arg),t=$("#t");if(v&&t)t.textContent=hm(Date.now()-v.ini)},20000);
+}
+
+function inicio(){
+  const d=new Date().toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
+  const agora=D.visitas.find(v=>!v.fim);
+  return `
+  <div class="hello"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span></div>
+  ${agora?`<button class="tile primary" onclick="ir('casaV','${agora.casa}')"><span class="ic">⏱️</span><span>Estou na ${esc(casa(agora.casa)?.nome)}<small style="color:inherit">Toque para ver ou sair</small></span></button>`:""}
+  <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · família</small></span></button>
+  <button class="tile" onclick="ir('casas')"><span class="ic">🏠</span><span>As minhas casas<small>Cheguei, saí, tarefas e notas</small></span></button>
+  <button class="tile" onclick="ir('lembrete')"><span class="ic">⏰</span><span>Lembrar-me de…<small>O relógio vibra na hora</small></span></button>
+  <button class="tile" onclick="ir('dinheiro')"><span class="ic">💶</span><span>Horas e pagamentos<small>Quem já pagou e quem falta</small></span></button>
+  <button class="tile" onclick="ir('tesouro')"><span class="ic">🎁</span><span>Caça ao tesouro<small>Pistas prontas a esconder</small></span></button>
+  <button class="back" onclick="ir('config')" style="align-self:center">⚙️ Configurar (para o filho)</button>`;
+}
+
+function sos(){
+  const a=aberta(D.visitas.find(v=>!v.fim)?.casa);
+  const c=a?casa(a.casa):null;
+  return `${voltar()}<h1>Emergência</h1>
+  <p class="muted">Toque no número para ligar. Se não ligar, marque o número que aparece.</p>
+  ${EMERGENCIA.map(e=>telBtn(e,e.red?"red":"")).join("")}
+  ${c?`<h2>Família da ${esc(c.nome)}</h2>${c.contactos.map(x=>telBtn(x)).join("")}`:""}
+  <h2>A minha família</h2>${D.meus.map(x=>telBtn(x)).join("")}
+  ${!c?`<h2>Famílias das casas</h2>${D.casas.flatMap(k=>k.contactos.map(x=>telBtn({...x,nota:k.nome}))).join("")}`:""}`;
+}
+
+function casas(){
+  return `${voltar()}<h1>As minhas casas</h1>
+  ${D.casas.map(c=>`<button class="tile" onclick="ir('casaV','${c.id}')"><span class="ic">${c.tipo==="idoso"?"👵":"🧽"}</span><span>${esc(c.nome)}<small>${aberta(c.id)?"⏱️ Está lá agora":(c.tipo==="idoso"?"Cuidar":"Limpeza")}</small></span></button>`).join("")}
+  <button class="big ghost" onclick="ir('casaEdit',null)">＋ Juntar uma casa</button>`;
+}
+
+function casaV(){
+  const c=casa(arg); if(!c) return casas();
+  const v=aberta(c.id), k=c.id+"|"+hoje(), feito=D.feito[k]||[];
+  return `<button class="back" onclick="ir('casas')">← Voltar às casas</button>
+  <h1>${esc(c.nome)}</h1>${c.exemplo?`<span class="example">Casa de exemplo. Pode alterar em ⚙️ Configurar.</span>`:""}
+  ${v?`<div class="card"><p class="muted" style="text-align:center">Chegou às ${new Date(v.ini).toLocaleTimeString("pt-PT",{hour:"2-digit",minute:"2-digit"})}</p><div class="timer" id="t">${hm(Date.now()-v.ini)}</div>
+       <button class="big primary" onclick="sair('${c.id}')">👋 Saí</button></div>`
+     :`<button class="big primary" onclick="cheguei('${c.id}')">✅ Cheguei</button>`}
+  <div class="card"><h2>Hoje</h2>
+   ${c.tarefas.map((t,i)=>`<button class="check ${feito.includes(i)?"done":""}" onclick="marcar('${c.id}',${i})"><span class="box">${feito.includes(i)?"✓":""}</span><span>${esc(t)}</span></button>`).join("")||`<p class="muted">Sem tarefas.</p>`}
+  </div>
+  <div class="card"><h2>Notas da casa</h2>
+   <textarea id="notas" aria-label="Notas da casa">${esc(c.notas)}</textarea>
+   <button class="big ghost" onclick="gNotas('${c.id}')">Guardar notas</button></div>
+  <div class="card"><h2>Ligar à família</h2>${c.contactos.map(x=>telBtn(x)).join("")}</div>
+  <button class="big ghost" onclick="ir('lembrete','${c.id}')">⏰ Lembrete para esta casa</button>`;
+}
+function cheguei(id){D.visitas.forEach(v=>{if(!v.fim)v.fim=Date.now()});D.visitas.push({casa:id,ini:Date.now(),fim:null,pago:false});guardar();toast("Boa! Começou a contar.");render()}
+function sair(id){const v=aberta(id);if(v){v.fim=Date.now();guardar();toast("Saiu. Ficaram "+hm(v.fim-v.ini))}render()}
+function marcar(id,i){const k=id+"|"+hoje(),a=D.feito[k]||[];D.feito[k]=a.includes(i)?a.filter(x=>x!==i):[...a,i];guardar();render()}
+function gNotas(id){casa(id).notas=$("#notas").value;guardar();toast("Notas guardadas")}
+
+function dinheiro(){
+  const linhas=D.casas.map(c=>{
+    const vs=D.visitas.filter(v=>v.casa===c.id&&v.fim&&!v.pago);
+    const ms=vs.reduce((s,v)=>s+(v.fim-v.ini),0);
+    return {c,ms,val:ms/3600000*c.valor,n:vs.length};
+  });
+  const total=linhas.reduce((s,l)=>s+l.val,0);
+  return `${voltar()}<h1>Horas e pagamentos</h1>
+  <div class="card"><p class="muted">Ainda por receber</p><p class="num" style="font-size:2.4rem;font-weight:700">${eur(total)}</p></div>
+  ${linhas.map(l=>`<div class="card"><div class="row"><h2>${esc(l.c.nome)}</h2>${l.n?`<span class="pill due">Falta pagar</span>`:`<span class="pill ok">Tudo pago</span>`}</div>
+    <div class="row num"><span>${l.n} vez(es) · ${hm(l.ms)}</span><b>${eur(l.val)}</b></div>
+    ${l.n?`<button class="big primary" onclick="pagou('${l.c.id}')">💶 Já me pagou</button>`:""}</div>`).join("")}
+  <p class="muted">As contas usam o valor por hora de cada casa (em ⚙️ Configurar).</p>`;
+}
+function pagou(id){D.visitas.forEach(v=>{if(v.casa===id&&v.fim)v.pago=true});guardar();toast("Marcado como pago");render()}
+
+/* ---------- lembretes via Google Calendar (aparecem no relógio) ---------- */
+let L={o:null,q:null,hora:""};
+const OQUE=["💊 Medicamento","🚗 Sair para outra casa","📞 Ligar a alguém","🛒 Fazer compras","🍽️ Dar de comer","🧺 Tirar a roupa"];
+const QUANDO=[["Daqui a 15 min",15],["Daqui a 30 min",30],["Daqui a 1 hora",60],["Daqui a 2 horas",120]];
+function lembrete(){
+  const c=arg?casa(arg):null;
+  return `${voltar()}<h1>Lembrar-me de…</h1>
+  <div class="card"><h2>1. O quê?</h2><div class="chips">${OQUE.map((o,i)=>`<button class="chip" aria-pressed="${L.o===i}" onclick="L.o=${i};render()">${o}</button>`).join("")}</div></div>
+  <div class="card"><h2>2. Quando?</h2><div class="chips">${QUANDO.map((q,i)=>`<button class="chip" aria-pressed="${L.q===i}" onclick="L.q=${i};L.hora='';render()">${q[0]}</button>`).join("")}</div>
+   <label for="hora">ou a uma hora certa<input id="hora" type="time" value="${L.hora}" onchange="L.hora=this.value;L.q=null;render()"></label></div>
+  <a class="btn big primary" href="${linkCal(c)}" target="_blank" rel="noopener" ${L.o===null||(L.q===null&&!L.hora)?'aria-disabled="true" style="opacity:.45;pointer-events:none"':""}>⏰ Guardar lembrete</a>
+  <p class="muted">Abre a Agenda Google. Carregue em <b>Guardar</b> e pronto: o relógio vibra na hora.</p>`;
+}
+function linkCal(c){
+  if(L.o===null) return "#";
+  let d=new Date();
+  if(L.hora){const[h,m]=L.hora.split(":");d.setHours(+h,+m,0,0);if(d<new Date())d.setDate(d.getDate()+1)}
+  else if(L.q!==null) d=new Date(Date.now()+QUANDO[L.q][1]*60000); else return "#";
+  const f=x=>x.getFullYear()+String(x.getMonth()+1).padStart(2,"0")+String(x.getDate()).padStart(2,"0")+"T"+String(x.getHours()).padStart(2,"0")+String(x.getMinutes()).padStart(2,"0")+"00";
+  const fim=new Date(d.getTime()+10*60000);
+  const t=OQUE[L.o]+(c?" – "+c.nome:"");
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(t)+"&dates="+f(d)+"/"+f(fim)+"&ctz=Europe/Lisbon";
+}
+
+/* ---------- caça ao tesouro ---------- */
+const SITIOS={
+ "Frigorífico":["Sou frio por dentro, guardo o leite e o queijo. Abre a minha porta e vais ver o que eu vejo!","Mantenho tudo fresco, mas hoje guardo um segredo. Procura onde o frio mora."],
+ "Sofá":["Sou fofinho e grande, toda a gente se senta em mim. Procura nas minhas almofadas, a pista está aqui!","Onde a família descansa ao fim do dia, há algo escondido entre as almofadas."],
+ "Debaixo da cama":["À noite dormes em cima de mim. Espreita lá em baixo, está escuro, mas está ali!","Onde se sonha à noite, olha para baixo e não para cima."],
+ "Máquina de lavar":["Ando à roda, à roda, e deixo a roupa a cheirar bem. Abre a minha portinha redonda!","Gira, gira e lava tudo. Hoje lavou-te uma pista."],
+ "Forno":["Faço bolos quentinhos, mas agora estou desligado. Espreita pelo meu vidro!","Onde se cozinham os assados de domingo, hoje há outra coisa à espera (está desligado!)."],
+ "Caixa do correio":["Trago cartas e postais todos os dias. Vai lá fora ver o que chegou!","Todos os dias espera o carteiro. Hoje o carteiro foi outra pessoa."],
+ "Sapateira":["Guardo sapatos, botas e chinelos. Mete a mão num sapato… cuidado com o cheiro!","Onde descansam os pés da casa, um deles tem uma surpresa."],
+ "Banheira / duche":["Aqui tomas banho com espuma e patinhos. Puxa a cortina devagarinho!","Onde a água cai todas as manhãs, mas hoje está seco o segredo."],
+ "Gaveta das meias":["Moro numa gaveta, ando sempre aos pares. Às vezes perco o meu irmão. Quem sou?","Procura onde os pares se escondem. Um par não está sozinho."],
+ "Estante dos livros":["Tenho muitas histórias mas não sei falar. Abre o livro mais grosso que encontrares!","Onde as palavras dormem em fila, procura atrás das lombadas."],
+ "Vaso das plantas":["Bebo água e cresço para o sol. Olha bem à minha volta, no meu vaso há um tesouro!","Quem rega todas as semanas? Hoje há algo junto às raízes."],
+ "Caixa dos brinquedos":["Moram aqui os bonecos, os carrinhos e as bolas. Procura lá dentro, bem no fundo!","Onde os brinquedos vão dormir, a pista está no fundo."],
+ "Micro-ondas":["Faço PIM quando acabo e aqueço o leite num instante. Abre a minha porta!","Aquece em segundos e diz PIM. Abre e vê."],
+ "Debaixo do tapete":["Toda a gente me pisa, mas eu não me queixo. Levanta a minha pontinha!","Onde se limpam os pés à entrada, há algo escondido por baixo."],
+};
+let T={sel:[],quem:"crianca",res:null};
+function tesouro(){
+  const nomes=Object.keys(SITIOS);
+  return `${voltar()}<h1>Caça ao tesouro</h1>
+  <div class="card"><h2>1. Para quem?</h2><div class="chips">
+   <button class="chip" aria-pressed="${T.quem==="crianca"}" onclick="T.quem='crianca';T.res=null;render()">🧒 Criança</button>
+   <button class="chip" aria-pressed="${T.quem==="adultos"}" onclick="T.quem='adultos';T.res=null;render()">🧑 Adultos</button></div></div>
+  <div class="card"><h2>2. Onde vai esconder?</h2><p class="muted">Toque em 3 a 6 sítios. A última escolha é onde fica o chocolate.</p>
+   <div class="chips">${nomes.map(n=>`<button class="chip" aria-pressed="${T.sel.includes(n)}" onclick="tSel('${n}')">${T.sel.includes(n)?(T.sel.indexOf(n)+1)+". ":""}${n}</button>`).join("")}</div></div>
+  <button class="big primary" onclick="tGerar()" ${T.sel.length<2?"disabled style='opacity:.45'":""}>🎁 Fazer as pistas</button>
+  ${T.res?T.res:""}`;
+}
+function tSel(n){T.sel=T.sel.includes(n)?T.sel.filter(x=>x!==n):[...T.sel,n];T.res=null;render()}
+function tGerar(){
+  const k=T.quem==="crianca"?0:1;
+  let h=`<h2>As pistas</h2><p class="muted">Escreva cada pista num papel. O papel 1 entrega à mão.</p>`;
+  T.sel.forEach((s,i)=>{
+    h+=`<div class="clue"><span class="where">Papel ${i+1} · ${i===0?"entregar à mão":"esconder em: "+T.sel[i-1]}</span><p>${SITIOS[s][k]}</p></div>`;
+  });
+  h+=`<div class="clue"><span class="where">🍫 O chocolate fica em: ${T.sel[T.sel.length-1]}</span><p>Parabéns, encontraste o tesouro!</p></div>`;
+  T.res=h;render();
+}
+
+/* ---------- configurar (para o filho) ---------- */
+function config(){
+  return `${voltar()}<h1>Configurar</h1>
+  <p class="muted">Esta parte é para o filho preencher uma vez.</p>
+  <div class="card"><h2>A minha família</h2>
+   ${D.meus.map((m,i)=>`<div class="grid2"><input id="mn${i}" value="${esc(m.nome)}" aria-label="Nome"><input id="mt${i}" value="${esc(m.num)}" inputmode="tel" placeholder="Número" aria-label="Número"></div>`).join("")}
+   <button class="big ghost" onclick="gMeus(true)">＋ Mais um contacto</button>
+   <button class="big primary" onclick="gMeus()">Guardar família</button></div>
+  <div class="card"><h2>Casas</h2>${D.casas.map(c=>`<button class="tile" onclick="ir('casaEdit','${c.id}')"><span class="ic">✏️</span><span>${esc(c.nome)}<small>${eur(c.valor)} por hora</small></span></button>`).join("")}
+   <button class="big ghost" onclick="ir('casaEdit',null)">＋ Nova casa</button></div>
+  <div class="card"><h2>Cópia de segurança</h2><p class="muted">Os dados ficam só neste telemóvel. Copie isto de vez em quando para um sítio seguro.</p>
+   <textarea id="bk" aria-label="Cópia de segurança">${esc(JSON.stringify(D))}</textarea>
+   <div class="grid2"><button class="big ghost" onclick="copiar()">Copiar</button><button class="big ghost" onclick="repor()">Repor</button></div></div>`;
+}
+function gMeus(mais){D.meus=D.meus.map((m,i)=>({nome:$("#mn"+i).value,num:$("#mt"+i).value})).filter(m=>m.nome||m.num);if(mais)D.meus.push({nome:"",num:""});guardar();if(!mais)toast("Guardado");render()}
+function copiar(){const t=$("#bk");navigator.clipboard?.writeText(t.value).then(()=>toast("Copiado"),()=>{t.select();toast("Selecionado: copie à mão")})}
+function repor(){try{D=JSON.parse($("#bk").value);guardar();toast("Reposto");ir("inicio")}catch(e){toast("Esse texto não é uma cópia válida")}}
+
+function casaEdit(){
+  const c=arg?casa(arg):{id:"c"+Date.now(),nome:"",tipo:"idoso",valor:8,contactos:[{nome:"",num:""}],notas:"",tarefas:[]};
+  return `<button class="back" onclick="ir('config')">← Voltar</button><h1>${arg?"Alterar casa":"Nova casa"}</h1>
+  <label for="cn">Nome<input id="cn" value="${esc(c.nome)}" placeholder="Ex.: Casa do Sr. Manuel"></label>
+  <div class="chips"><button class="chip" id="ti" aria-pressed="${c.tipo==="idoso"}" onclick="this.setAttribute('aria-pressed','true');$('#tl').setAttribute('aria-pressed','false')">👵 Cuidar</button>
+   <button class="chip" id="tl" aria-pressed="${c.tipo==="limpeza"}" onclick="this.setAttribute('aria-pressed','true');$('#ti').setAttribute('aria-pressed','false')">🧽 Limpeza</button></div>
+  <label for="cv">Valor por hora (€)<input id="cv" type="number" step="0.5" inputmode="decimal" value="${c.valor}"></label>
+  <label for="ct">Tarefas (uma por linha)<textarea id="ct">${esc(c.tarefas.join("\n"))}</textarea></label>
+  <label for="cc">Contactos da família (Nome: número, um por linha)<textarea id="cc">${esc(c.contactos.map(x=>x.nome+": "+x.num).join("\n"))}</textarea></label>
+  <label for="cno">Notas<textarea id="cno">${esc(c.notas)}</textarea></label>
+  <button class="big primary" onclick="gCasa('${c.id}')">Guardar casa</button>
+  ${arg?`<button class="big ghost" onclick="aCasa('${c.id}')" id="apagar">Apagar esta casa</button>`:""}`;
+}
+function gCasa(id){
+  const nova={id,nome:$("#cn").value.trim()||"Casa sem nome",tipo:$("#ti").getAttribute("aria-pressed")==="true"?"idoso":"limpeza",
+    valor:parseFloat($("#cv").value)||0,tarefas:$("#ct").value.split("\n").map(s=>s.trim()).filter(Boolean),
+    contactos:$("#cc").value.split("\n").map(l=>{const[a,...b]=l.split(":");return{nome:(a||"").trim(),num:b.join(":").trim()}}).filter(x=>x.nome||x.num),
+    notas:$("#cno").value};
+  const i=D.casas.findIndex(c=>c.id===id); if(i>=0)D.casas[i]=nova; else D.casas.push(nova);
+  guardar();toast("Casa guardada");ir("config");
+}
+function aCasa(id){const b=$("#apagar");if(b.dataset.ok){D.casas=D.casas.filter(c=>c.id!==id);guardar();toast("Casa apagada");ir("config")}else{b.dataset.ok=1;b.textContent="Toque outra vez para apagar";b.style.borderColor="var(--sos)"}}
+
+render();
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
+</script>
+</body>
+</html>
