@@ -22,6 +22,8 @@ O zip traz a app pronta a usar:
 
 **[⬇ Versão PC para Windows (ZIP, 97 MB)](https://github.com/GiuseppeLomb/Orimbux-Mothership-R36S/releases/download/v1.11-pc/OrimbuxMothership_v1.11_PC_Windows.zip)**: um `Orimbux Mothership.exe` que não precisa de Python nem de instalação (também em *Releases*, ver *Correr no PC*). É a v1.11, ainda sem o ORIMBOX: o ZIP de cima já o tem.
 
+**ORIMBOX no telemóvel:** [giuseppelomb.github.io/Orimbux-Mothership-R36S](https://giuseppelomb.github.io/Orimbux-Mothership-R36S/). No iPhone abre no Safari e carrega em *Partilhar > Adicionar ao ecrã principal*: fica como uma app, com ícone, e funciona sem internet. No Android, no Chrome: *Instalar app*. Grava a mistura e partilha-a.
+
 Vídeos: [trailer (1 min 18 s)](docs/video/trailer.mp4) com imagens reais das apps, e [créditos](docs/video/creditos.mp4). Áudio: [uma mistura do ORIMBOX](docs/audio/orimbox_demo.m4a).
 
 ## As 13 apps
@@ -87,7 +89,9 @@ ports/
     trailer.py, credits.py   o trailer e os créditos (desenhados em tempo real)
     lib/sdl2/             pysdl2, incluído para a consola
     assets/               sons, músicas, pixel art (.frm), fontes
+web/orimbox/              o ORIMBOX para telemóvel (app web instalável: index.html, sw.js para funcionar sem internet)
 tools/
+  build_web.py            gera o site do ORIMBOX para o GitHub Pages (ramo gh-pages) a partir dos sons e da arte da app
   build_*.py              geram os assets: sons, músicas, fontes, arte, trailer, sample packs
   render_trailer.py       grava o trailer/créditos em MP4 (precisa do ffmpeg)
   package.py              faz os zips da release
