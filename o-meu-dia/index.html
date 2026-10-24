@@ -39,6 +39,10 @@ main{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px;p
 body.home #veil{background:linear-gradient(180deg,rgba(0,0,0,.45) 0,rgba(0,0,0,0) 18vh,rgba(var(--veil),0) 54vh,rgba(var(--veil),.82) 68vh,rgba(var(--veil),.97) 84vh)}
 .hero{min-height:52vh;display:flex;flex-direction:column;justify-content:flex-start;gap:4px;padding:6px 4px 10px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.55)}
 .hero h1{font-size:2.6rem;line-height:1.05}
+.bubble{align-self:flex-end;margin-top:10px;max-width:min(240px,62%);font-size:1.05rem!important;background:#fff;color:#18302e;text-shadow:none;font-size:1.15rem;font-weight:700;line-height:1.3;padding:14px 16px;border-radius:20px 20px 20px 4px;box-shadow:0 8px 24px rgba(0,0,0,.25);position:relative;text-align:left;display:block;border:0}
+.bubble::after{content:"";position:absolute;left:18px;bottom:-12px;border:12px solid transparent;border-top-color:#fff;border-bottom:0;border-left:0}
+.bubble small{display:block;font-weight:400;font-size:.85rem;color:#5b706d;margin-top:4px}
+@media (prefers-reduced-motion:no-preference){.bubble{animation:pop .5s cubic-bezier(.2,1.4,.4,1) both .2s}@keyframes pop{from{transform:scale(.6) translateY(10px);opacity:0}to{transform:none;opacity:1}}}
 .hero .date{color:#fff;opacity:.95;font-size:1.1rem}
 h1{font-family:var(--f-disp);font-size:2rem;margin:0;font-weight:600;text-wrap:balance}
 h2{font-family:var(--f-disp);font-size:1.5rem;margin:0;font-weight:600}
@@ -167,11 +171,20 @@ function render(){
   if(ecra==="casaV"&&aberta(arg)) tick=setInterval(()=>{const v=aberta(arg),t=$("#t");if(v&&t)t.textContent=hm(Date.now()-v.ini)},20000);
 }
 
+const CAES={
+ manha:["Bom dia, mãe! 🐾 Vai com calma e volta depressa!","Bom dia! Já tomaste o pequeno-almoço? Nós também queremos… 🥺","Acordámos a pensar em ti! Bom trabalho hoje, dona! 💛","Bom dia, mãe linda! Hoje vais arrasar! 🐶"],
+ tarde:["Estás a ir tão bem, mãe! Estamos orgulhosos! 🐾","Bom trabalho, dona! Os idosos têm muita sorte contigo 💛","Mãe… quero o fiambre. Só um bocadinho. Por favor. 🥺","Quando chegares, há festa à porta! 🎉🐶"],
+ noite:["Já acabaste? Vem para casa, temos saudades! 🐾","Foste incrível hoje, mãe. Agora descansa connosco 💛","Boa noite, dona! Mereces miminhos (e nós um biscoito) 🍪","Obrigado por cuidares de toda a gente. E de nós! 🐶"],
+ sempre:["Quero um biscoito! 🍪 …e um abraço também.","Quero o fiambre! 🥓 Prometo que me porto bem!","Somos os teus maiores fãs, mãe! 🐾🐾","Ninguém faz festinhas como tu. Bom trabalho! 💛","Abanamos a cauda só de pensar em ti! 🐕","Hoje portámo-nos bem. Merecemos fiambre? 🥺"]};
+let msgCao=null;
+function novaMsg(){const h=new Date().getHours(),p=h<6||h>=20?"noite":h<13?"manha":"tarde";const l=[...CAES[p],...CAES.sempre];let m;do{m=l[Math.floor(Math.random()*l.length)]}while(m===msgCao&&l.length>1);msgCao=m}
+function maisMsg(){novaMsg();render()}
 function inicio(){
+  if(!msgCao) novaMsg();
   const d=new Date().toLocaleDateString("pt-PT",{weekday:"long",day:"numeric",month:"long"});
   const agora=D.visitas.find(v=>!v.fim);
   return `
-  <div class="hero"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span></div>
+  <div class="hero"><h1>${(h=>h<6||h>=20?"Boa noite!":h<13?"Bom dia!":"Boa tarde!")(new Date().getHours())}</h1><span class="date">${d}</span><button class="bubble" onclick="maisMsg()" aria-label="Mensagem dos cães, toque para outra">${msgCao}<small>— os teus patudos 🐾</small></button></div>
   ${agora?`<button class="tile primary" onclick="ir('casaV','${agora.casa}')"><span class="ic">⏱️</span><span>Estou na ${esc(casa(agora.casa)?.nome)}<small style="color:inherit">Toque para ver ou sair</small></span></button>`:""}
   <button class="tile sos" onclick="ir('sos')"><span class="ic">🆘</span><span>Emergência<small>112 · SNS 24 · Antivenenos</small></span><span class="go" aria-hidden="true">›</span></button>
   <button class="tile" onclick="ir('casas')"><span class="ic">🏠</span><span>As minhas casas<small>Cheguei, saí, tarefas e notas</small></span><span class="go" aria-hidden="true">›</span></button>
