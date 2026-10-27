@@ -1,7 +1,10 @@
 """ORIMBOX for phones (a web app you add to the iPhone / Android home screen): builds the site in OUTDIR from the
-app's own sounds and pixel art, ready for GitHub Pages (the gh-pages branch).
+app's own sounds and pixel art, ready for GitHub Pages (the gh-pages branch, where it is the site's root page).
 
     python3 tools/build_web.py OUTDIR
+
+It only writes ORIMBOX's own files (the ones listed below), so OUTDIR can be a checkout of gh-pages: the other
+apps on the site (o-meu-dia/...) are left as they are.
 
 OUTDIR gets index.html, sw.js (offline cache), manifest.webmanifest, kit.json, a/*.wav (the 25 loops of
 assets/orimbox), img/ (the aliens, the planet, the ship and the app icons) and fonts/ (Tiny5, OFL).
@@ -110,20 +113,15 @@ def main():
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as f:
         f.write(page)
     open(os.path.join(out, ".nojekyll"), "w").close()
-    # the offline cache: every file, and a version that changes whenever any of them does
-    files = ["./"]
+    # the offline cache: ORIMBOX's files only, and a version that changes whenever any of them does
+    own = ["index.html", "kit.json", "manifest.webmanifest"]
+    for sub in ("a", "img", "fonts"):
+        own += sorted("%s/%s" % (sub, f) for f in os.listdir(os.path.join(out, sub)))
+    files = ["./"] + own
     h = hashlib.sha1()
-    for dp, _, fs in sorted(os.walk(out)):
-        if ".git" in dp.split(os.sep):
-            continue
-        for fn in sorted(fs):
-            p = os.path.join(dp, fn)
-            rel = os.path.relpath(p, out).replace(os.sep, "/")
-            if rel in ("sw.js", ".nojekyll", "CNAME") or rel.startswith("."):
-                continue
-            files.append(rel)
-            with open(p, "rb") as f:
-                h.update(rel.encode() + f.read())
+    for rel in own:
+        with open(os.path.join(out, rel), "rb") as f:
+            h.update(rel.encode() + f.read())
     with open(os.path.join(SRC, "sw.js"), encoding="utf-8") as f:
         sw = f.read()
     sw = sw.replace("__VERSION__", "%s-%s" % (version, h.hexdigest()[:10])).replace("__FILES__", json.dumps(files))

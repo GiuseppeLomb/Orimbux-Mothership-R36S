@@ -12,7 +12,11 @@ self.addEventListener("activate", function (e) {
       .map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
+var URLS = null;
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
+  // only ORIMBOX's own files: the other apps on the same site (o-meu-dia/...) go straight to the network
+  URLS = URLS || FILES.map(function (f) { return new URL(f, self.registration.scope).href; });
+  if (URLS.indexOf(e.request.url.split("#")[0].split("?")[0]) < 0) return;
   e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(function (r) { return r || fetch(e.request); }));
 });
